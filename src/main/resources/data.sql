@@ -56,4 +56,4 @@ INSERT INTO cards (num,cardtype,isActive) VALUES (11,'clover',false);
 INSERT INTO cards (num,cardtype,isActive) VALUES (12,'clover',false);
 INSERT INTO cards (num,cardtype,isActive) VALUES (13,'clover',false);
 
-INSERT INTO hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id) VALUES (1,2,3,4,5,6,false);
+INSERT INTO hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,isActive) VALUES (1,2,3,4,5,6,false);
