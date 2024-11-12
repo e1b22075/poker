@@ -1,1 +1,14 @@
-test
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.springframework.org/schema/security">
+
+<head>
+  <meta charset="utf-8">
+  <title>poker</title>
+</head>
+
+<body>
+  <h1>こんにちは！[[${login_user}]]</h1>
+  <a href="/logout">ログアウト</a>
+  <br>
+  <a href="/poker">pokerへのアクセス</a>
+</body>
