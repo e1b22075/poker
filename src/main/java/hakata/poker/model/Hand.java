@@ -1,4 +1,5 @@
-package poker.model;
+package hakata.poker.model;
+
 public class Hand {
   int id;
   int userid;

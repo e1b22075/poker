@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Random;
 import java.util.Comparator;
 
+import org.springframework.beans.factory.annotation.Autowired;
 // import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -15,16 +16,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 // import org.springframework.web.bind.annotation.RequestParam;
 
 import hakata.poker.model.card;
+import hakata.poker.model.Room;
 
 @Controller
 public class PokerController {
 
+  @Autowired
+  private Room room;
   Random rmd = new Random();
 
   @GetMapping("room")
   public String room_login(ModelMap model, Principal prin) {
     String loginUser = prin.getName(); // ログインユーザ情報
+    this.room.addUser("CPU");
+    this.room.addUser(loginUser);
     model.addAttribute("login_user", loginUser);
+    model.addAttribute("room", room);
     return "room.html";
   }
 
