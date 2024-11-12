@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
+import java.util.Comparator;
 
 // import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -80,6 +81,7 @@ public class PokerController {
         i++;
       }
     }
+    cardList.sort(Comparator.comparing(card::getNumber));
     i = 0;
     while (i < 5) {
       // ここからの処理は、CPUのカードの値を正常にする処理とマークを判別してる。
@@ -104,6 +106,7 @@ public class PokerController {
         i++;
       }
     }
+    cpu_CardList.sort(Comparator.comparing(card::getNumber));
 
     model.addAttribute("cardList", cardList);
     model.addAttribute("cpu_CardList", cpu_CardList);
