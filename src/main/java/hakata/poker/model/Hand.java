@@ -8,6 +8,8 @@ public class Hand {
   int hand3id;
   int hand4id;
   int hand5id;
+  int roleid;
+  int rolenum;
   boolean isActive;
 
   public void setActive(boolean isActive) {
@@ -33,6 +35,15 @@ public class Hand {
   public void setHand5id(int hand5id) {
     this.hand5id = hand5id;
   }
+
+  public void setRoleid(int roleid) {
+    this.roleid = roleid;
+  }
+
+  public void setRolenum(int rolenum) {
+    this.rolenum = rolenum;
+  }
+
 
   public void setId(int id) {
     this.id = id;
@@ -61,6 +72,15 @@ public class Hand {
   public int getHand5id() {
     return hand5id;
   }
+
+  public int getRoleid() {
+    return roleid;
+  }
+
+  public int getRolenum() {
+    return rolenum;
+  }
+  
 
   public int getId() {
     return id;
