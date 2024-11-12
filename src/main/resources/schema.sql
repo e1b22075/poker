@@ -1,7 +1,7 @@
 CREATE TABLE users (
     id IDENTITY,
     userName VARCHAR NOT NULL
-);
+  );
 
 CREATE TABLE cards (
     id IDENTITY,
