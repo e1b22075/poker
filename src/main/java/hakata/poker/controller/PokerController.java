@@ -21,6 +21,13 @@ public class PokerController {
 
   Random rmd = new Random();
 
+  @GetMapping("room")
+  public String room_login(ModelMap model, Principal prin) {
+    String loginUser = prin.getName(); // ログインユーザ情報
+    model.addAttribute("login_user", loginUser);
+    return "room.html";
+  }
+
   @GetMapping("poker")
   public String login(ModelMap model, Principal prin) {
     String loginUser = prin.getName(); // ログインユーザ情報
