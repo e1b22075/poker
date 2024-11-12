@@ -21,6 +21,8 @@ public class PokerAuthConfiguration {
             .logoutUrl("/logout")
             .logoutSuccessUrl("/")) // ログアウト後に / にリダイレクト
         .authorizeHttpRequests(authz -> authz
+            .requestMatchers(AntPathRequestMatcher.antMatcher("/room/**"))
+            .authenticated()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/poker/**"))
             .authenticated()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/**"))
