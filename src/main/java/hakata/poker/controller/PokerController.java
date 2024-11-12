@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 // import org.springframework.web.bind.annotation.RequestMapping;
 // import org.springframework.web.bind.annotation.RequestParam;
 
+import hakata.poker.model.card;
+
 @Controller
 public class PokerController {
 
@@ -42,8 +44,11 @@ public class PokerController {
       validCards.add(false);
     }
 
-    ArrayList<Integer> number = new ArrayList<Integer>();// カードの数字の変数
-    ArrayList<String> type = new ArrayList<String>();// カードのマークの変数
+    ArrayList<card> cardList = new ArrayList<>();
+    // これはカード格納用の変数(モデル含め仮組)
+
+    ArrayList<card> cpu_CardList = new ArrayList<>();
+    // これはCPUのカード格納用の変数(モデル含め仮組)
 
     while (i < 5) {
       // ここからの処理は、カードの値を正常にする処理とマークを判別してる。
@@ -59,7 +64,7 @@ public class PokerController {
         validCards.set(num, true);
         if (num <= 12) {
           num += 1;
-          types = "su";
+          types = "♥";
         } else if (num <= 25) {
           num -= 12;
           types = "♦";
@@ -70,13 +75,38 @@ public class PokerController {
           num -= 38;
           types = "♣";
         }
-        number.add(num);
-        type.add(types);
+
+        cardList.add(new card(num, types));
         i++;
       }
     }
-    model.addAttribute("card", number);
-    model.addAttribute("type", type);
+    i = 0;
+    while (i < 5) {
+      // ここからの処理は、CPUのカードの値を正常にする処理とマークを判別してる。
+
+      num = rmd.nextInt(52);
+      if (!validCards.get(num)) {
+        validCards.set(num, true);
+        if (num <= 12) {
+          num += 1;
+          types = "♥";
+        } else if (num <= 25) {
+          num -= 12;
+          types = "♦";
+        } else if (num <= 38) {
+          num -= 25;
+          types = "♠";
+        } else if (num <= 51) {
+          num -= 38;
+          types = "♣";
+        }
+        cpu_CardList.add(new card(num, types));
+        i++;
+      }
+    }
+
+    model.addAttribute("cardList", cardList);
+    model.addAttribute("cpu_CardList", cpu_CardList);
     return "poker.html";
   }
 
