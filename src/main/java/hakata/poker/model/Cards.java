@@ -1,4 +1,4 @@
-package poker.model;
+package hakata.poker.model;
 
 public class Cards {
   int id;

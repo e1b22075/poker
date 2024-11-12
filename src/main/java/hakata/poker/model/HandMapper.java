@@ -1,4 +1,4 @@
-package poker.model;
+package hakata.poker.model;
 
 import java.util.ArrayList;
 

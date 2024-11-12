@@ -8,6 +8,12 @@
 
 <body>
   <h1>こんにちは！[[${login_user}]]</h1>
+  <div th:if="${room}">
+    ルーム利用者
+    <ul>
+      <li th:each="user : ${room.users}">[[${user}]]</li>
+    </ul>
+  </div>
   <a href="/logout">ログアウト</a>
   <br>
   <a href="/poker">pokerへのアクセス</a>
