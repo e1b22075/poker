@@ -1,16 +1,14 @@
 package hakata.poker.model;
 
 public class index {
-  private Integer[] id;
+  Integer[] id;
 
-  public index() {
+  public void setId(Integer[] id) {
+    this.id = id;
   }
 
   public Integer[] getId() {
     return id;
   }
 
-  public void setId(Integer[] id) {
-    this.id = id;
-  };
 }

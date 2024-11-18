@@ -6,9 +6,6 @@ public class Cards {
   String cardtype;
   boolean isActive;
 
-  public Cards() {
-  }
-
   public String getCardtype() {
     return cardtype;
   }
