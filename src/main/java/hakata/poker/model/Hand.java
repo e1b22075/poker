@@ -12,6 +12,9 @@ public class Hand {
   int rolenum;
   boolean isActive;
 
+  public Hand() {
+  };
+
   public void setActive(boolean isActive) {
     this.isActive = isActive;
   }
@@ -43,7 +46,6 @@ public class Hand {
   public void setRolenum(int rolenum) {
     this.rolenum = rolenum;
   }
-
 
   public void setId(int id) {
     this.id = id;
@@ -80,7 +82,6 @@ public class Hand {
   public int getRolenum() {
     return rolenum;
   }
-  
 
   public int getId() {
     return id;

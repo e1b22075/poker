@@ -25,6 +25,8 @@ public class PokerAuthConfiguration {
             .authenticated()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/poker/**"))
             .authenticated()
+            .requestMatchers(AntPathRequestMatcher.antMatcher("/result/**"))
+            .authenticated()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/**"))
             .permitAll())// 上記以外は全員アクセス可能
         .csrf(csrf -> csrf

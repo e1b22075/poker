@@ -4,33 +4,9 @@
 <head>
   <meta charset="utf-8">
   <title>poker</title>
-  <script th:inline="javascript" th:if="${cardList}">
+  <script th:inline="javascript" th:if="${myCards}">
     window.onload = function () {
-      var cards = [[${ cardList }]];
 
-      var card_txt = "[";
-      var type_txt = "[";
-      var cpu_cards = [[${ cpu_CardList }]];
-
-      var cpu_card_txt = "[";
-      var cpu_type_txt = "[";
-
-      for (let i = 0; i < 5; i++) {
-        card_txt = card_txt + "  " + cards[i].number;
-        type_txt = type_txt + " " + cards[i].type;
-
-        cpu_card_txt = cpu_card_txt + "  " + cpu_cards[i].number;
-        cpu_type_txt = cpu_type_txt + " " + cpu_cards[i].type;
-      }
-      card_txt += "]";
-      type_txt += "]";
-      document.getElementById("card").innerHTML = card_txt;
-      document.getElementById("card_type").innerHTML = type_txt;
-
-      cpu_card_txt += "]";
-      cpu_type_txt += "]";
-      document.getElementById("cpu_card").innerHTML = cpu_card_txt;
-      document.getElementById("cpu_card_type").innerHTML = cpu_type_txt;
 
 
     }
@@ -41,27 +17,16 @@
   <h1>Authorized! [[${login_user}]]</h1>
   <a href="/logout">ログアウト</a>
   <h2><a href="/poker/card">カードを引く</a></h2>
-  <div th:if="${cardList}">
+  <div th:if="${myCards}">
     <h4>自分の手札</h4>
-    <span id="card">
-      ほげほげ
-    </span>
-    <br>
-    <span id="card_type">
-      ほげほげ
-    </span>
-    <div th:if="${cpu_CardList}">
-      <h4>相手の手札</h4>
-      <span id="cpu_card">
-        ほげほげ
-      </span>
-      <br>
-      <span id="cpu_card_type">
-        ほげほげ
-      </span>
-    </div>
-
-
+    <form action="#" th:action="@{/result}" th:object="${index}" method="post">
+      <div th:each="item, iterStat : ${myCards}">
+        <input type="checkbox" th:value="${iterStat.index+1}" th:text="${item.num} + ' ' +  ${item.cardtype}"
+          th:field="*{id}" />
+      </div>
+      <p><input type="submit" value="送信" /> </p>
+    </form>
+  </div>
 
 
 

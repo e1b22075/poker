@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 import java.util.Comparator;
+import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
 // import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +15,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 // import org.springframework.web.bind.annotation.PostMapping;
 // import org.springframework.web.bind.annotation.RequestMapping;
 // import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 
-import hakata.poker.model.card;
 import hakata.poker.model.Room;
+import hakata.poker.model.index;
+import hakata.poker.model.Cards;
+import hakata.poker.model.CardsMapper;
+import hakata.poker.model.Hand;
+import hakata.poker.model.UserMapper;
+import hakata.poker.model.HandMapper;
 
 @Controller
 public class PokerController {
@@ -24,6 +32,15 @@ public class PokerController {
   @Autowired
   private Room room;
   Random rmd = new Random();
+
+  @Autowired
+  private CardsMapper cardsMapper;
+
+  @Autowired
+  private HandMapper handMapper;
+
+  @Autowired
+  private UserMapper userMapper;
 
   @GetMapping("room")
   public String room_login(ModelMap model, Principal prin) {
@@ -44,87 +61,72 @@ public class PokerController {
 
   @GetMapping("poker/card")
   public String showCard(ModelMap model, Principal prin) {
-    int num = 0;// カードの値用
-    String types = "";// マーク用
+    int userid;
     int i = 0;// ループ用
     // ログインユーザ情報の受け渡し
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
     // ここまで
+    Hand hand = new Hand();
+    hand.setActive(true);
+    ArrayList<Cards> myCards = cardsMapper.select5RandomCard();
+    hand.setHand1id(myCards.get(0).getId());
+    hand.setHand2id(myCards.get(1).getId());
+    hand.setHand3id(myCards.get(2).getId());
+    hand.setHand4id(myCards.get(3).getId());
+    hand.setHand5id(myCards.get(4).getId());
 
-    // 手札を決めるための処理。今回は適当
+    userid = userMapper.selectid(loginUser);
+    hand.setUserid(userid);
 
-    ArrayList<Boolean> validCards = new ArrayList<Boolean>();// これサンプル用。DBできてないから作ってる。カードの重複を防ぐ
-    for (int j = 0; j < 52; j++) {
-      validCards.add(false);
-    }
+    handMapper.insertHandandIsActive(hand);
 
-    ArrayList<card> cardList = new ArrayList<>();
-    // これはカード格納用の変数(モデル含め仮組)
+    model.addAttribute("myCards", myCards);
+    model.addAttribute("index", new index());
 
-    ArrayList<card> cpu_CardList = new ArrayList<>();
-    // これはCPUのカード格納用の変数(モデル含め仮組)
-
-    while (i < 5) {
-      // ここからの処理は、カードの値を正常にする処理とマークを判別してる。
-      /*
-       * これからの数値の基準はこんな感じ
-       * 0~12 ♥
-       * 13~25 ♦
-       * 26~38 ♠
-       * 39~51 ♣
-       */
-      num = rmd.nextInt(52);
-      if (!validCards.get(num)) {
-        validCards.set(num, true);
-        if (num <= 12) {
-          num += 1;
-          types = "♥";
-        } else if (num <= 25) {
-          num -= 12;
-          types = "♦";
-        } else if (num <= 38) {
-          num -= 25;
-          types = "♠";
-        } else if (num <= 51) {
-          num -= 38;
-          types = "♣";
-        }
-
-        cardList.add(new card(num, types));
-        i++;
-      }
-    }
-    cardList.sort(Comparator.comparing(card::getNumber));
-    i = 0;
-    while (i < 5) {
-      // ここからの処理は、CPUのカードの値を正常にする処理とマークを判別してる。
-
-      num = rmd.nextInt(52);
-      if (!validCards.get(num)) {
-        validCards.set(num, true);
-        if (num <= 12) {
-          num += 1;
-          types = "♥";
-        } else if (num <= 25) {
-          num -= 12;
-          types = "♦";
-        } else if (num <= 38) {
-          num -= 25;
-          types = "♠";
-        } else if (num <= 51) {
-          num -= 38;
-          types = "♣";
-        }
-        cpu_CardList.add(new card(num, types));
-        i++;
-      }
-    }
-    cpu_CardList.sort(Comparator.comparing(card::getNumber));
-
-    model.addAttribute("cardList", cardList);
-    model.addAttribute("cpu_CardList", cpu_CardList);
     return "poker.html";
+  }
+
+  @PostMapping("/result")
+  public String formResult(@ModelAttribute index index, ModelMap model, Principal prin) {
+    int id;
+    Hand hand;
+    ArrayList<Cards> myCards = new ArrayList<Cards>();
+    Cards drawCards;
+    for (Integer indes : index.getId()) {
+      System.out.println(indes + "選択されました: ");
+    }
+    String loginUser = prin.getName();
+    model.addAttribute("login_user", loginUser);
+
+    id = userMapper.selectid(loginUser);
+    hand = handMapper.selectByUserId(id);
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(id);
+
+    myCards.add(cardsMapper.selectAllById(hand.getHand1id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand2id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand3id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand4id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
+
+    for (Integer indes : index.getId()) {
+      drawCards = cardsMapper.selectRandomCard();
+      while (drawCards.getActive()) {
+        drawCards = cardsMapper.selectRandomCard();
+      }
+      myCards.set(indes - 1, drawCards);
+    }
+    hand.setHand1id(myCards.get(0).getId());
+    hand.setHand2id(myCards.get(1).getId());
+    hand.setHand3id(myCards.get(2).getId());
+    hand.setHand4id(myCards.get(3).getId());
+    hand.setHand5id(myCards.get(4).getId());
+    handMapper.insertHandandIsActive(hand);
+
+    model.addAttribute("myCards", myCards);
+    model.addAttribute("index", new index());
+
+    return "poker";
   }
 
 }
