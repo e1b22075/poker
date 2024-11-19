@@ -70,6 +70,10 @@ public class PokerController {
     Hand hand = new Hand();
     hand.setActive(true);
     ArrayList<Cards> myCards = cardsMapper.select5RandomCard();
+    for (Cards card : myCards) {
+      cardsMapper.updateisActiveTrueById(card.getId());
+    }
+
     hand.setHand1id(myCards.get(0).getId());
     hand.setHand2id(myCards.get(1).getId());
     hand.setHand3id(myCards.get(2).getId());
@@ -80,7 +84,7 @@ public class PokerController {
     hand.setUserid(userid);
 
     handMapper.insertHandandIsActive(hand);
-
+    myCards.sort(Comparator.comparing(Cards::getNum));
     model.addAttribute("myCards", myCards);
     model.addAttribute("index", new index());
 
@@ -113,8 +117,10 @@ public class PokerController {
       drawCards = cardsMapper.selectRandomCard();
       while (drawCards.getActive()) {
         drawCards = cardsMapper.selectRandomCard();
+
       }
       myCards.set(indes - 1, drawCards);
+      cardsMapper.updateisActiveTrueById(myCards.get(indes - 1).getId());
     }
     hand.setHand1id(myCards.get(0).getId());
     hand.setHand2id(myCards.get(1).getId());
@@ -122,7 +128,7 @@ public class PokerController {
     hand.setHand4id(myCards.get(3).getId());
     hand.setHand5id(myCards.get(4).getId());
     handMapper.insertHandandIsActive(hand);
-
+    myCards.sort(Comparator.comparing(Cards::getNum));
     model.addAttribute("myCards", myCards);
     model.addAttribute("index", new index());
 

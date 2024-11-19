@@ -21,10 +21,12 @@
     <h4>自分の手札</h4>
     <form action="#" th:action="@{/result}" th:object="${index}" method="post">
       <div th:each="item, iterStat : ${myCards}">
-        <input type="checkbox" th:value="${iterStat.index+1}" th:text="${item.num} + ' ' +  ${item.cardtype}"
-          th:field="*{id}" />
+        <label>
+          <input type="checkbox" th:value="${iterStat.index+1}" th:text="${item.num} + ' ' +  ${item.cardtype}"
+            th:field="*{id}" />
+        </label>
       </div>
-      <p><input type="submit" value="送信" /> </p>
+      <p><input type="submit" value="カードを交換する" /> </p>
     </form>
   </div>
 
