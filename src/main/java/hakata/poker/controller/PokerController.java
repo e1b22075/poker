@@ -122,13 +122,13 @@ public class PokerController {
       myCards.set(indes - 1, drawCards);
       cardsMapper.updateisActiveTrueById(myCards.get(indes - 1).getId());
     }
+    myCards.sort(Comparator.comparing(Cards::getNum));
     hand.setHand1id(myCards.get(0).getId());
     hand.setHand2id(myCards.get(1).getId());
     hand.setHand3id(myCards.get(2).getId());
     hand.setHand4id(myCards.get(3).getId());
     hand.setHand5id(myCards.get(4).getId());
     handMapper.insertHandandIsActive(hand);
-    myCards.sort(Comparator.comparing(Cards::getNum));
     model.addAttribute("myCards", myCards);
     model.addAttribute("index", new index());
 
