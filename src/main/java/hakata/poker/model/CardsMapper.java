@@ -15,9 +15,9 @@ public interface CardsMapper {
   ArrayList<Cards> selectAll();
 
   @Select("SELECT * from cards where id = #{id}")
-  Cards selectAllById();
+  Cards selectAllById(int id);
 
-  //1こランダムに選択
+  // 1こランダムに選択
   @Select("SELECT * FROM cards ORDER BY RAND() LIMIT 1")
   Cards selectRandomCard();
 
@@ -31,8 +31,8 @@ public interface CardsMapper {
   @Update("UPDATE CARDS SET ISACTIVE=false WHERE id =#{id}")
   void updateisActiveFalseById(int id);
 
-  //trueのカードをfalseに
-  //手札引き直すときのリセット処理
+  // trueのカードをfalseに
+  // 手札引き直すときのリセット処理
   @Update("UPDATE CARDS SET ISACTIVE=false WHERE isActive = true")
   void updateAllfalsetotrueByfalse();
 }

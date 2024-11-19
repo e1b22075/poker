@@ -12,4 +12,7 @@ import org.apache.ibatis.annotations.Update;
 public interface UserMapper {
   @Select("SELECT * from users")
   ArrayList<User> selectAll();
+
+  @Select("SELECT id from users WHERE userName = #{name}")
+  Integer selectid(String name);
 }

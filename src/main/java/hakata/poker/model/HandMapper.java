@@ -17,7 +17,11 @@ public interface HandMapper {
   @Select("SELECT * from hand where id = #{id}")
   ArrayList<Hand> selectAllById(int id);
 
-  @Insert("INSERT INTO Hand (id,userid,hand1id,hand2id,hand3id,hand4id,hand5id,isActive) VALUES (#{id},#{userid},#{hand1id},#{hand2id},#{hand3id},#{hand4id},#{hand5id},true);")
+  @Select("SELECT * from hand where userid = #{id} AND isActive = true")
+  Hand selectByUserId(int id);
+
+  @Insert("INSERT INTO Hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,isActive) VALUES (#{userid},#{hand1id},#{hand2id},#{hand3id},#{hand4id},#{hand5id},true);")
+  @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
   void insertHandandIsActive(Hand hand);
 
   @Update("UPDATE HAND SET ROLEID=#{ROLEID} WHERE ID=#{id}")
@@ -28,6 +32,9 @@ public interface HandMapper {
 
   @Update("UPDATE HAND SET isActive = true WHERE isActive = false")
   void updateIsActivefalsetotrueByfalse();
+
+  @Update("UPDATE HAND SET isActive = false WHERE isActive = true AND userid = #{id}")
+  void updateIsActivefalsetotrueByfalseAndUserId(int id);
 
   @Update("UPDATE HAND SET isActive = false WHERE isActive = true")
   void updateIsActivetruetofalseBytrue();
