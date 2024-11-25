@@ -30,6 +30,11 @@
     </form>
   </div>
 
+  <!-- ワンペアなどの役を表示 -->
+  <div th:if="${role}">
+    <h3 th:text="${role}"></h3>
+  </div>
+
 
 
 </body>
