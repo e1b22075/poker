@@ -57,3 +57,5 @@ INSERT INTO cards (num,cardtype,isActive) VALUES (12,'clover',false);
 INSERT INTO cards (num,cardtype,isActive) VALUES (13,'clover',false);
 
 INSERT INTO hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,roleid,rolenum,isActive) VALUES (1,2,3,4,5,6,7,8,false);
+
+INSERT INTO room (user1id,user2id,user3id,user4id,user5id,user6id) VALUES (1,2,3,4,5,6);

@@ -22,3 +22,13 @@ CREATE TABLE hand (
     rolenum INTEGER,
     isActive BOOLEAN
 );
+
+CREATE TABLE room (
+    id IDENTITY,
+    user1id INTEGER,
+    user2id INTEGER,
+    user3id INTEGER,
+    user4id INTEGER,
+    user5id INTEGER,
+    user6id INTEGER,
+)
