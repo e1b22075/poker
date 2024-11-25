@@ -132,7 +132,7 @@ public class PokerController {
     model.addAttribute("myCards", myCards);
     model.addAttribute("index", new index());
 
-    return "poker";
+    return "select";
   }
 
 }
