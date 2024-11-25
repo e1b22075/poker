@@ -16,6 +16,9 @@
 <body>
   <h1>[[${login_user}]]</h1>
   <a href="/logout">ログアウト</a>
+  <div th:if="${coin}">
+    <h2>あなたのコインは[[${coin}]]枚です。</h2>
+  </div>
   <h2>現在の手札</h2>
   <div th:if="${myCards}">
     <div th:each="item, iterStat : ${myCards}">
@@ -24,4 +27,7 @@
       </tr>
     </div>
     <h2>どうしますか？</h2>
+    <a href="/poker/call"><button>コール</button></a>
+    <a href="/poker/rays"><button>レイズ</button></a>
+    <a href="/poker/drop"><button>ドロップ</button></a>
   </div>

@@ -16,6 +16,9 @@
 <body>
   <h1>Authorized! [[${login_user}]]</h1>
   <a href="/logout">ログアウト</a>
+  <div th:if="${coin}">
+    <h2>あなたのコインは[[${coin}]]枚です。</h2>
+  </div>
   <div th:if="!${myCards}">
     <h2><a href="/poker/card">カードを引く</a></h2>
   </div>

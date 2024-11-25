@@ -62,7 +62,7 @@ public class PokerController {
   @GetMapping("poker/card")
   public String showCard(ModelMap model, Principal prin) {
     int userid;
-    int i = 0;// ループ用
+    int coin = 5;
     // ログインユーザ情報の受け渡し
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
@@ -79,13 +79,14 @@ public class PokerController {
     hand.setHand3id(myCards.get(2).getId());
     hand.setHand4id(myCards.get(3).getId());
     hand.setHand5id(myCards.get(4).getId());
-
+    hand.setCoin(coin);
     userid = userMapper.selectid(loginUser);
     hand.setUserid(userid);
+    myCards.sort(Comparator.comparing(Cards::getNum));
 
     handMapper.insertHandandIsActive(hand);
-    myCards.sort(Comparator.comparing(Cards::getNum));
     model.addAttribute("myCards", myCards);
+    model.addAttribute("coin", coin);
     model.addAttribute("index", new index());
 
     return "poker.html";
@@ -130,9 +131,33 @@ public class PokerController {
     hand.setHand5id(myCards.get(4).getId());
     handMapper.insertHandandIsActive(hand);
     model.addAttribute("myCards", myCards);
+    model.addAttribute("coin", hand.getCoin());
     model.addAttribute("index", new index());
 
     return "select";
   }
 
+  @GetMapping("poker/call")
+  public String showCall(ModelMap model, Principal prin) {
+    int id;
+    // ログインユーザ情報の受け渡し
+    String loginUser = prin.getName();
+    model.addAttribute("login_user", loginUser);
+    // ここまで
+    ArrayList<Cards> myCards = new ArrayList<Cards>();
+    id = userMapper.selectid(loginUser);
+    Hand hand = handMapper.selectByUserId(id);
+
+    myCards.add(cardsMapper.selectAllById(hand.getHand1id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand2id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand3id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand4id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
+
+    model.addAttribute("myCards", myCards);
+    model.addAttribute("coin", hand.getCoin());
+    model.addAttribute("index", new index());
+
+    return "poker.html";
+  }
 }
