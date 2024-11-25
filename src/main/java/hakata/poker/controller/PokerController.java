@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 // import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import hakata.poker.model.Room;
 import hakata.poker.model.index;
@@ -133,7 +134,6 @@ public class PokerController {
     model.addAttribute("myCards", myCards);
     model.addAttribute("coin", hand.getCoin());
     model.addAttribute("index", new index());
-
     return "select";
   }
 
@@ -159,5 +159,67 @@ public class PokerController {
     model.addAttribute("index", new index());
 
     return "poker.html";
+  }
+
+  @GetMapping("poker/drop")
+  public String showDrop(ModelMap model, Principal prin) {
+    int id;
+    int coin;
+    // ログインユーザ情報の受け渡し
+    String loginUser = prin.getName();
+    model.addAttribute("login_user", loginUser);
+    // ここまで
+    ArrayList<Cards> myCards = new ArrayList<Cards>();
+    id = userMapper.selectid(loginUser);
+    Hand hand = handMapper.selectByUserId(id);
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(id);
+    coin = hand.getCoin() - 1;
+    hand.setCoin(coin);
+    myCards.add(cardsMapper.selectAllById(hand.getHand1id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand2id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand3id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand4id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
+    handMapper.insertHandandIsActive(hand);
+    model.addAttribute("myCards", myCards);
+    model.addAttribute("coin", hand.getCoin());
+    model.addAttribute("index", new index());
+
+    return "poker.html";
+  }
+
+  @GetMapping("poker/rays")
+  public String rays(ModelMap model, Principal prin) {
+    int id;
+    String loginUser = prin.getName(); // ログインユーザ情報
+    model.addAttribute("login_user", loginUser);
+    id = userMapper.selectid(loginUser);
+    Hand hand = handMapper.selectByUserId(id);
+    model.addAttribute("coin", hand.getCoin());
+    return "rays.html";
+  }
+
+  @PostMapping("/rays")
+  public String formRays(@RequestParam("rays") Integer rays, ModelMap model, Principal prin) {
+    int id;
+    Hand hand;
+    ArrayList<Cards> myCards = new ArrayList<Cards>();
+    String loginUser = prin.getName();
+    model.addAttribute("login_user", loginUser);
+
+    id = userMapper.selectid(loginUser);
+    hand = handMapper.selectByUserId(id);
+
+    myCards.add(cardsMapper.selectAllById(hand.getHand1id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand2id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand3id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand4id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
+    model.addAttribute("rays", rays);
+    model.addAttribute("myCards", myCards);
+    model.addAttribute("coin", hand.getCoin());
+    model.addAttribute("index", new index());
+
+    return "poker";
   }
 }
