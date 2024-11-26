@@ -32,6 +32,11 @@ public class poker {
     int[][] player1Hand = drawCards(id, card);
     int[][] player2Hand = drawCards(id, card);
 
+    for (int i = 0; i < 5; i++) {
+      player1Hand[i][2] = 1;
+      player2Hand[i][2] = 2;
+    }
+
     // 手札の表示
     System.out.println("プレイヤー1の手札:");
     displayHand(player1Hand);
@@ -39,15 +44,29 @@ public class poker {
     System.out.println("プレイヤー2の手札:");
     displayHand(player2Hand);
 
-    int player1flag6 = 0;
-    int player1flag5 = 0;
-    int player1flag2 = 0;
-    int player1flag1 = 0;
+    int player1flag1 = 0; // ロイヤルストレートフラッシュ
+    int player1flag2 = 0; // ストレートフラッシュ
+    int player1flag3 = 0; // フォア・カード
+    int player1flag4 = 0; // フルハウス
+    int player1flag5 = 0; // フラッシュ
+    int player1flag6 = 0; // ストレート
+    int player1flag7 = 0; // スリーカード
+    int player1flag8 = 0; // ツウ・ペア
+    int player1flag9 = 0; // ワン・ペア
 
-    int player2flag6 = 0;
-    int player2flag5 = 0;
-    int player2flag2 = 0;
+    int one1 = 0; // ワン・ペア時の数字を格納
+
     int player2flag1 = 0;
+    int player2flag2 = 0;
+    int player2flag3 = 0;
+    int player2flag4 = 0;
+    int player2flag5 = 0;
+    int player2flag6 = 0;
+    int player2flag7 = 0;
+    int player2flag8 = 0;
+    int player2flag9 = 0;
+
+    int one2 = 0; // ワン・ペア時の数字を格納
 
     int resultflag1 = 10;
     int resultflag2 = 10;
@@ -73,18 +92,76 @@ public class poker {
       player1flag2 = 1;
     }
 
+    // フォーカードの判定
+    if ((player1Hand[0][1] == player1Hand[1][1] && player1Hand[1][1] == player1Hand[2][1]
+        && player1Hand[2][1] == player1Hand[3][1])
+        || (player1Hand[1][1] == player1Hand[2][1] && player1Hand[2][1] == player1Hand[3][1]
+            && player1Hand[3][1] == player1Hand[4][1])) {
+      player1flag3 = 1;
+    }
+    // スリーカードの判定
+    else if ((player1Hand[0][1] == player1Hand[1][1] && player1Hand[1][1] == player1Hand[2][1])
+        || (player1Hand[1][1] == player1Hand[2][1] && player1Hand[2][1] == player1Hand[3][1])
+        || (player1Hand[2][1] == player1Hand[3][1] && player1Hand[3][1] == player1Hand[4][1])) {
+      player1flag7 = 1;
+      // フルハウス用の処理
+      if (player1Hand[0][1] == player1Hand[1][1] && player1Hand[1][1] == player1Hand[2][1]) {
+        if (player1Hand[3][1] == player1Hand[4][1]) {
+          player1flag4 = 1;
+        }
+      } else if (player1Hand[2][1] == player1Hand[3][1] && player1Hand[3][1] == player1Hand[4][1]) {
+        if (player1Hand[0][1] == player1Hand[1][1]) {
+          player1flag4 = 1;
+        }
+      }
+    }
+    // ツウ・ペアの判定
+    else if ((player1Hand[0][1] == player1Hand[1][1] && player1Hand[2][1] == player1Hand[3][1])
+        || (player1Hand[1][1] == player1Hand[2][1] && player1Hand[3][1] == player1Hand[4][1])) {
+      player1flag8 = 1;
+    }
+    // ワン・ペアの判定
+    else if ((player1Hand[0][1] == player1Hand[1][1]) || (player1Hand[1][1] == player1Hand[2][1])
+        || (player1Hand[2][1] == player1Hand[3][1]) || (player1Hand[3][1] == player1Hand[4][1])) {
+      player1flag9 = 1;
+      if (player1Hand[0][1] == player1Hand[1][1]) {
+        one1 = player1Hand[1][1];
+      } else if (player1Hand[1][1] == player1Hand[2][1]) {
+        one1 = player1Hand[2][1];
+      } else if (player1Hand[2][1] == player1Hand[3][1]) {
+        one1 = player1Hand[3][1];
+      } else if (player1Hand[3][1] == player1Hand[4][1]) {
+        one1 = player1Hand[4][1];
+      }
+    }
+
     if (player1flag1 == 1) {
       System.out.println("プレイヤー1はロイヤルストレートフラッシュです");
       resultflag1 = 1;
     } else if (player1flag2 == 1) {
       System.out.println("プレイヤー1はストレートフラッシュです。");
       resultflag1 = 2;
+    } else if (player1flag3 == 1) {
+      System.out.println("プレイヤー1はフォア・カードです。");
+      resultflag1 = 3;
+    } else if (player1flag4 == 1) {
+      System.out.println("プレイヤー1はフルハウスです。");
+      resultflag1 = 4;
     } else if (player1flag5 == 1) {
       System.out.println("プレイヤー1はフラッシュです。");
       resultflag1 = 5;
     } else if (player1flag6 == 1) {
       System.out.println("プレイヤー1はストレートです。");
       resultflag1 = 6;
+    } else if (player1flag7 == 1) {
+      System.out.println("プレイヤー1はスリーカードです。");
+      resultflag1 = 7;
+    } else if (player1flag8 == 1) {
+      System.out.println("プレイヤー1はツウ・ペアです。");
+      resultflag1 = 8;
+    } else if (player1flag9 == 1) {
+      System.out.println("プレイヤー1はワン・ペアです。");
+      resultflag1 = 9;
     }
 
     // ストレートの判定
@@ -108,40 +185,167 @@ public class poker {
       player2flag2 = 1;
     }
 
+    // フォーカードの判定
+    if ((player2Hand[0][1] == player2Hand[1][1] && player2Hand[1][1] == player2Hand[2][1]
+        && player2Hand[2][1] == player2Hand[3][1])
+        || (player2Hand[1][1] == player2Hand[2][1] && player2Hand[2][1] == player2Hand[3][1]
+            && player2Hand[3][1] == player2Hand[4][1])) {
+      player2flag3 = 1;
+    }
+    // スリーカードの判定
+    else if ((player2Hand[0][1] == player2Hand[1][1] && player2Hand[1][1] == player2Hand[2][1])
+        || (player2Hand[1][1] == player2Hand[2][1] && player2Hand[2][1] == player2Hand[3][1])
+        || (player2Hand[2][1] == player2Hand[3][1] && player2Hand[3][1] == player2Hand[4][1])) {
+      player2flag7 = 1;
+      // フルハウスの判定
+      if (player2Hand[0][1] == player2Hand[1][1] && player2Hand[1][1] == player2Hand[2][1]) {
+        if (player2Hand[3][1] == player2Hand[4][1]) {
+          player2flag4 = 1;
+        }
+      } else if (player2Hand[2][1] == player2Hand[3][1] && player2Hand[3][1] == player2Hand[4][1]) {
+        if (player2Hand[0][1] == player2Hand[1][1]) {
+          player2flag4 = 1;
+        }
+      }
+    }
+    // ツウ・ペアの判定
+    else if ((player2Hand[0][1] == player2Hand[1][1] && player2Hand[2][1] == player2Hand[3][1])
+        || (player2Hand[1][1] == player2Hand[2][1] && player2Hand[3][1] == player2Hand[4][1])) {
+      player2flag8 = 1;
+    }
+    // ワン・ペアの判定
+    else if ((player2Hand[0][1] == player2Hand[1][1]) || (player2Hand[1][1] == player2Hand[2][1])
+        || (player2Hand[2][1] == player2Hand[3][1]) || (player2Hand[3][1] == player2Hand[4][1])) {
+      player2flag9 = 1;
+      if (player2Hand[0][1] == player2Hand[1][1]) {
+        one2 = player2Hand[1][1];
+      } else if (player2Hand[1][1] == player2Hand[2][1]) {
+        one2 = player2Hand[2][1];
+      } else if (player2Hand[2][1] == player2Hand[3][1]) {
+        one2 = player1Hand[3][1];
+      } else if (player2Hand[3][1] == player2Hand[4][1]) {
+        one2 = player2Hand[4][1];
+      }
+    }
+
     if (player2flag1 == 1) {
       System.out.println("プレイヤー2はロイヤルストレートフラッシュです");
       resultflag2 = 1;
     } else if (player2flag2 == 1) {
       System.out.println("プレイヤー2はストレートフラッシュです。");
       resultflag2 = 2;
+    } else if (player2flag3 == 1) {
+      System.out.println("プレイヤー2はフォア・カードです。");
+      resultflag2 = 3;
+    } else if (player2flag4 == 1) {
+      System.out.println("プレイヤー2はフルハウスです。");
+      resultflag2 = 4;
     } else if (player2flag5 == 1) {
       System.out.println("プレイヤー2はフラッシュです。");
       resultflag2 = 5;
     } else if (player2flag6 == 1) {
       System.out.println("プレイヤー2はストレートです。");
       resultflag2 = 6;
+    } else if (player2flag7 == 1) {
+      System.out.println("プレイヤー2はスリーカードです。");
+      resultflag2 = 7;
+    } else if (player2flag8 == 1) {
+      System.out.println("プレイヤー2はツウ・ペアです。");
+      resultflag2 = 8;
+    } else if (player2flag9 == 1) {
+      System.out.println("プレイヤー2はワン・ペアです。");
+      resultflag2 = 9;
     }
 
-    if (resultflag1 == resultflag2) {
+    // resultflagの大小で勝利者を判定
+    if (resultflag1 < resultflag2) {
+      System.out.println("プレイヤー1の勝利です。");
+    } else if (resultflag1 > resultflag2) {
+      System.out.println("プレイヤー2の勝利です。");
+    }
+    // ロイヤルストレートフラッシュ同士の比較
+    else if (resultflag1 == resultflag2 && resultflag2 == 1) {
+      if (player1Hand[4][2] < player2Hand[4][2]) {
+        System.out.println("プレイヤー1の勝利です。");
+      } else if (player1Hand[4][2] > player2Hand[4][2]) {
+        System.out.println("プレイヤー2の勝利です。");
+      }
+    }
+    // ストレートフラッシュ同士の比較
+    else if (resultflag1 == resultflag2 && resultflag2 == 2) {
       if (player1Hand[4][1] > player2Hand[4][1]) {
-        System.out.println("プレイヤー1の勝利です");
+        System.out.println("プレイヤー1の勝利です。");
       } else if (player1Hand[4][1] < player2Hand[4][1]) {
-        System.out.println("プレイヤー2の勝利です");
+        System.out.println("プレイヤー2の勝利です。");
       } else if (player1Hand[4][1] == player2Hand[4][1]) {
         if (player1Hand[4][2] < player2Hand[4][2]) {
           System.out.println("プレイヤー1の勝利です");
         } else if (player1Hand[4][2] > player2Hand[4][2]) {
           System.out.println("プレイヤー2の勝利です");
-        } else if (player1Hand[4][2] == player2Hand[4][2]) {
-          System.out.println("引き分けです。");
         }
       }
     }
-    else if (resultflag1 < resultflag2) {
-      System.out.println("プレイヤー1の勝利です");
+    // フラッシュ同士の比較
+    else if (resultflag1 == resultflag2 && resultflag2 == 5) {
+      if (player1Hand[4][2] < player2Hand[4][2]) {
+        System.out.println("プレイヤー1の勝利です");
+      } else if (player1Hand[4][2] > player2Hand[4][2]) {
+        System.out.println("プレイヤー2の勝利です");
+      }
     }
-    else if (resultflag1 > resultflag2) {
-      System.out.println("プレイヤー2の勝利です");
+    // ストレート同士の比較
+    else if (resultflag1 == resultflag2 && resultflag2 == 6) {
+      if (player1Hand[4][1] > player2Hand[4][1]) {
+        System.out.println("プレイヤー1の勝利です。");
+      } else if (player1Hand[4][1] < player2Hand[4][1]) {
+        System.out.println("プレイヤー2の勝利です。");
+      } else if (player1Hand[4][1] == player2Hand[4][1]) {
+        if (player1Hand[4][2] < player2Hand[4][2]) {
+          System.out.println("プレイヤー1の勝利です");
+        } else if (player1Hand[4][2] > player2Hand[4][2]) {
+          System.out.println("プレイヤー2の勝利です");
+        }
+      }
+    }
+    // フルハウスの同士の比較
+    else if (resultflag1 == resultflag2 && resultflag2 == 4) {
+      if (player1Hand[2][1] > player2Hand[2][1]) {
+        System.out.println("プレイヤー1の勝利です。");
+      } else if (player1Hand[2][1] < player2Hand[2][1]) {
+        System.out.println("プレイヤー2の勝利です。");
+      }
+    }
+    // フォア・カード同士の比較
+    else if (resultflag1 == resultflag2 && resultflag2 == 3) {
+      if (player1Hand[3][1] > player2Hand[3][1]) {
+        System.out.println("プレイヤー1の勝利です");
+      } else if (player1Hand[3][1] < player2Hand[3][1]) {
+        System.out.println("プレイヤー2の勝利です");
+      }
+    }
+    // スリーカード同士の比較
+    else if (resultflag1 == resultflag2 && resultflag2 == 7) {
+      if (player1Hand[2][1] > player2Hand[2][1]) {
+        System.out.println("プレイヤー1の勝利です");
+      } else if (player1Hand[2][1] < player2Hand[2][1]) {
+        System.out.println("プレイヤー2の勝利です");
+      }
+    }
+    // ツウ・ペア同士の比較
+    else if (resultflag1 == resultflag2 && resultflag2 == 8) {
+      if (player1Hand[3][1] > player2Hand[3][1]) {
+        System.out.println("プレイヤー1の勝利です");
+      } else if (player1Hand[3][1] < player2Hand[3][1]) {
+        System.out.println("プレイヤー2の勝利です");
+      }
+    }
+    // ワン・ペア同士の比較
+    else if (resultflag1 == resultflag2 && resultflag2 == 9) {
+      if (one1 > one2) {
+        System.out.println("プレイヤー1の勝利です");
+      } else if (one1 < one2) {
+        System.out.println("プレイヤー2の勝利です");
+      }
     }
   }
 
