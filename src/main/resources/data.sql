@@ -56,7 +56,7 @@ INSERT INTO cards (num,cardtype,isActive) VALUES (11,'clover',false);
 INSERT INTO cards (num,cardtype,isActive) VALUES (12,'clover',false);
 INSERT INTO cards (num,cardtype,isActive) VALUES (13,'clover',false);
 
-<<<<<<< HEAD
-INSERT INTO hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,roleid,rolenum,isActive) VALUES (1,2,3,4,5,6,7,8,false);
+
+INSERT INTO hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,coin,roleid,rolenum,isActive) VALUES (1,2,3,4,5,6,7,8,9,false);
 
 INSERT INTO room (roomName,user1id,user2id,user3id,user4id,user5id,user6id) VALUES ('テストの部屋',1,2,3,4,5,6);
