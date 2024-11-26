@@ -147,6 +147,7 @@ public class PokerController {
     model.addAttribute("myCards", myCards);
     model.addAttribute("coin", hand.getCoin());
     model.addAttribute("index", new index());
+    
     // ストレートの判定
     if (myCards.get(0).getNum() == myCards.get(1).getNum() + 1 && myCards.get(1).getNum() == myCards.get(2).getNum() + 1
         && myCards.get(2).getNum() == myCards.get(3).getNum() + 1
@@ -247,6 +248,8 @@ public class PokerController {
         onepairnum = myCards.get(4).getNum();
       }
     }
+     // 判定処理ここまで
+    // これ遷移先変わってるけど見れるようになってるはずなんでよろしく。コール押したら元に戻るよー
     return "select";
   }
 
@@ -311,7 +314,71 @@ public class PokerController {
     model.addAttribute("coin", hand.getCoin());
     return "rays.html";
   }
+    return "select";
 
+  }
+
+  @GetMapping("poker/call")
+  public String showCall(ModelMap model, Principal prin) {
+    int id;
+    // ログインユーザ情報の受け渡し
+    String loginUser = prin.getName();
+    model.addAttribute("login_user", loginUser);
+    // ここまで
+    ArrayList<Cards> myCards = new ArrayList<Cards>();
+    id = userMapper.selectid(loginUser);
+    Hand hand = handMapper.selectByUserId(id);
+
+    myCards.add(cardsMapper.selectAllById(hand.getHand1id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand2id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand3id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand4id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
+
+    model.addAttribute("myCards", myCards);
+    model.addAttribute("coin", hand.getCoin());
+    model.addAttribute("index", new index());
+
+    return "poker.html";
+  }
+
+  @GetMapping("poker/drop")
+  public String showDrop(ModelMap model, Principal prin) {
+    int id;
+    int coin;
+    // ログインユーザ情報の受け渡し
+    String loginUser = prin.getName();
+    model.addAttribute("login_user", loginUser);
+    // ここまで
+    ArrayList<Cards> myCards = new ArrayList<Cards>();
+    id = userMapper.selectid(loginUser);
+    Hand hand = handMapper.selectByUserId(id);
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(id);
+    coin = hand.getCoin() - 1;
+    hand.setCoin(coin);
+    myCards.add(cardsMapper.selectAllById(hand.getHand1id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand2id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand3id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand4id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
+    handMapper.insertHandandIsActive(hand);
+    model.addAttribute("myCards", myCards);
+    model.addAttribute("coin", hand.getCoin());
+    model.addAttribute("index", new index());
+
+    return "poker.html";
+  }
+
+  @GetMapping("poker/rays")
+  public String rays(ModelMap model, Principal prin) {
+    int id;
+    String loginUser = prin.getName(); // ログインユーザ情報
+    model.addAttribute("login_user", loginUser);
+    id = userMapper.selectid(loginUser);
+    Hand hand = handMapper.selectByUserId(id);
+    model.addAttribute("coin", hand.getCoin());
+    return "rays.html";
+  }
   @PostMapping("/rays")
   public String formRays(@RequestParam("rays") Integer rays, ModelMap model, Principal prin) {
     int id;
@@ -332,7 +399,6 @@ public class PokerController {
     model.addAttribute("myCards", myCards);
     model.addAttribute("coin", hand.getCoin());
     model.addAttribute("index", new index());
-
     return "poker";
   }
 }
