@@ -33,4 +33,9 @@ CREATE TABLE room (
     user4id INTEGER,
     user5id INTEGER,
     user6id INTEGER
-)
+);
+
+CREATE TABLE role (
+  id IDENTITY,
+  roleName VARCHAR NOT NULL
+);
