@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 // import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import hakata.poker.model.Room;
 import hakata.poker.model.index;
@@ -52,6 +53,13 @@ public class PokerController {
     return "room.html";
   }
 
+  @GetMapping("help")
+  public String help_page(ModelMap model, Principal prin) {
+    String loginUser = prin.getName(); // ログインユーザ情報
+    model.addAttribute("login_user", loginUser);
+    return "help.html";
+  }
+
   @GetMapping("poker")
   public String login(ModelMap model, Principal prin) {
     String loginUser = prin.getName(); // ログインユーザ情報
@@ -62,7 +70,7 @@ public class PokerController {
   @GetMapping("poker/card")
   public String showCard(ModelMap model, Principal prin) {
     int userid;
-    int i = 0;// ループ用
+    int coin = 5;
     // ログインユーザ情報の受け渡し
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
@@ -79,13 +87,14 @@ public class PokerController {
     hand.setHand3id(myCards.get(2).getId());
     hand.setHand4id(myCards.get(3).getId());
     hand.setHand5id(myCards.get(4).getId());
-
+    hand.setCoin(coin);
     userid = userMapper.selectid(loginUser);
     hand.setUserid(userid);
+    myCards.sort(Comparator.comparing(Cards::getNum));
 
     handMapper.insertHandandIsActive(hand);
-    myCards.sort(Comparator.comparing(Cards::getNum));
     model.addAttribute("myCards", myCards);
+    model.addAttribute("coin", coin);
     model.addAttribute("index", new index());
 
     return "poker.html";
@@ -97,6 +106,12 @@ public class PokerController {
     Hand hand;
     ArrayList<Cards> myCards = new ArrayList<Cards>();
     Cards drawCards;
+
+    int Straightflag = 0;
+    int Flashflag = 0; //フラッシュの旗
+
+    int onepairnum = 0;
+
     for (Integer indes : index.getId()) {
       System.out.println(indes + "選択されました: ");
     }
@@ -130,9 +145,194 @@ public class PokerController {
     hand.setHand5id(myCards.get(4).getId());
     handMapper.insertHandandIsActive(hand);
     model.addAttribute("myCards", myCards);
+    model.addAttribute("coin", hand.getCoin());
     model.addAttribute("index", new index());
+    return "select";
+  }
+
+  @GetMapping("poker/call")
+  public String showCall(ModelMap model, Principal prin) {
+    int id;
+    // ログインユーザ情報の受け渡し
+    String loginUser = prin.getName();
+    model.addAttribute("login_user", loginUser);
+    // ここまで
+    ArrayList<Cards> myCards = new ArrayList<Cards>();
+    id = userMapper.selectid(loginUser);
+    Hand hand = handMapper.selectByUserId(id);
+
+    myCards.add(cardsMapper.selectAllById(hand.getHand1id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand2id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand3id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand4id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
+
+    model.addAttribute("myCards", myCards);
+    model.addAttribute("coin", hand.getCoin());
+    model.addAttribute("index", new index());
+
+    return "poker.html";
+  }
+
+  @GetMapping("poker/drop")
+  public String showDrop(ModelMap model, Principal prin) {
+    int id;
+    int coin;
+    // ログインユーザ情報の受け渡し
+    String loginUser = prin.getName();
+    model.addAttribute("login_user", loginUser);
+    // ここまで
+    ArrayList<Cards> myCards = new ArrayList<Cards>();
+    id = userMapper.selectid(loginUser);
+    Hand hand = handMapper.selectByUserId(id);
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(id);
+    coin = hand.getCoin() - 1;
+    hand.setCoin(coin);
+    myCards.add(cardsMapper.selectAllById(hand.getHand1id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand2id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand3id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand4id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
+    handMapper.insertHandandIsActive(hand);
+    model.addAttribute("myCards", myCards);
+    model.addAttribute("coin", hand.getCoin());
+    model.addAttribute("index", new index());
+
+    return "poker.html";
+  }
+
+  @GetMapping("poker/rays")
+  public String rays(ModelMap model, Principal prin) {
+    int id;
+    String loginUser = prin.getName(); // ログインユーザ情報
+    model.addAttribute("login_user", loginUser);
+    id = userMapper.selectid(loginUser);
+    Hand hand = handMapper.selectByUserId(id);
+    model.addAttribute("coin", hand.getCoin());
+    return "rays.html";
+  }
+
+  @PostMapping("/rays")
+  public String formRays(@RequestParam("rays") Integer rays, ModelMap model, Principal prin) {
+    int id;
+    Hand hand;
+    ArrayList<Cards> myCards = new ArrayList<Cards>();
+    String loginUser = prin.getName();
+    model.addAttribute("login_user", loginUser);
+
+    id = userMapper.selectid(loginUser);
+    hand = handMapper.selectByUserId(id);
+
+    myCards.add(cardsMapper.selectAllById(hand.getHand1id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand2id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand3id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand4id()));
+    myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
+    model.addAttribute("rays", rays);
+    model.addAttribute("myCards", myCards);
+    model.addAttribute("coin", hand.getCoin());
+    model.addAttribute("index", new index());
+
+    //ストレートの判定
+    if (myCards.get(0).getNum() == myCards.get(1).getNum() + 1 && myCards.get(1).getNum() == myCards.get(2).getNum() + 1 && myCards.get(2).getNum() == myCards.get(3).getNum() + 1
+        && myCards.get(3).getNum() == myCards.get(4).getNum() + 1) {
+        hand.setRoleid(6);
+        String role = "あなたの役はストレートです。";
+        Straightflag = 1;
+
+        model.addAttribute("role", role);
+    }
+    //フラッシュの判定
+    if (myCards.get(0).getCardtype() == myCards.get(1).getCardtype()
+        && myCards.get(0).getCardtype() == myCards.get(1).getCardtype()
+        && myCards.get(0).getCardtype() == myCards.get(1).getCardtype()
+        && myCards.get(0).getCardtype() == myCards.get(1).getCardtype()) {
+      hand.setRoleid(5);
+      String role = "あなたの役はフラッシュです。";
+      Flashflag = 1;
+
+      model.addAttribute("role", role);
+    }
+    //ロイヤルストレートフラッシュの判定
+    if (Flashflag == 1 && myCards.get(0).getNum() == 1 && myCards.get(1).getNum() == 10
+        && myCards.get(2).getNum() == 11 && myCards.get(3).getNum() == 12 && myCards.get(4).getNum() == 13) {
+      hand.setRoleid(1);
+      String role = "あなたの役はロイヤルストレートフラッシュです。";
+
+      model.addAttribute("role", role);
+    }
+    //ストレートフラッシュの判定
+    else if (Straightflag == 1 && Flashflag == 1) {
+      hand.setRoleid(2);
+      String role = "あなたの役はストレートフラッシュです。";
+
+      model.addAttribute("role", role);
+    }
+
+    //フォーカードの判定
+    if ((myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(1).getNum() == myCards.get(2).getNum()
+        && myCards.get(2).getNum() == myCards.get(3).getNum())
+        || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(2).getNum() == myCards.get(3).getNum()
+            && myCards.get(3).getNum() == myCards.get(4).getNum())) {
+      hand.setRoleid(3);
+      String role = "あなたの役はフォア・カードです。";
+
+      model.addAttribute("role", role);
+    }
+    //スリーカードの判定
+    else if ((myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(1).getNum() == myCards.get(2).getNum())
+        || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(2).getNum() == myCards.get(3).getNum())
+        || (myCards.get(2).getNum() == myCards.get(3).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())) {
+      hand.setRoleid(7);
+      String role = "あなたの役はスリーカードです。";
+
+      model.addAttribute("role", role);
+      //フルハウスの判定
+      if (myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(1).getNum() == myCards.get(2).getNum()) {
+        if (myCards.get(3).getNum() == myCards.get(4).getNum()) {
+          hand.setRoleid(4);
+          role = "あなたの役はフルハウスです。";
+
+          model.addAttribute("role", role);
+        }
+      } else if (myCards.get(2).getNum() == myCards.get(3).getNum()
+          && myCards.get(3).getNum() == myCards.get(4).getNum()) {
+        if (myCards.get(0).getNum() == myCards.get(1).getNum()) {
+          hand.setRoleid(4);
+          role = "あなたの役はフルハウスです。";
+
+          model.addAttribute("role", role);
+        }
+      }
+    }
+    //ツウ・ペアの判定
+    else if ((myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(2).getNum() == myCards.get(3).getNum())
+        || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())) {
+      hand.setRoleid(8);
+      String role = "あなたの役はツウ・ペアです。";
+
+      model.addAttribute("role", role);
+    }
+    //ワン・ペアの判定
+    else if ((myCards.get(0).getNum() == myCards.get(1).getNum())
+        || (myCards.get(1).getNum() == myCards.get(2).getNum()) || (myCards.get(2).getNum() == myCards.get(3).getNum())
+        || (myCards.get(3).getNum() == myCards.get(4).getNum())) {
+      hand.setRoleid(9);
+      String role = "あなたの役はワン・ペアです。";
+
+      model.addAttribute("role", role);
+      //ワンペア時の数値を格納
+      if (myCards.get(0).getNum() == myCards.get(1).getNum()) {
+        onepairnum = myCards.get(1).getNum();
+      } else if (myCards.get(1).getNum() == myCards.get(2).getNum()) {
+        onepairnum = myCards.get(2).getNum();
+      } else if (myCards.get(2).getNum() == myCards.get(3).getNum()) {
+        onepairnum = myCards.get(3).getNum();
+      } else if (myCards.get(3).getNum() == myCards.get(4).getNum()) {
+        onepairnum = myCards.get(4).getNum();
+      }
+    }
 
     return "poker";
   }
-
 }

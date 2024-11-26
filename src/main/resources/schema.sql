@@ -18,6 +18,7 @@ CREATE TABLE hand (
     hand3id INTEGER NOT NULL,
     hand4id INTEGER NOT NULL,
     hand5id INTEGER NOT NULL,
+    coin INTEGER NOT NULL,
     roleid INTEGER,
     rolenum INTEGER,
     isActive BOOLEAN

@@ -8,6 +8,7 @@ public class Hand {
   int hand3id;
   int hand4id;
   int hand5id;
+  int coin;
   int roleid;
   int rolenum;
   boolean isActive;
@@ -16,8 +17,16 @@ public class Hand {
     this.isActive = isActive;
   }
 
+  public void setCoin(int coin) {
+    this.coin = coin;
+  }
+
   public void setHand1id(int hand1id) {
     this.hand1id = hand1id;
+  }
+
+  public int getCoin() {
+    return coin;
   }
 
   public void setHand2id(int hand2id) {
@@ -43,7 +52,6 @@ public class Hand {
   public void setRolenum(int rolenum) {
     this.rolenum = rolenum;
   }
-
 
   public void setId(int id) {
     this.id = id;
@@ -80,7 +88,6 @@ public class Hand {
   public int getRolenum() {
     return rolenum;
   }
-  
 
   public int getId() {
     return id;

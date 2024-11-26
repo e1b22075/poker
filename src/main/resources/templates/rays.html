@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.springframework.org/schema/security">
+
+<head>
+  <meta charset="utf-8">
+  <title>poker</title>
+  <script th:inline="javascript" th:if="${myCards}">
+    window.onload = function () {
+
+
+
+    }
+  </script>
+</head>
+
+<body>
+  <h1>[[${login_user}]]さん</h1>
+  <a href="/logout">ログアウト</a>
+  <div th:if="${coin}">
+    <h2>あなたのコインは[[${coin}]]枚です。</h2>
+    <p>どの程度上乗せしますか？</p>
+    <form action="#" th:action="@{/rays}" method="post">
+      <select name="rays">
+        <div th:each="i : ${#numbers.sequence(0,4)}">
+          <option th:if="${coin} >= ${i}" th:value="${i}" th:text="${i}">
+          </option>
+        </div>
+      </select>
+      <button type="submit">送信</button>
+    </form>
+  </div>
+</body>
