@@ -16,7 +16,15 @@
 <body>
   <h1>Authorized! [[${login_user}]]</h1>
   <a href="/logout">ログアウト</a>
-  <h2><a href="/poker/card">カードを引く</a></h2>
+  <div th:if="${coin}">
+    <h2>あなたのコインは[[${coin}]]枚です。</h2>
+  </div>
+  <div th:if="${rays}">
+    <h2>あなたは[[${rays}]]枚賭けてます。</h2>
+  </div>
+  <div th:if="!${myCards}">
+    <h2><a href="/poker/card">カードを引く</a></h2>
+  </div>
   <div th:if="${myCards}">
     <h4>自分の手札</h4>
     <form action="#" th:action="@{/result}" th:object="${index}" method="post">
