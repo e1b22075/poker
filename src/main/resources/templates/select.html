@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.springframework.org/schema/security">
+
+<head>
+  <meta charset="utf-8">
+  <title>poker</title>
+  <script th:inline="javascript" th:if="${myCards}">
+    window.onload = function () {
+
+
+
+    }
+  </script>
+</head>
+
+<body>
+  <h1>[[${login_user}]]</h1>
+  <a href="/logout">ログアウト</a>
+  <div th:if="${coin}">
+    <h2>あなたのコインは[[${coin}]]枚です。</h2>
+  </div>
+  <h2>現在の手札</h2>
+  <div th:if="${myCards}">
+    <div th:each="item, iterStat : ${myCards}">
+      <tr>
+        <td>[[${item.num}]] [[${item.cardtype}]]</td>
+      </tr>
+    </div>
+    <div th:if="${role}">
+      <h3 th:text="${role}"></h3>
+    </div>
+    <h2>どうしますか？</h2>
+    <a href="/poker/call"><button>コール</button></a>
+    <a href="/poker/rays"><button>レイズ</button></a>
+    <a href="/poker/drop"><button>ドロップ</button></a>
+  </div>

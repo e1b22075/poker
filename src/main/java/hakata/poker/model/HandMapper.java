@@ -20,7 +20,7 @@ public interface HandMapper {
   @Select("SELECT * from hand where userid = #{id} AND isActive = true")
   Hand selectByUserId(int id);
 
-  @Insert("INSERT INTO Hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,isActive) VALUES (#{userid},#{hand1id},#{hand2id},#{hand3id},#{hand4id},#{hand5id},true);")
+  @Insert("INSERT INTO Hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,coin,isActive) VALUES (#{userid},#{hand1id},#{hand2id},#{hand3id},#{hand4id},#{hand5id},#{coin},true);")
   @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
   void insertHandandIsActive(Hand hand);
 
