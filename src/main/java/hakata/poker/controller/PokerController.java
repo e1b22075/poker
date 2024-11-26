@@ -52,6 +52,13 @@ public class PokerController {
     return "room.html";
   }
 
+  @GetMapping("help")
+  public String help_page(ModelMap model, Principal prin) {
+    String loginUser = prin.getName(); // ログインユーザ情報
+    model.addAttribute("login_user", loginUser);
+    return "help.html";
+  }
+
   @GetMapping("poker")
   public String login(ModelMap model, Principal prin) {
     String loginUser = prin.getName(); // ログインユーザ情報
