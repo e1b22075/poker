@@ -25,10 +25,11 @@ CREATE TABLE hand (
 
 CREATE TABLE room (
     id IDENTITY,
+    roomName VARCHAR,
     user1id INTEGER,
     user2id INTEGER,
     user3id INTEGER,
     user4id INTEGER,
     user5id INTEGER,
-    user6id INTEGER,
+    user6id INTEGER
 )
