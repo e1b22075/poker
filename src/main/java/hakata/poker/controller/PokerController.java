@@ -147,8 +147,6 @@ public class PokerController {
     model.addAttribute("myCards", myCards);
     model.addAttribute("coin", hand.getCoin());
     model.addAttribute("index", new index());
-
-    // 判定処理はここから
     // ストレートの判定
     if (myCards.get(0).getNum() == myCards.get(1).getNum() + 1 && myCards.get(1).getNum() == myCards.get(2).getNum() + 1
         && myCards.get(2).getNum() == myCards.get(3).getNum() + 1
@@ -249,10 +247,7 @@ public class PokerController {
         onepairnum = myCards.get(4).getNum();
       }
     }
-    // 判定処理ここまで
-    // これ遷移先変わってるけど見れるようになってるはずなんでよろしく。コール押したら元に戻るよー
     return "select";
-
   }
 
   @GetMapping("poker/call")
@@ -337,6 +332,7 @@ public class PokerController {
     model.addAttribute("myCards", myCards);
     model.addAttribute("coin", hand.getCoin());
     model.addAttribute("index", new index());
+
     return "poker";
   }
 }
