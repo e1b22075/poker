@@ -24,6 +24,17 @@ CREATE TABLE hand (
     isActive BOOLEAN
 );
 
+
+CREATE TABLE match (
+    id IDENTITY,
+    user1id INTEGER,
+    user2id INTEGER,
+    user1coin INTEGER,
+    user2coin INTEGER,
+    bet INTEGER,
+    isActive BOOLEAN
+  };
+
 CREATE TABLE room (
     id IDENTITY,
     roomName VARCHAR,
@@ -38,4 +49,5 @@ CREATE TABLE room (
 CREATE TABLE role (
   id IDENTITY,
   roleName VARCHAR NOT NULL
+
 );
