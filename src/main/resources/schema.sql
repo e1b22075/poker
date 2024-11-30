@@ -33,7 +33,7 @@ CREATE TABLE match (
     user2coin INTEGER,
     bet INTEGER,
     isActive BOOLEAN
-  };
+);
 
 CREATE TABLE room (
     id IDENTITY,
