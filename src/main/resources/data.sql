@@ -56,7 +56,23 @@ INSERT INTO cards (num,cardtype,isActive) VALUES (11,'clover',false);
 INSERT INTO cards (num,cardtype,isActive) VALUES (12,'clover',false);
 INSERT INTO cards (num,cardtype,isActive) VALUES (13,'clover',false);
 
+
 INSERT INTO hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,coin,roleid,rolenum,isActive) VALUES (1,2,3,4,5,6,7,8,9,false);
+
 
 INSERT INTO match(user1id,user2id,user1coin,user2coin,bet,isActive) VALUES
 (1,2,5,5,1,false);
+
+INSERT INTO room (roomName,user1id,user2id,user3id,user4id,user5id,user6id) VALUES ('テストの部屋',1,2,3,4,5,6);
+
+
+INSERT INTO role (roleName) VALUES ('ロイヤルストレートフラッシュ');
+INSERT INTO role (roleName) VALUES ('ストレート・フラッシュ');
+INSERT INTO role (roleName) VALUES ('フォア・カード');
+INSERT INTO role (roleName) VALUES ('フルハウス');
+INSERT INTO role (roleName) VALUES ('フラッシュ');
+INSERT INTO role (roleName) VALUES ('ストレート');
+INSERT INTO role (roleName) VALUES ('スリーカード');
+INSERT INTO role (roleName) VALUES ('ツウ・ペア');
+INSERT INTO role (roleName) VALUES ('ワン・ペア');
+

@@ -159,9 +159,9 @@ public class PokerController {
     }
     // フラッシュの判定
     if (myCards.get(0).getCardtype() == myCards.get(1).getCardtype()
-        && myCards.get(0).getCardtype() == myCards.get(1).getCardtype()
-        && myCards.get(0).getCardtype() == myCards.get(1).getCardtype()
-        && myCards.get(0).getCardtype() == myCards.get(1).getCardtype()) {
+        && myCards.get(1).getCardtype() == myCards.get(2).getCardtype()
+        && myCards.get(2).getCardtype() == myCards.get(3).getCardtype()
+        && myCards.get(3).getCardtype() == myCards.get(4).getCardtype()) {
       hand.setRoleid(5);
       String role = "あなたの役はフラッシュです。";
       Flashflag = 1;
@@ -210,8 +210,7 @@ public class PokerController {
 
           model.addAttribute("role", role);
         }
-      } else if (myCards.get(2).getNum() == myCards.get(3).getNum()
-          && myCards.get(3).getNum() == myCards.get(4).getNum()) {
+      } else if (myCards.get(2).getNum() == myCards.get(3).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum()) {
         if (myCards.get(0).getNum() == myCards.get(1).getNum()) {
           hand.setRoleid(4);
           role = "あなたの役はフルハウスです。";
@@ -222,7 +221,7 @@ public class PokerController {
     }
     // ツウ・ペアの判定
     else if ((myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(2).getNum() == myCards.get(3).getNum())
-        || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())) {
+        || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum()) || (myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())) {
       hand.setRoleid(8);
       String role = "あなたの役はツウ・ペアです。";
 
