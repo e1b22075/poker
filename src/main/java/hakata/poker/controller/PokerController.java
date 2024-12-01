@@ -6,20 +6,18 @@ import java.util.Collections;
 import java.util.Random;
 import java.util.Comparator;
 import java.util.Arrays;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
-// import org.springframework.web.bind.annotation.PostMapping;
-// import org.springframework.web.bind.annotation.RequestMapping;
-// import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import hakata.poker.model.Room;
+import hakata.poker.model.RoomMapper;
 import hakata.poker.model.index;
 import hakata.poker.model.Cards;
 import hakata.poker.model.CardsMapper;
@@ -31,8 +29,7 @@ import hakata.poker.model.HandMapper;
 public class PokerController {
 
   @Autowired
-  private Room room;
-  Random rmd = new Random();
+  private RoomMapper roomMapper;
 
   @Autowired
   private CardsMapper cardsMapper;
@@ -43,13 +40,22 @@ public class PokerController {
   @Autowired
   private UserMapper userMapper;
 
-  @GetMapping("room")
-  public String room_login(ModelMap model, Principal prin) {
+  @GetMapping("room/step1")
+  public String room1(ModelMap model, Principal prin) {
     String loginUser = prin.getName(); // ログインユーザ情報
-    this.room.addUser("CPU");
-    this.room.addUser(loginUser);
+    model.addAttribute("room1", true);
     model.addAttribute("login_user", loginUser);
-    model.addAttribute("room", room);
+    ArrayList<Room> rooms1 = roomMapper.selectAll();
+    model.addAttribute("rooms", rooms1);
+    return "room.html";
+  }
+
+  @GetMapping("room/step2")
+  public String room2(@RequestParam Integer id, ModelMap model, Principal prin) {
+    String loginUser = prin.getName(); // ログインユーザ情報
+    model.addAttribute("login_user", loginUser);
+    model.addAttribute("room2", true);
+    // model.addAttribute("room", room);
     return "room.html";
   }
 
@@ -210,7 +216,8 @@ public class PokerController {
 
           model.addAttribute("role", role);
         }
-      } else if (myCards.get(2).getNum() == myCards.get(3).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum()) {
+      } else if (myCards.get(2).getNum() == myCards.get(3).getNum()
+          && myCards.get(3).getNum() == myCards.get(4).getNum()) {
         if (myCards.get(0).getNum() == myCards.get(1).getNum()) {
           hand.setRoleid(4);
           role = "あなたの役はフルハウスです。";
@@ -221,7 +228,8 @@ public class PokerController {
     }
     // ツウ・ペアの判定
     else if ((myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(2).getNum() == myCards.get(3).getNum())
-        || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum()) || (myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())) {
+        || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())
+        || (myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())) {
       hand.setRoleid(8);
       String role = "あなたの役はツウ・ペアです。";
 
@@ -281,7 +289,7 @@ public class PokerController {
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
     // ここまで
-    
+
     ArrayList<Cards> myCards = new ArrayList<Cards>();
     id = userMapper.selectid(loginUser);
     Hand hand = handMapper.selectByUserId(id);

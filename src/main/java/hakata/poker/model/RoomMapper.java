@@ -10,7 +10,8 @@ import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.Delete;
 
 @Mapper
-public interface Room2Mapper {
+public interface RoomMapper {
   @Select("SELECT * from room")
-  ArrayList<Room2> selectAll();
+  ArrayList<Room> selectAll();
+
 }

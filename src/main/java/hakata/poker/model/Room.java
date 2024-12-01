@@ -1,41 +1,38 @@
 package hakata.poker.model;
 
-import java.util.ArrayList;
-
-import org.springframework.stereotype.Component;
-
-@Component
 public class Room {
-  ArrayList<String> users = new ArrayList<>();
-  int roomNo = 1;
+  int id;
+  String roomName;
+  int user1id;
+  int user2id;
 
-  public void addUser(String name) {
-    // 同名のユーザが居たら何もせずにreturn
-    for (String s : this.users) {
-      if (s.equals(name)) {
-        return;
-      }
-    }
-    // 同名のユーザが居なかった場合はusersにnameを追加する
-    this.users.add(name);
+  public int getId() {
+    return id;
+  }
+  public String getRoomName() {
+    return roomName;
   }
 
-  // 以降はフィールドのgetter/setter
-  // これらがないとThymeleafで値を取得できない
-  public int getRoomNo() {
-    return roomNo;
+  public int getUser1id() {
+    return user1id;
   }
 
-  public void setRoomNo(int roomNo) {
-    this.roomNo = roomNo;
+  public int getUser2id() {
+    return user2id;
   }
 
-  public ArrayList<String> getUsers() {
-    return users;
+  public void setId(int id) {
+    this.id = id;
+  }
+  public void setRoomName(String roomName) {
+    this.roomName = roomName;
   }
 
-  public void setUsers(ArrayList<String> users) {
-    this.users = users;
+  public void setUser1id(int user1id) {
+    this.user1id = user1id;
   }
 
+  public void setUser2id(int user2id) {
+    this.user2id = user2id;
+  }
 }

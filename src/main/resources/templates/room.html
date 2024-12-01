@@ -8,15 +8,27 @@
 
 <body>
   <h1>こんにちは！[[${login_user}]]</h1>
-  <div th:if="${room}">
+  <div th:if="${room1}">
+    <h1>ルームを選んでください</h1>
+    ルーム一覧
+    <ul>
+      <li th:each="room : ${rooms}">
+        <p>ルーム名: [[${room.roomName}]]</p>
+        <p>プレイヤー1 ID: [[${room.user1id}]]</p>
+        <p>プレイヤー2 ID: [[${room.user2id}]]</p>
+        <a th:href="@{/room/step2(id=${room.id})}">入室</a>
+      </li>
+    </ul>
+  </div>
+  <div th:if="${room2}">
     ルーム利用者
     <ul>
       <li th:each="user : ${room.users}">[[${user}]]</li>
     </ul>
-  </div>
-  <a href="/logout">ログアウト</a>
   <br>
   <a href="/poker">pokerへのアクセス</a>
   <br>
   <a href="/help">helpへのアクセス</a>
+  </div>
+  <a href="/logout">ログアウト</a>
 </body>
