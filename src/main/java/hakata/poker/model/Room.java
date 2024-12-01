@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 public class Room {
   ArrayList<String> users = new ArrayList<>();
   int roomNo = 1;
+  int count = 0;
 
   public void addUser(String name) {
     // 同名のユーザが居たら何もせずにreturn
@@ -18,6 +19,7 @@ public class Room {
     }
     // 同名のユーザが居なかった場合はusersにnameを追加する
     this.users.add(name);
+    count++;
   }
 
   // 以降はフィールドのgetter/setter
@@ -36,6 +38,10 @@ public class Room {
 
   public void setUsers(ArrayList<String> users) {
     this.users = users;
+  }
+
+  public int getCount() {
+    return count;
   }
 
 }

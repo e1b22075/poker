@@ -4,6 +4,21 @@
 <head>
   <meta charset="utf-8">
   <title>poker</title>
+  <script>
+    window.onload = function () {
+
+      var sse = new EventSource('/sample');
+      sse.onopen = function (event) {
+        console.log("SSE connection established."); // 接続が確立された場合にコンソールに表示 };
+      }
+
+      sse.onmessage = function (event) {
+        console.log(event.data);
+        document.getElementById("test").textContent = event.data;
+        window.location.href = '/poker';
+      }
+    }
+  </script>
 </head>
 
 <body>
@@ -14,6 +29,7 @@
       <li th:each="user : ${room.users}">[[${user}]]</li>
     </ul>
   </div>
+  <p id="test">マッチング中です</p>
   <a href="/logout">ログアウト</a>
   <br>
   <a href="/poker">pokerへのアクセス</a>

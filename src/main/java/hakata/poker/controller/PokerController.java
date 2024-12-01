@@ -1,5 +1,6 @@
 package hakata.poker.controller;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,16 +9,15 @@ import java.util.Comparator;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
-// import org.springframework.web.bind.annotation.PostMapping;
-// import org.springframework.web.bind.annotation.RequestMapping;
-// import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import hakata.poker.model.Room;
 import hakata.poker.model.index;
@@ -26,6 +26,9 @@ import hakata.poker.model.CardsMapper;
 import hakata.poker.model.Hand;
 import hakata.poker.model.UserMapper;
 import hakata.poker.model.HandMapper;
+import hakata.poker.model.Match;
+import hakata.poker.model.matchMapper;
+import hakata.poker.service.AsyncMatch;
 
 @Controller
 public class PokerController {
@@ -43,10 +46,15 @@ public class PokerController {
   @Autowired
   private UserMapper userMapper;
 
+  @Autowired
+  private matchMapper matchMapper;
+
+  @Autowired
+  AsyncMatch match12;
+
   @GetMapping("room")
   public String room_login(ModelMap model, Principal prin) {
     String loginUser = prin.getName(); // ログインユーザ情報
-    this.room.addUser("CPU");
     this.room.addUser(loginUser);
     model.addAttribute("login_user", loginUser);
     model.addAttribute("room", room);
@@ -62,19 +70,46 @@ public class PokerController {
 
   @GetMapping("poker")
   public String login(ModelMap model, Principal prin) {
+    int userid;
+    int coin = 5;
+    Match match = new Match();
+    ArrayList<String> user;
     String loginUser = prin.getName(); // ログインユーザ情報
     model.addAttribute("login_user", loginUser);
-    return "poker.html";
+    userid = userMapper.selectid(loginUser);
+    // マッチ内容を登録する処理(ルームに二人いる想定で作成中)
+    if (matchMapper.selectAllById(userid).isEmpty() && room.getCount() == 2) {
+      user = room.getUsers();
+      userid = userMapper.selectid(user.get(0));
+      match.setUser1id(userid);
+      userid = userMapper.selectid(user.get(1));
+      match.setUser2id(userid);
+      match.setUser1coin(coin);
+      match.setUser2coin(coin);
+      match.setBet(1);
+      this.match12.syncNewMatch(match);
+      return "poker.html";
+    }
+    // ここまで
+    else if (!matchMapper.selectAllById(userid).isEmpty()) {
+      return "poker.html";
+    } else {
+      model.addAttribute("room", room);
+      return "room.html";
+    }
   }
 
   @GetMapping("poker/card")
   public String showCard(ModelMap model, Principal prin) {
     int userid;
     int coin = 5;
+
     // ログインユーザ情報の受け渡し
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
     // ここまで
+
+    // 手札をデータベースに登録する処理
     Hand hand = new Hand();
     hand.setActive(true);
     ArrayList<Cards> myCards = cardsMapper.select5RandomCard();
@@ -91,13 +126,13 @@ public class PokerController {
     userid = userMapper.selectid(loginUser);
     hand.setUserid(userid);
     myCards.sort(Comparator.comparing(Cards::getNum));
-
     handMapper.insertHandandIsActive(hand);
+    // ここまで
     model.addAttribute("myCards", myCards);
     model.addAttribute("coin", coin);
     model.addAttribute("index", new index());
-
     return "poker.html";
+
   }
 
   @PostMapping("/result")
@@ -210,7 +245,8 @@ public class PokerController {
 
           model.addAttribute("role", role);
         }
-      } else if (myCards.get(2).getNum() == myCards.get(3).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum()) {
+      } else if (myCards.get(2).getNum() == myCards.get(3).getNum()
+          && myCards.get(3).getNum() == myCards.get(4).getNum()) {
         if (myCards.get(0).getNum() == myCards.get(1).getNum()) {
           hand.setRoleid(4);
           role = "あなたの役はフルハウスです。";
@@ -221,7 +257,8 @@ public class PokerController {
     }
     // ツウ・ペアの判定
     else if ((myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(2).getNum() == myCards.get(3).getNum())
-        || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum()) || (myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())) {
+        || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())
+        || (myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())) {
       hand.setRoleid(8);
       String role = "あなたの役はツウ・ペアです。";
 
@@ -281,7 +318,7 @@ public class PokerController {
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
     // ここまで
-    
+
     ArrayList<Cards> myCards = new ArrayList<Cards>();
     id = userMapper.selectid(loginUser);
     Hand hand = handMapper.selectByUserId(id);
@@ -334,5 +371,12 @@ public class PokerController {
     model.addAttribute("index", new index());
 
     return "poker";
+  }
+
+  @GetMapping("/sample")
+  public SseEmitter sample() {
+    final SseEmitter emitter = new SseEmitter();
+    this.match12.AsyncMatchsend(emitter);
+    return emitter;
   }
 }
