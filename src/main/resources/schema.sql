@@ -38,8 +38,10 @@ CREATE TABLE match (
 CREATE TABLE room (
     id IDENTITY,
     roomName VARCHAR,
-    user1id INTEGER,
-    user2id INTEGER
+    user1Name INTEGER,
+    user1Status BOOLEAN,
+    user2Name INTEGER,
+    user2Status BOOLEAN
 );
 
 CREATE TABLE role (

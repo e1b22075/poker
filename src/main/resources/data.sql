@@ -65,8 +65,8 @@ INSERT INTO hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,coin,roleid,rol
 INSERT INTO match(user1id,user2id,user1coin,user2coin,bet,isActive) VALUES
 (1,2,5,5,1,false);
 
-INSERT INTO room (roomName,user1id,user2id) VALUES ('テストの部屋',5,NULL);
-INSERT INTO room (roomName,user1id,user2id) VALUES ('テストの部屋2',NULL,NULL);
+INSERT INTO room (roomName,user1id,user2id) VALUES ('テストの部屋',5,NULL,NULL,NULL);
+INSERT INTO room (roomName,user1id,user2id) VALUES ('テストの部屋2',NULL,NULL,NULL,NULL);
 
 
 INSERT INTO role (roleName) VALUES ('ロイヤルストレートフラッシュ');
