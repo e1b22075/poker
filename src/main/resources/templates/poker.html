@@ -4,6 +4,24 @@
 <head>
   <meta charset="utf-8">
   <title>poker</title>
+  <script>
+    window.onload = function () {
+
+      var sse = new EventSource('/state');
+      sse.onopen = function (event) {
+        console.log("SSE connection established."); // 接続が確立された場合にコンソールに表示 };
+      }
+
+      sse.onmessage = function (event) {
+        console.log(event.data);
+        if (event.data == "drop") {
+          window.location.href = '/poker/drop';
+        }
+        document.getElementById("state").textContent = event.data;
+
+      }
+    }
+  </script>
 </head>
 
 <body>
@@ -30,6 +48,8 @@
       <p><input type="submit" value="カードを交換する" /> </p>
     </form>
   </div>
+
+  <h2 id="state">行動中…</h2>
 
   <!-- ワンペアなどの役を表示 -->
   <div th:if="${role}">

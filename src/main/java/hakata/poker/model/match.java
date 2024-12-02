@@ -7,7 +7,29 @@ public class Match {
   int user1coin;
   int user2coin;
   int bet;
+  String user1state;
+  String user2state;
+  public int getId() {
+    return id;
+  }
+
   boolean isActive;
+
+  public void setUser1state(String user1state) {
+    this.user1state = user1state;
+  }
+
+  public void setUser2state(String user2state) {
+    this.user2state = user2state;
+  }
+
+  public String getUser1state() {
+    return user1state;
+  }
+
+  public String getUser2state() {
+    return user2state;
+  }
 
   public void setId(int id) {
     this.id = id;

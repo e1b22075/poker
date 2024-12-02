@@ -1,0 +1,263 @@
+#
+# There is insufficient memory for the Java Runtime Environment to continue.
+# Native memory allocation (mmap) failed to map 67108864 bytes. Error detail: G1 virtual space
+# Possible reasons:
+#   The system is out of physical RAM or swap space
+#   This process is running with CompressedOops enabled, and the Java Heap may be blocking the growth of the native heap
+# Possible solutions:
+#   Reduce memory load on the system
+#   Increase physical memory or swap space
+#   Check if swap backing store is full
+#   Decrease Java heap size (-Xmx/-Xms)
+#   Decrease number of Java threads
+#   Decrease Java thread stack sizes (-Xss)
+#   Set larger code cache with -XX:ReservedCodeCacheSize=
+#   JVM is running with Unscaled Compressed Oops mode in which the Java heap is
+#     placed in the first 4GB address space. The Java Heap base address is the
+#     maximum limit for the native heap growth. Please use -XX:HeapBaseMinAddress
+#     to set the Java Heap base and to place the Java Heap above 4GB virtual address.
+# This output file may be truncated or incomplete.
+#
+#  Out of Memory Error (os_windows.cpp:3603), pid=14160, tid=15772
+#
+# JRE version:  (21.0.3+9) (build )
+# Java VM: OpenJDK 64-Bit Server VM (21.0.3+9-LTS, mixed mode, sharing, tiered, compressed oops, compressed class ptrs, g1 gc, windows-amd64)
+# No core dump will be written. Minidumps are not enabled by default on client versions of Windows
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: -Xmx64m -Xms64m -javaagent:C:/oit/isdev24-byod/gradle-8.10/lib/agents/gradle-instrumentation-agent-8.10.jar -Dfile.encoding=utf-8 -Dorg.gradle.appname=gradle -Dfile.encoding=SHIFT-JIS org.gradle.launcher.GradleMain bootrun
+
+Host: 12th Gen Intel(R) Core(TM) i5-1235U, 12 cores, 7G,  Windows 11 , 64 bit Build 22621 (10.0.22621.4391)
+Time: Tue Dec  3 02:40:10 2024  Windows 11 , 64 bit Build 22621 (10.0.22621.4391) elapsed time: 0.050084 seconds (0d 0h 0m 0s)
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x00000175ae39aa40):  JavaThread "Unknown thread" [_thread_in_vm, id=15772, stack(0x0000000e71800000,0x0000000e71900000) (1024K)]
+
+Stack: [0x0000000e71800000,0x0000000e71900000]
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+V  [jvm.dll+0x6d4fa9]
+V  [jvm.dll+0x8b01c3]
+V  [jvm.dll+0x8b251e]
+V  [jvm.dll+0x8b2c03]
+V  [jvm.dll+0x284fb6]
+V  [jvm.dll+0x6d1775]
+V  [jvm.dll+0x6c5eaa]
+V  [jvm.dll+0x35bd0b]
+V  [jvm.dll+0x3638b6]
+V  [jvm.dll+0x3b4e46]
+V  [jvm.dll+0x3b5118]
+V  [jvm.dll+0x32f44c]
+V  [jvm.dll+0x33013b]
+V  [jvm.dll+0x8782b9]
+V  [jvm.dll+0x3c2211]
+V  [jvm.dll+0x8616e8]
+V  [jvm.dll+0x45648e]
+V  [jvm.dll+0x458001]
+C  [jli.dll+0x52ab]
+C  [ucrtbase.dll+0x29333]
+C  [KERNEL32.DLL+0x1259d]
+C  [ntdll.dll+0x5af38]
+
+
+---------------  P R O C E S S  ---------------
+
+Threads class SMR info:
+_java_thread_list=0x00007ffb02e5d008, length=0, elements={
+}
+
+Java Threads: ( => current thread )
+Total: 0
+
+Other Threads:
+  0x00000175ae3b8790 WorkerThread "GC Thread#0"                     [id=19668, stack(0x0000000e71900000,0x0000000e71a00000) (1024K)]
+  0x00000175ae3b9f70 ConcurrentGCThread "G1 Main Marker"            [id=5588, stack(0x0000000e71a00000,0x0000000e71b00000) (1024K)]
+  0x00000175ae3baa70 WorkerThread "G1 Conc#0"                       [id=23872, stack(0x0000000e71b00000,0x0000000e71c00000) (1024K)]
+
+[error occurred during error reporting (printing all threads), id 0xc0000005, EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x00007ffb025625a7]
+VM state: not at safepoint (not fully initialized)
+
+VM Mutex/Monitor currently owned by a thread:  ([mutex/lock_event])
+[0x00007ffb02ed11c8] Heap_lock - owner thread: 0x00000175ae39aa40
+
+Heap address: 0x00000000fc000000, size: 64 MB, Compressed Oops mode: 32-bit
+
+CDS archive(s) mapped at: [0x0000000000000000-0x0000000000000000-0x0000000000000000), size 0, SharedBaseAddress: 0x0000000800000000, ArchiveRelocationMode: 1.
+Narrow klass base: 0x0000000000000000, Narrow klass shift: 0, Narrow klass range: 0x0
+
+GC Precious Log:
+ CardTable entry size: 512
+ Card Set container configuration: InlinePtr #cards 5 size 8 Array Of Cards #cards 12 size 40 Howl #buckets 4 coarsen threshold 1843 Howl Bitmap #cards 512 size 80 coarsen threshold 460 Card regions per heap region 1 cards per card region 2048
+
+Heap:
+ garbage-first heap   total 0K, used 0K [0x00000000fc000000, 0x0000000100000000)
+  region size 1024K, 0 young (0K), 0 survivors (0K)
+
+[error occurred during error reporting (printing heap information), id 0xc0000005, EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x00007ffb0294e919]
+GC Heap History (0 events):
+No events
+
+Dll operation events (1 events):
+Event: 0.030 Loaded shared library C:\oit\isdev24-byod\amazonjdk21.0.3_9\bin\java.dll
+
+Deoptimization events (0 events):
+No events
+
+Classes loaded (0 events):
+No events
+
+Classes unloaded (0 events):
+No events
+
+Classes redefined (0 events):
+No events
+
+Internal exceptions (0 events):
+No events
+
+ZGC Phase Switch (0 events):
+No events
+
+VM Operations (0 events):
+No events
+
+Events (0 events):
+No events
+
+
+Dynamic libraries:
+0x00007ff7ee420000 - 0x00007ff7ee42e000 	C:\oit\isdev24-byod\amazonjdk21.0.3_9\bin\java.exe
+0x00007ffb92850000 - 0x00007ffb92a67000 	C:\WINDOWS\SYSTEM32\ntdll.dll
+0x00007ffb91660000 - 0x00007ffb91724000 	C:\WINDOWS\System32\KERNEL32.DLL
+0x00007ffb8fc90000 - 0x00007ffb90049000 	C:\WINDOWS\System32\KERNELBASE.dll
+0x00007ffb90050000 - 0x00007ffb90161000 	C:\WINDOWS\System32\ucrtbase.dll
+0x00007ffb65690000 - 0x00007ffb656ab000 	C:\oit\isdev24-byod\amazonjdk21.0.3_9\bin\VCRUNTIME140.dll
+0x00007ffb61040000 - 0x00007ffb61058000 	C:\oit\isdev24-byod\amazonjdk21.0.3_9\bin\jli.dll
+0x00007ffb91a60000 - 0x00007ffb91c0e000 	C:\WINDOWS\System32\USER32.dll
+0x00007ffb794b0000 - 0x00007ffb79742000 	C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.22621.4391_none_2715d37f73803e96\COMCTL32.dll
+0x00007ffb90170000 - 0x00007ffb90196000 	C:\WINDOWS\System32\win32u.dll
+0x00007ffb90600000 - 0x00007ffb906a7000 	C:\WINDOWS\System32\msvcrt.dll
+0x00007ffb927e0000 - 0x00007ffb92809000 	C:\WINDOWS\System32\GDI32.dll
+0x00007ffb90210000 - 0x00007ffb9032b000 	C:\WINDOWS\System32\gdi32full.dll
+0x00007ffb904d0000 - 0x00007ffb9056a000 	C:\WINDOWS\System32\msvcp_win.dll
+0x00007ffb91860000 - 0x00007ffb91891000 	C:\WINDOWS\System32\IMM32.DLL
+0x00007ffb83b90000 - 0x00007ffb83b9c000 	C:\oit\isdev24-byod\amazonjdk21.0.3_9\bin\vcruntime140_1.dll
+0x00007ffb54f80000 - 0x00007ffb5500d000 	C:\oit\isdev24-byod\amazonjdk21.0.3_9\bin\msvcp140.dll
+0x00007ffb02220000 - 0x00007ffb02fb1000 	C:\oit\isdev24-byod\amazonjdk21.0.3_9\bin\server\jvm.dll
+0x00007ffb914c0000 - 0x00007ffb91572000 	C:\WINDOWS\System32\ADVAPI32.dll
+0x00007ffb90790000 - 0x00007ffb90837000 	C:\WINDOWS\System32\sechost.dll
+0x00007ffb904a0000 - 0x00007ffb904c8000 	C:\WINDOWS\System32\bcrypt.dll
+0x00007ffb91730000 - 0x00007ffb91844000 	C:\WINDOWS\System32\RPCRT4.dll
+0x00007ffb915e0000 - 0x00007ffb91651000 	C:\WINDOWS\System32\WS2_32.dll
+0x00007ffb890f0000 - 0x00007ffb89124000 	C:\WINDOWS\SYSTEM32\WINMM.dll
+0x00007ffb76770000 - 0x00007ffb7677a000 	C:\WINDOWS\SYSTEM32\VERSION.dll
+0x00007ffb8e9b0000 - 0x00007ffb8e9fd000 	C:\WINDOWS\SYSTEM32\POWRPROF.dll
+0x00007ffb8e990000 - 0x00007ffb8e9a3000 	C:\WINDOWS\SYSTEM32\UMPDC.dll
+0x00007ffb8ec50000 - 0x00007ffb8ec68000 	C:\WINDOWS\SYSTEM32\kernel.appcore.dll
+0x00007ffb805d0000 - 0x00007ffb805da000 	C:\oit\isdev24-byod\amazonjdk21.0.3_9\bin\jimage.dll
+0x00007ffb8d370000 - 0x00007ffb8d5a2000 	C:\WINDOWS\SYSTEM32\DBGHELP.DLL
+0x00007ffb91c30000 - 0x00007ffb91fbf000 	C:\WINDOWS\System32\combase.dll
+0x00007ffb906b0000 - 0x00007ffb90787000 	C:\WINDOWS\System32\OLEAUT32.dll
+0x00007ffb76730000 - 0x00007ffb76762000 	C:\WINDOWS\SYSTEM32\dbgcore.DLL
+0x00007ffb8fc10000 - 0x00007ffb8fc8b000 	C:\WINDOWS\System32\bcryptPrimitives.dll
+0x00007ffb7fac0000 - 0x00007ffb7face000 	C:\oit\isdev24-byod\amazonjdk21.0.3_9\bin\instrument.dll
+0x00007ffb61020000 - 0x00007ffb6103f000 	C:\oit\isdev24-byod\amazonjdk21.0.3_9\bin\java.dll
+
+dbghelp: loaded successfully - version: 4.0.5 - missing functions: none
+symbol engine: initialized successfully - sym options: 0x614 - pdb path: .;C:\oit\isdev24-byod\amazonjdk21.0.3_9\bin;C:\WINDOWS\SYSTEM32;C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.22621.4391_none_2715d37f73803e96;C:\oit\isdev24-byod\amazonjdk21.0.3_9\bin\server
+
+VM Arguments:
+jvm_args: -Xmx64m -Xms64m -javaagent:C:/oit/isdev24-byod/gradle-8.10/lib/agents/gradle-instrumentation-agent-8.10.jar -Dfile.encoding=utf-8 -Dorg.gradle.appname=gradle -Dfile.encoding=SHIFT-JIS 
+java_command: org.gradle.launcher.GradleMain bootrun
+java_class_path (initial): C:/oit/isdev24-byod/gradle-8.10/lib/gradle-gradle-cli-main-8.10.jar
+Launcher Type: SUN_STANDARD
+
+[Global flags]
+     intx CICompilerCount                          = 4                                         {product} {ergonomic}
+     uint ConcGCThreads                            = 3                                         {product} {ergonomic}
+     uint G1ConcRefinementThreads                  = 10                                        {product} {ergonomic}
+   size_t G1HeapRegionSize                         = 1048576                                   {product} {ergonomic}
+    uintx GCDrainStackTargetSize                   = 64                                        {product} {ergonomic}
+   size_t InitialHeapSize                          = 67108864                                  {product} {command line}
+   size_t MarkStackSize                            = 4194304                                   {product} {ergonomic}
+   size_t MaxHeapSize                              = 67108864                                  {product} {command line}
+   size_t MinHeapDeltaBytes                        = 1048576                                   {product} {ergonomic}
+   size_t MinHeapSize                              = 67108864                                  {product} {command line}
+    uintx NonNMethodCodeHeapSize                   = 5839372                                {pd product} {ergonomic}
+    uintx NonProfiledCodeHeapSize                  = 122909434                              {pd product} {ergonomic}
+    uintx ProfiledCodeHeapSize                     = 122909434                              {pd product} {ergonomic}
+    uintx ReservedCodeCacheSize                    = 251658240                              {pd product} {ergonomic}
+     bool SegmentedCodeCache                       = true                                      {product} {ergonomic}
+   size_t SoftMaxHeapSize                          = 67108864                               {manageable} {ergonomic}
+     bool UseCompressedOops                        = true                           {product lp64_product} {ergonomic}
+     bool UseG1GC                                  = true                                      {product} {ergonomic}
+     bool UseLargePagesIndividualAllocation        = false                                  {pd product} {ergonomic}
+
+Logging:
+Log output configuration:
+ #0: stdout all=warning uptime,level,tags foldmultilines=false
+ #1: stderr all=off uptime,level,tags foldmultilines=false
+
+Environment Variables:
+JAVA_HOME=C:/oit/isdev24-byod/amazonjdk21.0.3_9/
+_JAVA_OPTIONS=-Dfile.encoding=SHIFT-JIS
+PATH=C:\Users\faruk\oithomes\isdev\bin;C:\oit\isdev24-byod\gradle-8.10\bin\;C:\oit\isdev24-byod\VSCode-win32-x64-1.92.2\;C:\oit\isdev24-byod\PortableGit-2.42.0-64\mingw64\bin;C:\oit\isdev24-byod\PortableGit-2.42.0-64\usr\local\bin;C:\oit\isdev24-byod\PortableGit-2.42.0-64\usr\bin;C:\oit\isdev24-byod\PortableGit-2.42.0-64\usr\bin;C:\oit\isdev24-byod\PortableGit-2.42.0-64\usr\bin\core_perl;C:\oit\isdev24-byod\PortableGit-2.42.0-64\usr\bin\vendor_perl;C:\oit\isdev24-byod\amazonjdk21.0.3_9\bin\;C:\oit\isdev24-byod\PortableGit-2.42.0-64\usr\bin\vendor_perl;C:\oit\isdev24-byod\PortableGit-2.42.0-64\usr\bin\core_perl
+USERNAME=faruk
+SHELL=C:\oit\isdev24-byod\PortableGit-2.42.0-64\usr\bin\bash.exe
+DISPLAY=needs-to-be-defined
+LANG=ja_JP.UTF-8
+TERM=xterm-256color
+TMPDIR=C:\Users\faruk\AppData\Local\Temp
+OS=Windows_NT
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 154 Stepping 4, GenuineIntel
+TMP=C:\Users\faruk\AppData\Local\Temp
+TEMP=C:\Users\faruk\AppData\Local\Temp
+
+
+
+
+Periodic native trim disabled
+
+---------------  S Y S T E M  ---------------
+
+OS:
+ Windows 11 , 64 bit Build 22621 (10.0.22621.4391)
+OS uptime: 19 days 5:59 hours
+Hyper-V role detected
+
+CPU: total 12 (initial active 12) (6 cores per cpu, 2 threads per core) family 6 model 154 stepping 4 microcode 0x434, cx8, cmov, fxsr, ht, mmx, 3dnowpref, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, lzcnt, tsc, tscinvbit, avx, avx2, aes, erms, clmul, bmi1, bmi2, adx, sha, fma, vzeroupper, clflush, clflushopt, clwb, hv, serialize, rdtscp, rdpid, fsrm, f16c, cet_ibt, cet_ss
+Processor Information for processor 0
+  Max Mhz: 2500, Current Mhz: 1370, Mhz Limit: 1350
+Processor Information for processor 1
+  Max Mhz: 2500, Current Mhz: 1370, Mhz Limit: 1350
+Processor Information for processor 2
+  Max Mhz: 2500, Current Mhz: 1370, Mhz Limit: 1350
+Processor Information for processor 3
+  Max Mhz: 2500, Current Mhz: 1370, Mhz Limit: 1350
+Processor Information for processor 4
+  Max Mhz: 2500, Current Mhz: 2500, Mhz Limit: 2500
+Processor Information for processor 5
+  Max Mhz: 2500, Current Mhz: 2500, Mhz Limit: 2500
+Processor Information for processor 6
+  Max Mhz: 2500, Current Mhz: 2500, Mhz Limit: 2500
+Processor Information for processor 7
+  Max Mhz: 2500, Current Mhz: 2500, Mhz Limit: 2500
+Processor Information for processor 8
+  Max Mhz: 2500, Current Mhz: 2500, Mhz Limit: 2500
+Processor Information for processor 9
+  Max Mhz: 2500, Current Mhz: 2500, Mhz Limit: 2500
+Processor Information for processor 10
+  Max Mhz: 2500, Current Mhz: 2500, Mhz Limit: 2500
+Processor Information for processor 11
+  Max Mhz: 2500, Current Mhz: 2500, Mhz Limit: 2500
+
+Memory: 4k page, system-wide physical 8016M (478M free)
+TotalPageFile size 32592M (AvailPageFile size 57M)
+current process WorkingSet (physical memory assigned to process): 11M, peak: 11M
+current process commit charge ("private bytes"): 63M, peak: 127M
+
+vm_info: OpenJDK 64-Bit Server VM (21.0.3+9-LTS) for windows-amd64 JRE (21.0.3+9-LTS), built on 2024-04-10T19:10:39Z by "Administrator" with MS VC++ 16.10 / 16.11 (VS2019)
+
+END.

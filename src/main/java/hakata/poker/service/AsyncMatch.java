@@ -53,7 +53,7 @@ public class AsyncMatch {
         }
         emitter.send(massage);
 
-        TimeUnit.MILLISECONDS.sleep(1000);
+        TimeUnit.MILLISECONDS.sleep(500);
         dbUpdated = false;
       }
     } catch (Exception e) {

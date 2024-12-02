@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.Comparator;
 import java.util.Arrays;
 
+import org.apache.ibatis.jdbc.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Controller;
@@ -29,6 +30,7 @@ import hakata.poker.model.HandMapper;
 import hakata.poker.model.Match;
 import hakata.poker.model.matchMapper;
 import hakata.poker.service.AsyncMatch;
+import hakata.poker.service.AsyncState;
 
 @Controller
 public class PokerController {
@@ -51,6 +53,9 @@ public class PokerController {
 
   @Autowired
   AsyncMatch match12;
+
+  @Autowired
+  AsyncState states;
 
   @GetMapping("room")
   public String room_login(ModelMap model, Principal prin) {
@@ -141,6 +146,7 @@ public class PokerController {
     Hand hand;
     ArrayList<Cards> myCards = new ArrayList<Cards>();
     Cards drawCards;
+    Match match;
 
     int Straightflag = 0;
     int Flashflag = 0; // フラッシュの旗
@@ -179,8 +185,21 @@ public class PokerController {
     hand.setHand4id(myCards.get(3).getId());
     hand.setHand5id(myCards.get(4).getId());
     handMapper.insertHandandIsActive(hand);
+    // ここまでカードをデータベースに登録する処理
+    // ここから試合状況のほうにデータベースの登録を行う処理
+    if (matchMapper.selectAllByuser1Id(id) != null) {
+      match = matchMapper.selectAllByuser1Id(id);
+      model.addAttribute("coin", match.getUser1coin());
+      this.states.syncchange1(match.getId(), "change");
+      model.addAttribute("rays", match.getBet());
+
+    } else if (matchMapper.selectAllByuser2Id(id) != null) {
+      match = matchMapper.selectAllByuser2Id(id);
+      model.addAttribute("coin", match.getUser2coin());
+      this.states.syncchange2(match.getId(), "change");
+      model.addAttribute("rays", match.getBet());
+    }
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", hand.getCoin());
     model.addAttribute("index", new index());
     // ストレートの判定
     if (myCards.get(0).getNum() == myCards.get(1).getNum() + 1 && myCards.get(1).getNum() == myCards.get(2).getNum() + 1
@@ -291,6 +310,7 @@ public class PokerController {
     int id;
     // ログインユーザ情報の受け渡し
     String loginUser = prin.getName();
+    Match match;
     model.addAttribute("login_user", loginUser);
     // ここまで
     ArrayList<Cards> myCards = new ArrayList<Cards>();
@@ -303,8 +323,19 @@ public class PokerController {
     myCards.add(cardsMapper.selectAllById(hand.getHand4id()));
     myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
 
+    if (matchMapper.selectAllByuser1Id(id) != null) {
+      match = matchMapper.selectAllByuser1Id(id);
+      model.addAttribute("coin", match.getUser1coin());
+      this.states.synccall1(match.getId(), "call");
+      model.addAttribute("rays", match.getBet());
+    } else if (matchMapper.selectAllByuser2Id(id) != null) {
+      match = matchMapper.selectAllByuser2Id(id);
+      model.addAttribute("coin", match.getUser2coin());
+      this.states.synccall2(match.getId(), "call");
+      model.addAttribute("rays", match.getBet());
+    }
+
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", hand.getCoin());
     model.addAttribute("index", new index());
 
     return "poker.html";
@@ -314,6 +345,7 @@ public class PokerController {
   public String showDrop(ModelMap model, Principal prin) {
     int id;
     int coin;
+    Match match;
     // ログインユーザ情報の受け渡し
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
@@ -331,8 +363,24 @@ public class PokerController {
     myCards.add(cardsMapper.selectAllById(hand.getHand4id()));
     myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
     handMapper.insertHandandIsActive(hand);
+
+    if (matchMapper.selectAllByuser1Id(id) != null) {
+      match = matchMapper.selectAllByuser1Id(id);
+      coin = match.getUser1coin() - 1;
+      match.setUser1coin(coin);
+      model.addAttribute("coin", match.getUser1coin());
+      this.states.syncdrop1(match.getId(), "drop");
+      matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin());
+
+    } else if (matchMapper.selectAllByuser2Id(id) != null) {
+      match = matchMapper.selectAllByuser2Id(id);
+      coin = match.getUser2coin() - 1;
+      match.setUser2coin(coin);
+      model.addAttribute("coin", match.getUser2coin());
+      this.states.syncdrop2(match.getId(), "drop");
+      matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin());
+    }
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", hand.getCoin());
     model.addAttribute("index", new index());
 
     return "poker.html";
@@ -350,11 +398,13 @@ public class PokerController {
   }
 
   @PostMapping("/rays")
-  public String formRays(@RequestParam("rays") Integer rays, ModelMap model, Principal prin) {
+  public String formRays(@RequestParam("rays") int rays, ModelMap model, Principal prin) {
     int id;
     Hand hand;
     ArrayList<Cards> myCards = new ArrayList<Cards>();
+    Match match;
     String loginUser = prin.getName();
+    int bet;
     model.addAttribute("login_user", loginUser);
 
     id = userMapper.selectid(loginUser);
@@ -365,9 +415,26 @@ public class PokerController {
     myCards.add(cardsMapper.selectAllById(hand.getHand3id()));
     myCards.add(cardsMapper.selectAllById(hand.getHand4id()));
     myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
-    model.addAttribute("rays", rays);
+
+    if (matchMapper.selectAllByuser1Id(id) != null) {
+      match = matchMapper.selectAllByuser1Id(id);
+      model.addAttribute("coin", match.getUser1coin());
+      this.states.syncrays2(match.getId(), "rays");
+      bet = rays + match.getBet();
+      match.setBet(bet);
+      matchMapper.updateBetById(match.getId(), bet);
+      model.addAttribute("rays", match.getBet());
+    } else if (matchMapper.selectAllByuser2Id(id) != null) {
+      match = matchMapper.selectAllByuser2Id(id);
+      model.addAttribute("coin", match.getUser2coin());
+      this.states.syncrays2(match.getId(), "rays");
+      bet = rays + match.getBet();
+      match.setBet(bet);
+      matchMapper.updateBetById(match.getId(), bet);
+      model.addAttribute("rays", match.getBet());
+    }
+
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", hand.getCoin());
     model.addAttribute("index", new index());
 
     return "poker";
@@ -377,6 +444,13 @@ public class PokerController {
   public SseEmitter sample() {
     final SseEmitter emitter = new SseEmitter();
     this.match12.AsyncMatchsend(emitter);
+    return emitter;
+  }
+
+  @GetMapping("/state")
+  public SseEmitter state() {
+    final SseEmitter emitter = new SseEmitter();
+    this.states.AsyncMatchsend(emitter);
     return emitter;
   }
 }
