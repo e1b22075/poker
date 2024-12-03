@@ -1,11 +1,16 @@
 package hakata.poker.controller;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 import java.util.Comparator;
 import java.util.Arrays;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 // import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +23,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import hakata.poker.model.Room;
 import hakata.poker.model.index;
+import hakata.poker.service.AsyncCount;
 import hakata.poker.model.Cards;
 import hakata.poker.model.CardsMapper;
 import hakata.poker.model.Hand;
@@ -281,7 +288,7 @@ public class PokerController {
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
     // ここまで
-    
+
     ArrayList<Cards> myCards = new ArrayList<Cards>();
     id = userMapper.selectid(loginUser);
     Hand hand = handMapper.selectByUserId(id);
@@ -334,5 +341,30 @@ public class PokerController {
     model.addAttribute("index", new index());
 
     return "poker";
+  }
+
+
+  private final Logger logger = LoggerFactory.getLogger(PokerController.class);
+
+
+  @Autowired
+  private AsyncCount sse;
+  @GetMapping("step1")
+  public SseEmitter pushCount() {
+    // infoレベルでログを出力する
+    logger.info("pushCount");
+
+    // finalは初期化したあとに再代入が行われない変数につける（意図しない再代入を防ぐ）
+    final SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);//
+    // 引数にLongの最大値をTimeoutとして指定する
+
+    try {
+      this.sse.count(emitter);
+    } catch (IOException e) {
+      // 例外の名前とメッセージだけ表示する
+      logger.warn("Exception:" + e.getClass().getName() + ":" + e.getMessage());
+      emitter.complete();
+    }
+    return emitter;
   }
 }
