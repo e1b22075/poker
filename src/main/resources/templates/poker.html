@@ -27,6 +27,9 @@
   <h1>Authorized! [[${login_user}]]</h1>
   <p id="p1"></p>
   <a href="/logout">ログアウト</a>
+  <div th:if="${message}">
+    <h3 th:text="${message}"></h3>
+  </div>
   <div th:if="${coin}">
     <h2>あなたのコインは[[${coin}]]枚です。</h2>
   </div>

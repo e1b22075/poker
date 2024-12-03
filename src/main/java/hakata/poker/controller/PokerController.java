@@ -289,6 +289,7 @@ public class PokerController {
     model.addAttribute("login_user", loginUser);
     // ここまで
 
+    String message = "ドロップしました";
     ArrayList<Cards> myCards = new ArrayList<Cards>();
     id = userMapper.selectid(loginUser);
     Hand hand = handMapper.selectByUserId(id);
@@ -304,6 +305,7 @@ public class PokerController {
     model.addAttribute("myCards", myCards);
     model.addAttribute("coin", hand.getCoin());
     model.addAttribute("index", new index());
+    model.addAttribute("message", message);
 
     return "poker.html";
   }
