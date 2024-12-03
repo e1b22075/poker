@@ -85,9 +85,9 @@ public class PokerController {
     return "room.html";
   }
 
-  @GetMapping("step3")
+  @GetMapping("/room/step3")
   public SseEmitter room3() {
-    final SseEmitter sseEmitter = new SseEmitter();
+    final SseEmitter sseEmitter = new SseEmitter(60 * 1000L);
     this.acRoom.asyncShowRoomsList(sseEmitter);
     return sseEmitter;
   }

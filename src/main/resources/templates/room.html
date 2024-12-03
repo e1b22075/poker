@@ -23,7 +23,7 @@
           var status2 = "<td>" + (rooms_list[i].user2Status === 1 ? '準備完了' : '未準備') + "</td>";
           var operation = "<td>" +
             (rooms_list[i].user2id === 0 || rooms_list[i].user1id === 0
-              ? "<a href='/room/step2?id=" + rooms_list[i].id + "'>入室</a>"
+              ? "<a href='/room/step2?roomId=" + rooms_list[i].id + "'>入室</a>"
               : "<span>満員</span>") +
             "</td>";
           rooms_table = rooms_table + bgn_tr + room_name + player1 + status1 + player2 + status2 + operation + end_tr;
@@ -63,7 +63,7 @@
             <td>[[${room.user2id != 0 ? users[room.user2id]?.userName : '募集中'}]]</td>
             <td>[[${room.user2Status == 1 ? '準備完了' : '未準備'}]]</td>
             <td>
-              <a th:if="${room.user2id == 0 || room.user1id == 0}" th:href="@{/room/step2(id=${room.id})}">入室</a>
+              <a th:if="${room.user2id == 0 || room.user1id == 0}" th:href="@{/room/step2(roomId=${room.id})}">入室</a>
               <span th:if="${room.user2id != 0 && room.user1id != 0}">満員</span>
             </td>
           </tr>
