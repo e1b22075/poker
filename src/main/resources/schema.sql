@@ -38,9 +38,9 @@ CREATE TABLE match (
 CREATE TABLE room (
     id IDENTITY,
     roomName VARCHAR,
-    user1Name INTEGER,
+    user1id INTEGER,
     user1Status BOOLEAN,
-    user2Name INTEGER,
+    user2id INTEGER,
     user2Status BOOLEAN
 );
 

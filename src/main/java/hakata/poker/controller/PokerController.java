@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.Comparator;
 import java.util.Arrays;
 import java.util.ArrayList;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import hakata.poker.model.Room;
 import hakata.poker.model.RoomMapper;
@@ -22,8 +24,12 @@ import hakata.poker.model.index;
 import hakata.poker.model.Cards;
 import hakata.poker.model.CardsMapper;
 import hakata.poker.model.Hand;
+import hakata.poker.model.User;
 import hakata.poker.model.UserMapper;
 import hakata.poker.model.HandMapper;
+import hakata.poker.service.AsyncRoom;
+
+
 
 @Controller
 public class PokerController {
@@ -40,23 +46,50 @@ public class PokerController {
   @Autowired
   private UserMapper userMapper;
 
+  @Autowired
+  private AsyncRoom acRoom;
+
   @GetMapping("room/step1")
   public String room1(ModelMap model, Principal prin) {
     String loginUser = prin.getName(); // ログインユーザ情報
     model.addAttribute("room1", true);
     model.addAttribute("login_user", loginUser);
-    ArrayList<Room> rooms1 = roomMapper.selectAll();
+    final ArrayList<Room> rooms1 = acRoom.syncShowRoomsList();
+    ArrayList<User> users1 = new ArrayList<>();
+    User dummyUser = new User(0, "indexずれ防止用");
+    users1.add(dummyUser);
+    users1.addAll(userMapper.selectAll());
     model.addAttribute("rooms", rooms1);
+    model.addAttribute("users", users1);
     return "room.html";
   }
 
+  //id=room.id
   @GetMapping("room/step2")
-  public String room2(@RequestParam Integer id, ModelMap model, Principal prin) {
+  @Transactional
+  public String room2(@RequestParam Integer roomId, ModelMap model, Principal prin) {
     String loginUser = prin.getName(); // ログインユーザ情報
     model.addAttribute("login_user", loginUser);
+    int userid = userMapper.selectid(loginUser);
+    int userIndex = 2;
+    acRoom.syncEnterRoom(userIndex,userid, roomId);
+    Room room2 = acRoom.syncShowRoomById(roomId);
+    ArrayList<User> users1 = new ArrayList<>();
+    User dummyUser = new User(0, "indexずれ防止用");
+    users1.add(dummyUser);
+    users1.addAll(userMapper.selectAll());
+    model.addAttribute("users", users1);
     model.addAttribute("room2", true);
-    // model.addAttribute("room", room);
+
+    model.addAttribute("room2", room2);
     return "room.html";
+  }
+
+  @GetMapping("step3")
+  public SseEmitter room3() {
+    final SseEmitter sseEmitter = new SseEmitter();
+    this.acRoom.asyncShowRoomsList(sseEmitter);
+    return sseEmitter;
   }
 
   @GetMapping("help")
