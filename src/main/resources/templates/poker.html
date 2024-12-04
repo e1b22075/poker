@@ -19,6 +19,12 @@
           window.location.href = "/room";
         }
       };
+
+      window.addEventListener('beforeunload', function () {
+        if (sse) {
+          sse.close();
+        }
+      });
     };
   </script>
 </head>
