@@ -6,7 +6,7 @@
   <title>poker</title>
   <script th:inline="javascript" th:if="${myCards}">
     window.onload = function () {
-      var counter = 10; //初期値を60に設定
+      var counter = 4000; //初期値を60に設定
       var sse = new EventSource('/step1');
 
       sse.onmessage = function (event) {
@@ -44,9 +44,25 @@
       </tr>
     </div>
 
-    <div th:if="${role}">
-      <h3 th:text="${role}"></h3>
+    <div th:if="${myrole}">
+      <h3 th:text="${myrole}"></h3>
     </div>
+
+  <h2>CPUの手札</h2>
+    <div th:each="item, iterStat : ${CPUCards}">
+      <tr>
+        <td>[[${item.num}]] [[${item.cardtype}]]</td>
+      </tr>
+    </div>
+
+    <div th:if="${cpurole}">
+      <h3 th:text="${cpurole}"></h3>
+    </div>
+
+    <div th:if="${result}">
+      <h2 th:text="${result}"></h2>
+    </div>
+
     <h2>どうしますか？</h2>
     <a href="/poker/call"><button>コール</button></a>
     <a href="/poker/rays"><button>レイズ</button></a>
