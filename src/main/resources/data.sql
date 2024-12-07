@@ -2,6 +2,7 @@ INSERT INTO users (userName) VALUES ('おくだ');
 INSERT INTO users (userName) VALUES ('ひらお');
 INSERT INTO users (userName) VALUES ('よしたに');
 INSERT INTO users (userName) VALUES ('まつうら');
+INSERT INTO users (userName) VALUES ('CPU');
 
 INSERT INTO cards (num,cardtype,isActive) VALUES (1,'heart',false);
 INSERT INTO cards (num,cardtype,isActive) VALUES (2,'heart',false);
@@ -75,4 +76,3 @@ INSERT INTO role (roleName) VALUES ('ストレート');
 INSERT INTO role (roleName) VALUES ('スリーカード');
 INSERT INTO role (roleName) VALUES ('ツウ・ペア');
 INSERT INTO role (roleName) VALUES ('ワン・ペア');
-

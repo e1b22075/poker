@@ -6,7 +6,7 @@
   <title>poker</title>
   <script th:inline="javascript" th:if="${coin}">
     window.onload = function () {
-      var counter = 10; //初期値を60に設定
+      var counter = 4000; //初期値を60に設定
       var sse = new EventSource('/step1');
 
       sse.onmessage = function (event) {
