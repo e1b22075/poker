@@ -88,11 +88,10 @@ public class PokerController {
   public SseEmitter room3() {
     final SseEmitter sseEmitter = new SseEmitter(60 * 1000L);
     this.acRoom.asyncShowRoomsList(sseEmitter);
-    ArrayList<User> users1 = new ArrayList<>();
+    /*ArrayList<User> users1 = new ArrayList<>();
     User dummyUser = new User(0, "indexずれ防止用");
     users1.add(dummyUser);
-    users1.addAll(userMapper.selectAll());
-    model.addAttribute("users", users1);
+    users1.addAll(userMapper.selectAll());*/
     return sseEmitter;
   }
 
