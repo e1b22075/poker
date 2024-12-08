@@ -1,5 +1,6 @@
 package hakata.poker.controller;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,6 +9,10 @@ import java.util.Comparator;
 import java.util.Arrays;
 import java.util.ArrayList;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -21,6 +26,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import hakata.poker.model.Room;
 import hakata.poker.model.RoomMapper;
 import hakata.poker.model.index;
+import hakata.poker.service.AsyncCount;
 import hakata.poker.model.Cards;
 import hakata.poker.model.CardsMapper;
 import hakata.poker.model.Hand;
@@ -93,13 +99,6 @@ public class PokerController {
     users1.add(dummyUser);
     users1.addAll(userMapper.selectAll());*/
     return sseEmitter;
-  }
-
-  @GetMapping("help")
-  public String help_page(ModelMap model, Principal prin) {
-    String loginUser = prin.getName(); // ログインユーザ情報
-    model.addAttribute("login_user", loginUser);
-    return "help.html";
   }
 
   @GetMapping("poker")
@@ -325,7 +324,7 @@ public class PokerController {
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
     // ここまで
-
+    String message = "ドロップしました";
     ArrayList<Cards> myCards = new ArrayList<Cards>();
     id = userMapper.selectid(loginUser);
     Hand hand = handMapper.selectByUserId(id);
@@ -341,6 +340,7 @@ public class PokerController {
     model.addAttribute("myCards", myCards);
     model.addAttribute("coin", hand.getCoin());
     model.addAttribute("index", new index());
+    model.addAttribute("message", message);
 
     return "poker.html";
   }
@@ -378,5 +378,30 @@ public class PokerController {
     model.addAttribute("index", new index());
 
     return "poker";
+  }
+
+
+  private final Logger logger = LoggerFactory.getLogger(PokerController.class);
+
+
+  @Autowired
+  private AsyncCount sse;
+  @GetMapping("step1")
+  public SseEmitter pushCount() {
+    // infoレベルでログを出力する
+    logger.info("pushCount");
+
+    // finalは初期化したあとに再代入が行われない変数につける（意図しない再代入を防ぐ）
+    final SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);//
+    // 引数にLongの最大値をTimeoutとして指定する
+
+    try {
+      this.sse.count(emitter);
+    } catch (IOException e) {
+      // 例外の名前とメッセージだけ表示する
+      logger.warn("Exception:" + e.getClass().getName() + ":" + e.getMessage());
+      emitter.complete();
+    }
+    return emitter;
   }
 }
