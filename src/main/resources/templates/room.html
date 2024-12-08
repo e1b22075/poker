@@ -17,10 +17,10 @@
           var bgn_tr = "<tr>";
           var end_tr = "</tr>";
           var room_name = "<td>" + rooms_list[i].roomName + "</td>";
-          var player1 = "<td>" + (rooms_list[i].user1id !== 0 ? rooms_list[i].user1Name : '募集中') + "</td>";
-          var status1 = "<td>" + (rooms_list[i].user1Status === 1 ? '準備完了' : '未準備') + "</td>";
-          var player2 = "<td>" + (rooms_list[i].user2id !== 0 ? rooms_list[i].user2Name : '募集中') + "</td>";
-          var status2 = "<td>" + (rooms_list[i].user2Status === 1 ? '準備完了' : '未準備') + "</td>";
+          var player1 = "<td>" + (rooms_list[i].user1id !== 0 ? users[rooms_list[i].user1id].userName : '募集中') + "</td>";
+          var status1 = "<td>" + (rooms_list[i].user1Status === true ? '準備完了' : '未準備') + "</td>";
+          var player2 = "<td>" + (rooms_list[i].user2id !== 0 ? users[rooms_list[i].user2id].userName : '募集中') + "</td>";
+          var status2 = "<td>" + (rooms_list[i].user2Status === true ? '準備完了' : '未準備') + "</td>";
           var operation = "<td>" +
             (rooms_list[i].user2id === 0 || rooms_list[i].user1id === 0
               ? "<a href='/room/step2?roomId=" + rooms_list[i].id + "'>入室</a>"

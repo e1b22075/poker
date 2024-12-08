@@ -64,7 +64,6 @@ public class PokerController {
     return "room.html";
   }
 
-  //id=room.id
   @GetMapping("room/step2")
   @Transactional
   public String room2(@RequestParam Integer roomId, ModelMap model, Principal prin) {
@@ -89,6 +88,11 @@ public class PokerController {
   public SseEmitter room3() {
     final SseEmitter sseEmitter = new SseEmitter(60 * 1000L);
     this.acRoom.asyncShowRoomsList(sseEmitter);
+    ArrayList<User> users1 = new ArrayList<>();
+    User dummyUser = new User(0, "indexずれ防止用");
+    users1.add(dummyUser);
+    users1.addAll(userMapper.selectAll());
+    model.addAttribute("users", users1);
     return sseEmitter;
   }
 
