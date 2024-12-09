@@ -3,6 +3,7 @@ package hakata.poker.model;
 public class User {
   int id;
   String userName;
+  String 
 
   public User(int i, String name) {
     id = i;
