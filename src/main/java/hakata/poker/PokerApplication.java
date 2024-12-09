@@ -5,9 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@EnableAsync
-@EnableScheduling
 @SpringBootApplication
+@EnableScheduling
+@EnableAsync
 public class PokerApplication {
 
 	public static void main(String[] args) {

@@ -4,6 +4,7 @@ INSERT INTO users (userName) VALUES ('よしたに');
 INSERT INTO users (userName) VALUES ('まつうら');
 INSERT INTO users (userName) VALUES ('CPU');
 
+
 INSERT INTO cards (num,cardtype,isActive) VALUES (1,'heart',false);
 INSERT INTO cards (num,cardtype,isActive) VALUES (2,'heart',false);
 INSERT INTO cards (num,cardtype,isActive) VALUES (3,'heart',false);
@@ -64,7 +65,8 @@ INSERT INTO hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,coin,roleid,rol
 INSERT INTO match(user1id,user2id,user1coin,user2coin,bet,isActive) VALUES
 (1,2,5,5,1,false);
 
-INSERT INTO room (roomName,user1id,user2id,user3id,user4id,user5id,user6id) VALUES ('テストの部屋',1,2,3,4,5,6);
+INSERT INTO room (roomName,user1id,user1Status,user2id,user2Status) VALUES ('テストの部屋',1,false,NULL,false);
+INSERT INTO room (roomName,user1id,user1Status,user2id,user2Status) VALUES ('テストの部屋2',NULL,false,NULL,false);
 
 
 INSERT INTO role (roleName) VALUES ('ロイヤルストレートフラッシュ');

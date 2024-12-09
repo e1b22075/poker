@@ -39,15 +39,12 @@ CREATE TABLE room (
     id IDENTITY,
     roomName VARCHAR,
     user1id INTEGER,
+    user1Status BOOLEAN,
     user2id INTEGER,
-    user3id INTEGER,
-    user4id INTEGER,
-    user5id INTEGER,
-    user6id INTEGER
+    user2Status BOOLEAN
 );
 
 CREATE TABLE role (
   id IDENTITY,
   roleName VARCHAR NOT NULL
-
 );

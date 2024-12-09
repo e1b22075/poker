@@ -4,19 +4,92 @@
 <head>
   <meta charset="utf-8">
   <title>poker</title>
+  <script>
+    window.onload = function () {
+      var sse = new EventSource('/room/step3');
+      sse.onmessage = function (event) {
+        console.log("sse.onmessage")
+        console.log(event.data);
+        var rooms_list = JSON.parse(event.data);//JSONオブジェクトとしてparse
+        var rooms_table = "";
+        // DBに残っているルームのリストがJSONオブジェクトとして得られるので，htmlを作成し，tbodyの中身毎入れ替える
+        for (var i = 0; i < rooms_list.length; i++) {
+          var bgn_tr = "<tr>";
+          var end_tr = "</tr>";
+          var room_name = "<td>" + rooms_list[i].roomName + "</td>";
+          var player1 = "<td>" + (rooms_list[i].user1id !== 0 ? users[rooms_list[i].user1id].userName : '募集中') + "</td>";
+          var status1 = "<td>" + (rooms_list[i].user1Status === true ? '準備完了' : '未準備') + "</td>";
+          var player2 = "<td>" + (rooms_list[i].user2id !== 0 ? users[rooms_list[i].user2id].userName : '募集中') + "</td>";
+          var status2 = "<td>" + (rooms_list[i].user2Status === true ? '準備完了' : '未準備') + "</td>";
+          var operation = "<td>" +
+            (rooms_list[i].user2id === 0 || rooms_list[i].user1id === 0
+              ? "<a href='/room/step2?roomId=" + rooms_list[i].id + "'>入室</a>"
+              : "<span>満員</span>") +
+            "</td>";
+          rooms_table = rooms_table + bgn_tr + room_name + player1 + status1 + player2 + status2 + operation + end_tr;
+        }
+        console.log(rooms_table);
+        var tbody = document.getElementById("rooms_list");
+        tbody.innerHTML = rooms_table; // idがrooms_listのtbodyのHTMLを差し替える
+      }
+    }
+  </script>
 </head>
 
 <body>
   <h1>こんにちは！[[${login_user}]]</h1>
-  <div th:if="${room}">
-    ルーム利用者
-    <ul>
-      <li th:each="user : ${room.users}">[[${user}]]</li>
-    </ul>
-  </div>
   <a href="/logout">ログアウト</a>
-  <br>
-  <a href="/poker">pokerへのアクセス</a>
-  <br>
-  <a href="/help">helpへのアクセス</a>
+
+  <div th:if="${room1}">
+    <h1>ルームを選んでください</h1>
+    ルーム一覧
+    <table border="1">
+      <thead>
+        <tr>
+          <th>ルーム名</th>
+          <th>プレイヤー1</th>
+          <th>1の状態</th>
+          <th>プレイヤー2</th>
+          <th>2の状態</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="rooms_list">
+        <span th:if="${rooms}">
+          <tr th:each="room : ${rooms}">
+            <td>[[${room.roomName}]]</td>
+            <td>[[${room.user1id != 0 ? users[room.user1id]?.userName : '募集中'}]]</td>
+            <td>[[${room.user1Status == 1 ? '準備完了' : '未準備'}]]</td>
+            <td>[[${room.user2id != 0 ? users[room.user2id]?.userName : '募集中'}]]</td>
+            <td>[[${room.user2Status == 1 ? '準備完了' : '未準備'}]]</td>
+            <td>
+              <a th:if="${room.user2id == 0 || room.user1id == 0}" th:href="@{/room/step2(roomId=${room.id})}">入室</a>
+              <span th:if="${room.user2id != 0 && room.user1id != 0}">満員</span>
+            </td>
+          </tr>
+        </span>
+      </tbody>
+    </table>
+  </div>
+
+  <div th:if="${room2}">
+    部屋名: [[${room2.roomName}]]
+    <h3>プレイヤー一覧</h3>
+    <ul>
+      <li th:text="${room2.user1id != 0 ? users[room2.user1id]?.userName : '募集中'}">
+        (<span th:text="${room2.user1Status != false ? '準備完了' : '待機中'}"></span>)
+      </li>
+      <li th:text="${room2.user2id != 0 ? users[room2.user2id]?.userName : '募集中'}">
+        (<span th:text="${room2.user2Status != false ? '準備完了' : '待機中'}"></span>)
+      </li>
+    </ul>
+    <br>
+    <a href="/room/step1">退室</a>
+    <br>
+    <a href="/poker">pokerを開始</a>
+    <br>
+    <a href="/help">helpへのアクセス</a>
+  </div>
 </body>
+
+</html>
