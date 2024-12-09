@@ -12,38 +12,41 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import hakata.poker.model.User;
-import hakata.poker.model.Room;
-import hakata.poker.model.RoomMapper;
-
+import hakata.poker.model.UserMapper;
 
 @Service
-public class AsyncRoom {
-  private final Logger logger = LoggerFactory.getLogger(AsyncRoom.class);
+public class AsyncUser {
+  private final Logger logger = LoggerFactory.getLogger(AsyncUser.class);
   boolean dbUpdated = false;
 
   @Autowired
-  RoomMapper rMapper;
+  UserMapper uMapper;
 
   @Transactional
-  public void syncEnterRoom(int userIndex, User loginUser, int roomId) {
-    int userid = loginUser.getId();
-    String userName = loginUser.getUserName();
-    rMapper.updateUser2ByRoomId(userid,userName,roomId);
+  public User syncUpdateUserName(int userId, String newUserName) {
+    User user = uMapper.selectAllById(userId);
+    uMapper.updateUserName(userId, newUserName);
+    this.dbUpdated = true;
+    return user;
+  }
+
+  @Transactional
+  public void syncInsertUser(User user) {
+    int userid;
+    uMapper.insertUser(user);
     this.dbUpdated = true;
   }
 
-  public ArrayList<Room> syncShowRoomsList() {
-    return rMapper.selectAll();
+  public ArrayList<User> syncShowUsersList() {
+    return uMapper.selectAll();
   }
 
-  public Room syncShowRoomById(int roomId) {
-    return rMapper.selectAllById(roomId);
+  public User syncShowUserById(int Id) {
+    return uMapper.selectAllById(Id);
   }
-
-
 
   @Async
-  public void asyncShowRoomsList(SseEmitter emitter) {
+  public void asyncShowUsersList(SseEmitter emitter) {
     dbUpdated = true;
     try {
       while (true) {// 無限ループ
@@ -53,8 +56,8 @@ public class AsyncRoom {
           continue;
         }
         // DBが更新されていれば更新後のフルーツリストを取得してsendし，1s休み，dbUpdatedをfalseにする
-        ArrayList<Room> rooms3 = this.syncShowRoomsList();
-        emitter.send(rooms3);
+        ArrayList<User> users3 = this.syncShowUsersList();
+        emitter.send(SseEmitter.event().name("users").data(users3));
         TimeUnit.MILLISECONDS.sleep(1000);
         dbUpdated = false;
       }
@@ -64,6 +67,6 @@ public class AsyncRoom {
     } finally {
       emitter.complete();
     }
-    System.out.println("asyncShowRoomsList complete");
+    System.out.println("asyncShowUsersList complete");
   }
 }

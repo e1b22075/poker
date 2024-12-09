@@ -34,8 +34,7 @@ import hakata.poker.model.User;
 import hakata.poker.model.UserMapper;
 import hakata.poker.model.HandMapper;
 import hakata.poker.service.AsyncRoom;
-
-
+import hakata.poker.service.AsyncUser;
 
 @Controller
 public class PokerController {
@@ -55,18 +54,18 @@ public class PokerController {
   @Autowired
   private AsyncRoom acRoom;
 
+  @Autowired
+  private AsyncUser acUser;
+
   @GetMapping("room/step1")
   public String room1(ModelMap model, Principal prin) {
     String loginUser = prin.getName(); // ログインユーザ情報
     model.addAttribute("room1", true);
     model.addAttribute("login_user", loginUser);
     final ArrayList<Room> rooms1 = acRoom.syncShowRoomsList();
-    ArrayList<User> users1 = new ArrayList<>();
-    User dummyUser = new User(0, "indexずれ防止用");
-    users1.add(dummyUser);
-    users1.addAll(userMapper.selectAll());
+    // ArrayList<User> users1 = userMapper.selectAll();
     model.addAttribute("rooms", rooms1);
-    model.addAttribute("users", users1);
+    // model.addAttribute("users", users1);
     return "room.html";
   }
 
@@ -75,15 +74,20 @@ public class PokerController {
   public String room2(@RequestParam Integer roomId, ModelMap model, Principal prin) {
     String loginUser = prin.getName(); // ログインユーザ情報
     model.addAttribute("login_user", loginUser);
-    int userid = userMapper.selectid(loginUser);
-    int userIndex = 2;
-    acRoom.syncEnterRoom(userIndex,userid, roomId);
+    User user1 = userMapper.selectAllByName(loginUser);
+    Room enteredRoom = roomMapper.selectAllById(roomId);
+    int userIndex = 0;
+    if (enteredRoom.getUser1id() == 0) {
+      userIndex = 1;
+    } else if (enteredRoom.getUser2id() == 0) {
+      userIndex = 2;
+    }
+    acRoom.syncEnterRoom(userIndex, user1, roomId);
     Room room2 = acRoom.syncShowRoomById(roomId);
-    ArrayList<User> users1 = new ArrayList<>();
-    User dummyUser = new User(0, "indexずれ防止用");
-    users1.add(dummyUser);
-    users1.addAll(userMapper.selectAll());
-    model.addAttribute("users", users1);
+    /*
+     * ArrayList<User> users1 = userMapper.selectAll();
+     * model.addAttribute("users", users1);
+     */
     model.addAttribute("room2", true);
 
     model.addAttribute("room2", room2);
@@ -94,10 +98,6 @@ public class PokerController {
   public SseEmitter room3() {
     final SseEmitter sseEmitter = new SseEmitter(60 * 1000L);
     this.acRoom.asyncShowRoomsList(sseEmitter);
-    /*ArrayList<User> users1 = new ArrayList<>();
-    User dummyUser = new User(0, "indexずれ防止用");
-    users1.add(dummyUser);
-    users1.addAll(userMapper.selectAll());*/
     return sseEmitter;
   }
 
@@ -380,12 +380,11 @@ public class PokerController {
     return "poker";
   }
 
-
   private final Logger logger = LoggerFactory.getLogger(PokerController.class);
-
 
   @Autowired
   private AsyncCount sse;
+
   @GetMapping("step1")
   public SseEmitter pushCount() {
     // infoレベルでログを出力する
