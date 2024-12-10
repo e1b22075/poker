@@ -12,6 +12,13 @@ CREATE TABLE cards (
     isActive BOOLEAN
 );
 
+CREATE TABLE cards2 (
+    id IDENTITY,
+    num INTEGER NOT NULL,
+    cardtype VARCHAR NOT NULL,
+    isActive BOOLEAN
+);
+
 CREATE TABLE hand (
     id IDENTITY,
     userid INTEGER NOT NULL,
