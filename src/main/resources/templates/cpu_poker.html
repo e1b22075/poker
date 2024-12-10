@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.springframework.org/schema/security">
+
+<head>
+  <meta charset="utf-8">
+  <title>poker</title>
+  <script th:inline="javascript" th:if="${myCards}">
+    window.onload = function () {
+      var counter = 4000; //初期値を60に設定
+      var sse = new EventSource('/step1');
+
+      sse.onmessage = function (event) {
+        counter--;
+        console.log(counter);
+        document.getElementById("p1").textContent = counter;
+
+        if (counter <= 0) {
+          sse.close(); //SSE接続を閉じる
+          window.location.href = "/room";
+        }
+      };
+
+      window.addEventListener('beforeunload', function () {
+        if (sse) {
+          sse.close();
+        }
+      });
+    };
+  </script>
+</head>
+
+<body>
+  <h1>Authorized! [[${login_user}]]</h1>
+  <p id="p1"></p>
+  <a href="/logout">ログアウト</a>
+  <div th:if="${message}">
+    <h3 th:text="${message}"></h3>
+  </div>
+  <div th:if="${coin}">
+    <h2>あなたのコインは[[${coin}]]枚です。</h2>
+  </div>
+  <div th:if="${rays}">
+    <h2>あなたは[[${rays}]]枚賭けてます。</h2>
+  </div>
+  <div th:if="!${myCards}">
+    <h2><a href="/poker/card">カードを引く</a></h2>
+  </div>
+  <div th:if="${myCards}">
+    <h4>自分の手札</h4>
+    <form action="#" th:action="@{/result}" th:object="${index}" method="post">
+      <div th:each="item, iterStat : ${myCards}">
+        <label>
+          <input type="checkbox" th:value="${iterStat.index+1}" th:text="${item.num} + ' ' +  ${item.cardtype}"
+            th:field="*{id}" />
+        </label>
+      </div>
+      <h4>CPUの手札</h4>
+      <div th:each="item, iterStat : ${CPUCards}">
+        <label>
+          <input type="checkbox" th:value="${iterStat.index+1}" th:text="${item.num} + ' ' +  ${item.cardtype}"
+            th:field="*{id}" />
+        </label>
+      </div>
+      <p><input type="submit" value="カードを交換する" /> </p>
+    </form>
+  </div>
+
+  <!-- ワンペアなどの役を表示 -->
+  <div th:if="${role}">
+    <h3 th:text="${role}"></h3>
+  </div>
+
+
+</body>
+
+</html>
