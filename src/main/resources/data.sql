@@ -1,3 +1,4 @@
+
 INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('おくだ', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('ひらお', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('よしたに', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -65,8 +66,8 @@ INSERT INTO hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,coin,roleid,rol
 INSERT INTO match(user1id,user2id,user1coin,user2coin,bet,isActive) VALUES
 (1,2,5,5,1,false);
 
-INSERT INTO room (roomName,user1id,user1Status,user2id,user2Status) VALUES ('テストの部屋',1,false,NULL,false);
-INSERT INTO room (roomName,user1id,user1Status,user2id,user2Status) VALUES ('テストの部屋2',NULL,false,NULL,false);
+INSERT INTO room (roomName,user1id,user1Name,user1Status,user2id,user2Name,user2Status) VALUES ('テストの部屋',1,'おくだ',true,NULL,NULL,false);
+INSERT INTO room (roomName,user1id,user1Name,user1Status,user2id,user2Name,user2Status) VALUES ('テストの部屋2',NULL,NULL,true,NULL,NULL,false);
 
 
 INSERT INTO role (roleName) VALUES ('ロイヤルストレートフラッシュ');

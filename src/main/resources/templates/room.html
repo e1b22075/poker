@@ -12,15 +12,14 @@
         console.log(event.data);
         var rooms_list = JSON.parse(event.data);//JSONオブジェクトとしてparse
         var rooms_table = "";
-        // DBに残っているルームのリストがJSONオブジェクトとして得られるので，htmlを作成し，tbodyの中身毎入れ替える
         for (var i = 0; i < rooms_list.length; i++) {
           var bgn_tr = "<tr>";
           var end_tr = "</tr>";
           var room_name = "<td>" + rooms_list[i].roomName + "</td>";
-          var player1 = "<td>" + (rooms_list[i].user1id !== 0 ? users[rooms_list[i].user1id].userName : '募集中') + "</td>";
-          var status1 = "<td>" + (rooms_list[i].user1Status === true ? '準備完了' : '未準備') + "</td>";
-          var player2 = "<td>" + (rooms_list[i].user2id !== 0 ? users[rooms_list[i].user2id].userName : '募集中') + "</td>";
-          var status2 = "<td>" + (rooms_list[i].user2Status === true ? '準備完了' : '未準備') + "</td>";
+          var player1 = "<td>" + rooms_list[i].user1Name + "</td>";
+          var status1 = "<td>" + rooms_list[i].user1Status + "</td>";
+          var player2 = "<td>" + rooms_list[i].user2Name + "</td>";
+          var status2 = "<td>" + rooms_list[i].user2Status + "</td>";
           var operation = "<td>" +
             (rooms_list[i].user2id === 0 || rooms_list[i].user1id === 0
               ? "<a href='/room/step2?roomId=" + rooms_list[i].id + "'>入室</a>"
@@ -58,13 +57,13 @@
         <span th:if="${rooms}">
           <tr th:each="room : ${rooms}">
             <td>[[${room.roomName}]]</td>
-            <td>[[${room.user1id != 0 ? users[room.user1id]?.userName : '募集中'}]]</td>
+            <td>[[${room.user1Name}]]</td>
             <td>[[${room.user1Status == 1 ? '準備完了' : '未準備'}]]</td>
-            <td>[[${room.user2id != 0 ? users[room.user2id]?.userName : '募集中'}]]</td>
+            <td>[[${room.user2id != 0 ? room.user2Name : '募集中'}]]</td>
             <td>[[${room.user2Status == 1 ? '準備完了' : '未準備'}]]</td>
             <td>
-              <a th:if="${room.user2id == 0 || room.user1id == 0}" th:href="@{/room/step2(roomId=${room.id})}">入室</a>
-              <span th:if="${room.user2id != 0 && room.user1id != 0}">満員</span>
+              <a th:if="${room.user1id == 0 || room.user2id == 0 }" th:href="@{/room/step2(roomId=${room.id})}">入室</a>
+              <span th:if="${room.user1id != 0 && room.user2id != 0 }">満員</span>
             </td>
           </tr>
         </span>
@@ -76,14 +75,15 @@
     部屋名: [[${room2.roomName}]]
     <h3>プレイヤー一覧</h3>
     <ul>
-      <li th:text="${room2.user1id != 0 ? users[room2.user1id]?.userName : '募集中'}">
+      <li th:text="${room2.user1id != 0 ? room2.user1Name : '募集中'}">
         (<span th:text="${room2.user1Status != false ? '準備完了' : '待機中'}"></span>)
       </li>
-      <li th:text="${room2.user2id != 0 ? users[room2.user2id]?.userName : '募集中'}">
+      <li th:text="${room2.user2id != 0 ? room2.user2Name : '募集中'}">
         (<span th:text="${room2.user2Status != false ? '準備完了' : '待機中'}"></span>)
       </li>
     </ul>
     <br>
+    <a href="/room/changeStatus"><button>準備</button></a>
     <a href="/room/step1">退室</a>
     <br>
     <a href="/poker">pokerを開始</a>

@@ -41,8 +41,10 @@ CREATE TABLE room (
     id IDENTITY,
     roomName VARCHAR,
     user1id INTEGER,
+    user1Name VARCHAR,
     user1Status BOOLEAN,
     user2id INTEGER,
+    user2Name VARCHAR,
     user2Status BOOLEAN
 );
 
