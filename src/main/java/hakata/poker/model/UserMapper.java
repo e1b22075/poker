@@ -25,6 +25,10 @@ public interface UserMapper {
   @Select("SELECT userName from Users WHERE userid = #{id}")
   String selectUserName(int id);
 
+<
+  @Select("SELECT * from Users WHERE username = #{username}")
+  User findByUsername(String username);
+
   @Update("UPDATE users SET userName=#{newuserName} WHERE id=#{userid}")
   void updateUserName(int userid, String newuserName);
 

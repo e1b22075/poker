@@ -1,0 +1,27 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ログイン画面</title>
+  <link rel="stylesheet" href="CSS/styles.css">
+</head>
+
+<body>
+  <div class="login-container">
+    <form action="/login" method="post">
+      <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+      <input type="text" name="username" class="login-input" placeholder="Username">
+      <input type="password" name="password" class="login-input" placeholder="Password">
+      <button type="submit" class="login-btn">Login</button>
+    </form>
+
+    <p style="color: red;">
+      <c:if test="${param.error}">
+        Invalid username or password. Please try again.
+      </c:if>
+    </p>
+  </div>
+</body>
+
+</html>

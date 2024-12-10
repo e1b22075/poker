@@ -1,9 +1,9 @@
-INSERT INTO users (id,userName) VALUES (0,'index調整用');
-INSERT INTO users (userName) VALUES ('おくだ');
-INSERT INTO users (userName) VALUES ('ひらお');
-INSERT INTO users (userName) VALUES ('よしたに');
-INSERT INTO users (userName) VALUES ('まつうら');
-INSERT INTO users (userName) VALUES ('CPU');
+
+INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('おくだ', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('ひらお', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('よしたに', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('まつうら', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('CPU', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
 INSERT INTO cards (num,cardtype,isActive) VALUES (1,'heart',false);
