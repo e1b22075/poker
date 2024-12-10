@@ -40,9 +40,6 @@ import hakata.poker.service.AsyncUser;
 public class PokerController {
 
   @Autowired
-  private RoomMapper roomMapper;
-
-  @Autowired
   private CardsMapper cardsMapper;
 
   @Autowired
@@ -52,54 +49,8 @@ public class PokerController {
   private UserMapper userMapper;
 
   @Autowired
-  private AsyncRoom acRoom;
-
-  @Autowired
   private AsyncUser acUser;
 
-  @GetMapping("room/step1")
-  public String room1(ModelMap model, Principal prin) {
-    String loginUser = prin.getName(); // ログインユーザ情報
-    model.addAttribute("room1", true);
-    model.addAttribute("login_user", loginUser);
-    final ArrayList<Room> rooms1 = acRoom.syncShowRoomsList();
-    // ArrayList<User> users1 = userMapper.selectAll();
-    model.addAttribute("rooms", rooms1);
-    // model.addAttribute("users", users1);
-    return "room.html";
-  }
-
-  @GetMapping("room/step2")
-  @Transactional
-  public String room2(@RequestParam Integer roomId, ModelMap model, Principal prin) {
-    String loginUser = prin.getName(); // ログインユーザ情報
-    model.addAttribute("login_user", loginUser);
-    User user1 = userMapper.selectAllByName(loginUser);
-    Room enteredRoom = roomMapper.selectAllById(roomId);
-    int userIndex = 0;
-    if (enteredRoom.getUser1id() == 0) {
-      userIndex = 1;
-    } else if (enteredRoom.getUser2id() == 0) {
-      userIndex = 2;
-    }
-    acRoom.syncEnterRoom(userIndex, user1, roomId);
-    Room room2 = acRoom.syncShowRoomById(roomId);
-    /*
-     * ArrayList<User> users1 = userMapper.selectAll();
-     * model.addAttribute("users", users1);
-     */
-    model.addAttribute("room2", true);
-
-    model.addAttribute("room2", room2);
-    return "room.html";
-  }
-
-  @GetMapping("/room/step3")
-  public SseEmitter room3() {
-    final SseEmitter sseEmitter = new SseEmitter(60 * 1000L);
-    this.acRoom.asyncShowRoomsList(sseEmitter);
-    return sseEmitter;
-  }
 
   @GetMapping("poker")
   public String login(ModelMap model, Principal prin) {
