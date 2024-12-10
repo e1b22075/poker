@@ -24,9 +24,7 @@ public class SecurityConfig {
             .defaultSuccessUrl("/room/step1", true)
             .failureUrl("/error")
             .permitAll())
-        .logout(logout -> logout
-            .logoutUrl("/logout")
-            .logoutSuccessUrl("/")) // ログアウト後に / にリダイレクト
+
         .authorizeHttpRequests(authz -> authz
             .requestMatchers(AntPathRequestMatcher.antMatcher("/room/**"))
             .authenticated()
