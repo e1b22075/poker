@@ -82,7 +82,7 @@ public class CPUController {
     hand.setHand3id(myCards.get(2).getId());
     hand.setHand4id(myCards.get(3).getId());
     hand.setHand5id(myCards.get(4).getId());
-    hand.setCoin(coin);
+    hand.setTurn(coin);
     userid = userMapper.selectid(loginUser);
     hand.setUserid(userid);
     myCards.sort(Comparator.comparing(Cards::getNum));
@@ -104,7 +104,7 @@ public class CPUController {
     CPUhand.setHand3id(CPUCards.get(2).getId());
     CPUhand.setHand4id(CPUCards.get(3).getId());
     CPUhand.setHand5id(CPUCards.get(4).getId());
-    CPUhand.setCoin(coin);
+    CPUhand.setTurn(coin);
     cpuid = userMapper.selectid(cpuname);
     CPUhand.setUserid(cpuid);
     CPUCards.sort(Comparator.comparing(Cards::getNum));
@@ -191,7 +191,7 @@ public class CPUController {
     userhand.setHand5id(myCards.get(4).getId());
     handMapper.insertHandandIsActive(userhand);
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", userhand.getCoin());
+    model.addAttribute("coin", userhand.getTurn());
     model.addAttribute("index", new index());
 
     String cpuname = "CPU";
@@ -221,7 +221,7 @@ public class CPUController {
     cpuhand.setHand5id(CPUCards.get(4).getId());
     handMapper.insertHandandIsActive(cpuhand);
     model.addAttribute("CPUCards", CPUCards);
-    model.addAttribute("coin", cpuhand.getCoin());
+    model.addAttribute("coin", cpuhand.getTurn());
     model.addAttribute("index", new index());
 
     // ストレートの判定
@@ -546,7 +546,7 @@ public class CPUController {
     myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
 
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", hand.getCoin());
+    model.addAttribute("coin", hand.getTurn());
     model.addAttribute("index", new index());
 
     ArrayList<Cards> CPUCards = new ArrayList<Cards>();
@@ -560,7 +560,7 @@ public class CPUController {
     CPUCards.add(cardsMapper.selectAllById(CPUhand.getHand5id()));
 
     model.addAttribute("CPUCards", CPUCards);
-    model.addAttribute("coin", hand.getCoin());
+    model.addAttribute("coin", hand.getTurn());
     model.addAttribute("index", new index());
 
     return "cpu_poker.html";
@@ -581,8 +581,8 @@ public class CPUController {
     userid = userMapper.selectid(loginUser);
     Hand userhand = handMapper.selectByUserId(userid);
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
-    coin = userhand.getCoin() - 1;
-    userhand.setCoin(coin);
+    coin = userhand.getTurn() - 1;
+    userhand.setTurn(coin);
 
     myCards.add(cardsMapper.selectAllById(userhand.getHand1id()));
     myCards.add(cardsMapper.selectAllById(userhand.getHand2id()));
@@ -592,7 +592,7 @@ public class CPUController {
 
     handMapper.insertHandandIsActive(userhand);
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", userhand.getCoin());
+    model.addAttribute("coin", userhand.getTurn());
     model.addAttribute("index", new index());
     model.addAttribute("message", message);
 
@@ -607,7 +607,7 @@ public class CPUController {
     CPUCards.add(cardsMapper.selectAllById(CPUhand.getHand5id()));
 
     model.addAttribute("CPUCards", CPUCards);
-    model.addAttribute("cpucoin", CPUhand.getCoin());
+    model.addAttribute("cpucoin", CPUhand.getTurn());
     model.addAttribute("index", new index());
 
     return "cpu_poker.html";
@@ -620,7 +620,7 @@ public class CPUController {
     model.addAttribute("login_user", loginUser);
     id = userMapper.selectid(loginUser);
     Hand hand = handMapper.selectByUserId(id);
-    model.addAttribute("coin", hand.getCoin());
+    model.addAttribute("coin", hand.getTurn());
     return "cpu_rays.html";
   }
 
@@ -646,7 +646,7 @@ public class CPUController {
     myCards.add(cardsMapper.selectAllById(userhand.getHand5id()));
     model.addAttribute("rays", rays);
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", userhand.getCoin());
+    model.addAttribute("coin", userhand.getTurn());
     model.addAttribute("index", new index());
 
     cpuid = userMapper.selectid(cpuname);
@@ -659,7 +659,7 @@ public class CPUController {
     cpuCards.add(cardsMapper.selectAllById(cpuhand.getHand5id()));
 
     model.addAttribute("CPUCards", cpuCards);
-    model.addAttribute("coin", cpuhand.getCoin());
+    model.addAttribute("coin", cpuhand.getTurn());
     model.addAttribute("index", new index());
 
     return "cpu_poker";

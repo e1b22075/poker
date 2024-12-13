@@ -112,16 +112,13 @@ public class PokerController {
     hand.setHand3id(myCards.get(2).getId());
     hand.setHand4id(myCards.get(3).getId());
     hand.setHand5id(myCards.get(4).getId());
-    hand.setCoin(coin);
+    hand.setTurn(coin);
     userid = userMapper.selectid(loginUser);
     hand.setUserid(userid);
     myCards.sort(Comparator.comparing(Cards::getNum));
 
     handMapper.insertHandandIsActive(hand);
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", coin);
-    model.addAttribute("index", new index());
-
     model.addAttribute("coin", coin);
     model.addAttribute("index", new index());
 
@@ -185,7 +182,7 @@ public class PokerController {
     userhand.setHand5id(myCards.get(4).getId());
     handMapper.insertHandandIsActive(userhand);
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", userhand.getCoin());
+    model.addAttribute("coin", userhand.getTurn());
     model.addAttribute("index", new index());
 
     // ストレートの判定
@@ -331,10 +328,10 @@ public class PokerController {
     myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
 
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", hand.getCoin());
+    model.addAttribute("coin", hand.getTurn());
     model.addAttribute("index", new index());
 
-    model.addAttribute("coin", hand.getCoin());
+    model.addAttribute("coin", hand.getTurn());
     model.addAttribute("index", new index());
 
     return "poker.html";
@@ -354,8 +351,8 @@ public class PokerController {
     userid = userMapper.selectid(loginUser);
     Hand userhand = handMapper.selectByUserId(userid);
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
-    coin = userhand.getCoin() - 1;
-    userhand.setCoin(coin);
+    coin = userhand.getTurn() - 1;
+    userhand.setTurn(coin);
 
     myCards.add(cardsMapper.selectAllById(userhand.getHand1id()));
     myCards.add(cardsMapper.selectAllById(userhand.getHand2id()));
@@ -365,7 +362,7 @@ public class PokerController {
 
     handMapper.insertHandandIsActive(userhand);
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", userhand.getCoin());
+    model.addAttribute("coin", userhand.getTurn());
     model.addAttribute("index", new index());
     model.addAttribute("message", message);
 
@@ -381,7 +378,7 @@ public class PokerController {
     model.addAttribute("login_user", loginUser);
     id = userMapper.selectid(loginUser);
     Hand hand = handMapper.selectByUserId(id);
-    model.addAttribute("coin", hand.getCoin());
+    model.addAttribute("coin", hand.getTurn());
     return "rays.html";
   }
 
@@ -405,7 +402,7 @@ public class PokerController {
     myCards.add(cardsMapper.selectAllById(userhand.getHand5id()));
     model.addAttribute("rays", rays);
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", userhand.getCoin());
+    model.addAttribute("coin", userhand.getTurn());
     model.addAttribute("index", new index());
     model.addAttribute("index", new index());
 
