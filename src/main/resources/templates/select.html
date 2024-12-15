@@ -33,8 +33,14 @@
   <h1>[[${login_user}]]</h1>
   <p id="p1"></p>
   <a href="/logout">ログアウト</a>
+  <div th:if="${turn}">
+    <h2>あなたは[[${turn}]]ターン目です。</h2>
+  </div>
   <div th:if="${coin}">
     <h2>あなたのコインは[[${coin}]]枚です。</h2>
+  </div>
+  <div th:if="${rays}">
+    <h2>あなたは[[${rays}]]枚賭けてます。</h2>
   </div>
   <h2>現在の手札</h2>
   <div th:if="${myCards}">
@@ -48,7 +54,7 @@
       <h3 th:text="${myrole}"></h3>
     </div>
 
-  <h2>CPUの手札</h2>
+    <h2>CPUの手札</h2>
     <div th:each="item, iterStat : ${CPUCards}">
       <tr>
         <td>[[${item.num}]] [[${item.cardtype}]]</td>

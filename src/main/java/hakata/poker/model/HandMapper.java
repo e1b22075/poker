@@ -20,11 +20,11 @@ public interface HandMapper {
   @Select("SELECT * from hand where userid = #{id} AND isActive = true")
   Hand selectByUserId(int id);
 
-  @Insert("INSERT INTO Hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,coin,isActive) VALUES (#{userid},#{hand1id},#{hand2id},#{hand3id},#{hand4id},#{hand5id},#{turn},true);")
+  @Insert("INSERT INTO Hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,turn,isActive) VALUES (#{userid},#{hand1id},#{hand2id},#{hand3id},#{hand4id},#{hand5id},#{turn},true);")
   @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
   void insertHandandIsActive(Hand hand);
 
-  @Update("UPDATE HAND SET ROLEID=#{ROLEID} WHERE ID=#{id}")
+  @Update("UPDATE HAND SET ROLEID=#{ROLEID、 WHERE ID=#{id}")
   void updateRoleIdById(int id);
 
   @Update("UPDATE HAND SET ROLEID=#{ROLEID},ROLENUM=#{ROLENUM} WHERE ID=#{id}")

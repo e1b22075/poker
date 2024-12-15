@@ -39,6 +39,7 @@ import hakata.poker.model.match;
 import hakata.poker.model.matchMapper;
 import hakata.poker.model.Entry;
 import hakata.poker.service.AsyncReady;
+import hakata.poker.service.AsyncDrop;
 
 @Controller
 public class PokerController {
@@ -53,6 +54,9 @@ public class PokerController {
   private UserMapper userMapper;
 
   @Autowired
+  private matchMapper matchMapper;
+
+  @Autowired
   private AsyncUser acUser;
 
   @Autowired
@@ -60,6 +64,9 @@ public class PokerController {
 
   @Autowired
   private AsyncReady ready;
+
+  @Autowired
+  private AsyncDrop drop;
 
   @GetMapping("ready")
   public String ready(ModelMap model, Principal prin) {
@@ -95,7 +102,8 @@ public class PokerController {
   @GetMapping("poker/card")
   public String showCard(ModelMap model, Principal prin) {
     int userid;
-    int coin = 5;
+    int turn = 1;
+    match match;
     // ログインユーザ情報の受け渡し
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
@@ -112,14 +120,25 @@ public class PokerController {
     hand.setHand3id(myCards.get(2).getId());
     hand.setHand4id(myCards.get(3).getId());
     hand.setHand5id(myCards.get(4).getId());
-    hand.setTurn(coin);
+    hand.setTurn(turn);
     userid = userMapper.selectid(loginUser);
     hand.setUserid(userid);
     myCards.sort(Comparator.comparing(Cards::getNum));
 
     handMapper.insertHandandIsActive(hand);
+
+    match = matchMapper.selectAllById(userid);
+
+    if (match.getUser1id() == userid) {
+      model.addAttribute("coin", match.getUser1coin());
+    } else if (match.getUser2id() == userid) {
+      model.addAttribute("coin", match.getUser2coin());
+    }
+
+    model.addAttribute("rays", match.getBet());
+
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", coin);
+    model.addAttribute("turn", hand.getTurn());
     model.addAttribute("index", new index());
 
     return "poker.html";
@@ -131,6 +150,7 @@ public class PokerController {
     Hand userhand;
     ArrayList<Cards> myCards = new ArrayList<Cards>();
     Cards userdrawCards;
+    match match;
 
     int myflag1 = 0; // ロイヤルストレートフラッシュ
     int myflag2 = 0; // ストレートフラッシュ
@@ -181,8 +201,21 @@ public class PokerController {
     userhand.setHand4id(myCards.get(3).getId());
     userhand.setHand5id(myCards.get(4).getId());
     handMapper.insertHandandIsActive(userhand);
+    match = matchMapper.selectAllById(userid);
+
+    if (match.getUser1id() == userid) {
+      model.addAttribute("coin", match.getUser1coin());
+    } else if (match.getUser2id() == userid) {
+      model.addAttribute("coin", match.getUser2coin());
+    }
+
+    model.addAttribute("rays", match.getBet());
+
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", userhand.getTurn());
+    model.addAttribute("turn", userhand.getTurn());
+
+    model.addAttribute("myCards", myCards);
+
     model.addAttribute("index", new index());
 
     // ストレートの判定
@@ -312,6 +345,7 @@ public class PokerController {
   public String showCall(ModelMap model, Principal prin) {
     int userid;
     int cpuid;
+    match match;
     String cpuname = "CPU";
     // ログインユーザ情報の受け渡し
     String loginUser = prin.getName();
@@ -320,6 +354,7 @@ public class PokerController {
     ArrayList<Cards> myCards = new ArrayList<Cards>();
     userid = userMapper.selectid(loginUser);
     Hand hand = handMapper.selectByUserId(userid);
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
 
     myCards.add(cardsMapper.selectAllById(hand.getHand1id()));
     myCards.add(cardsMapper.selectAllById(hand.getHand2id()));
@@ -327,14 +362,29 @@ public class PokerController {
     myCards.add(cardsMapper.selectAllById(hand.getHand4id()));
     myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
 
+    hand.setTurn(hand.getTurn() + 1);
+    handMapper.insertHandandIsActive(hand);
+
+    match = matchMapper.selectAllById(userid);
+
+    if (match.getUser1id() == userid) {
+      model.addAttribute("coin", match.getUser1coin());
+    } else if (match.getUser2id() == userid) {
+      model.addAttribute("coin", match.getUser2coin());
+    }
+
+    model.addAttribute("rays", match.getBet());
+
+    model.addAttribute("turn", hand.getTurn());
+
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", hand.getTurn());
-    model.addAttribute("index", new index());
+    if (hand.getTurn() >= 3) {
+      return "result";
+    } else {
+      model.addAttribute("index", new index());
 
-    model.addAttribute("coin", hand.getTurn());
-    model.addAttribute("index", new index());
-
-    return "poker.html";
+      return "poker.html";
+    }
   }
 
   @GetMapping("poker/drop")
@@ -342,43 +392,113 @@ public class PokerController {
     int userid;
     int coin;
     int cpuid;
+    match match;
     // ログインユーザ情報の受け渡し
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
     // ここまで
     String message = "ドロップしました";
-    ArrayList<Cards> myCards = new ArrayList<Cards>();
+
     userid = userMapper.selectid(loginUser);
     Hand userhand = handMapper.selectByUserId(userid);
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
-    coin = userhand.getTurn() - 1;
-    userhand.setTurn(coin);
-
-    myCards.add(cardsMapper.selectAllById(userhand.getHand1id()));
-    myCards.add(cardsMapper.selectAllById(userhand.getHand2id()));
-    myCards.add(cardsMapper.selectAllById(userhand.getHand3id()));
-    myCards.add(cardsMapper.selectAllById(userhand.getHand4id()));
-    myCards.add(cardsMapper.selectAllById(userhand.getHand5id()));
+    userhand.setTurn(1);
 
     handMapper.insertHandandIsActive(userhand);
-    model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", userhand.getTurn());
-    model.addAttribute("index", new index());
+
+    match = matchMapper.selectAllById(userid);
+
+    if (match.getUser1id() == userid) {
+      match.setUser1coin(match.getUser1coin() - 1);
+      model.addAttribute("coin", match.getUser1coin());
+      matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin());
+      drop.syncDrop1(match.getId());
+    } else if (match.getUser2id() == userid) {
+      match.setUser2coin(match.getUser2coin() - 1);
+      model.addAttribute("coin", match.getUser2coin());
+      matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin());
+      drop.syncDrop2(match.getId());
+    }
+    match.setBet(1);
+    matchMapper.updateBetById(match.getId(), 1);
+    model.addAttribute("rays", match.getBet());
+
+    model.addAttribute("turn", userhand.getTurn());
+
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
+
+    cardsMapper.updateAllfalsetotrueByfalse();
+
     model.addAttribute("message", message);
 
     model.addAttribute("index", new index());
 
-    return "poker.html";
+    return "drop.html";
+  }
+
+  @GetMapping("poker/drop2")
+  public String showDrop2(ModelMap model, Principal prin) {
+    int userid;
+    int coin;
+    int cpuid;
+    match match;
+    // ログインユーザ情報の受け渡し
+    String loginUser = prin.getName();
+    model.addAttribute("login_user", loginUser);
+    // ここまで
+    String message = "相手がドロップしました";
+
+    userid = userMapper.selectid(loginUser);
+    Hand userhand = handMapper.selectByUserId(userid);
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
+    userhand.setTurn(1);
+
+    handMapper.insertHandandIsActive(userhand);
+
+    match = matchMapper.selectAllById(userid);
+
+    if (match.getUser1id() == userid) {
+      match.setUser1coin(match.getUser1coin() + 1);
+      matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin());
+      drop.syncDrop1(match.getId());
+    } else if (match.getUser2id() == userid) {
+      match.setUser2coin(match.getUser2coin() + 1);
+      matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin());
+      drop.syncDrop2(match.getId());
+    }
+    match.setBet(1);
+    matchMapper.updateBetById(match.getId(), 1);
+    model.addAttribute("rays", match.getBet());
+
+    model.addAttribute("turn", userhand.getTurn());
+
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
+
+    cardsMapper.updateAllfalsetotrueByfalse();
+
+    model.addAttribute("message", message);
+
+    model.addAttribute("index", new index());
+
+    return "drop.html";
   }
 
   @GetMapping("poker/rays")
   public String rays(ModelMap model, Principal prin) {
-    int id;
+    int userid;
     String loginUser = prin.getName(); // ログインユーザ情報
     model.addAttribute("login_user", loginUser);
-    id = userMapper.selectid(loginUser);
-    Hand hand = handMapper.selectByUserId(id);
-    model.addAttribute("coin", hand.getTurn());
+    match match;
+    userid = userMapper.selectid(loginUser);
+    Hand hand = handMapper.selectByUserId(userid);
+    match = matchMapper.selectAllById(userid);
+
+    if (match.getUser1id() == userid) {
+      model.addAttribute("coin", match.getUser1coin());
+    } else if (match.getUser2id() == userid) {
+      model.addAttribute("coin", match.getUser2coin());
+    }
+
     return "rays.html";
   }
 
@@ -388,6 +508,7 @@ public class PokerController {
     int cpuid;
     Hand userhand;
     Hand cpuhand;
+    match match;
     ArrayList<Cards> myCards = new ArrayList<Cards>();
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
@@ -395,18 +516,38 @@ public class PokerController {
     userid = userMapper.selectid(loginUser);
     userhand = handMapper.selectByUserId(userid);
 
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
     myCards.add(cardsMapper.selectAllById(userhand.getHand1id()));
     myCards.add(cardsMapper.selectAllById(userhand.getHand2id()));
     myCards.add(cardsMapper.selectAllById(userhand.getHand3id()));
     myCards.add(cardsMapper.selectAllById(userhand.getHand4id()));
     myCards.add(cardsMapper.selectAllById(userhand.getHand5id()));
-    model.addAttribute("rays", rays);
-    model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", userhand.getTurn());
-    model.addAttribute("index", new index());
-    model.addAttribute("index", new index());
 
-    return "poker";
+    model.addAttribute("myCards", myCards);
+
+    userhand.setTurn(userhand.getTurn() + 1);
+    handMapper.insertHandandIsActive(userhand);
+
+    match = matchMapper.selectAllById(userid);
+
+    if (match.getUser1id() == userid) {
+      model.addAttribute("coin", match.getUser1coin());
+    } else if (match.getUser2id() == userid) {
+      model.addAttribute("coin", match.getUser2coin());
+    }
+
+    match.setBet(match.getBet() + rays);
+    matchMapper.updateBetById(match.getId(), match.getBet());
+    model.addAttribute("rays", match.getBet());
+
+    model.addAttribute("turn", userhand.getTurn());
+    if (userhand.getTurn() >= 3) {
+      return "result";
+    } else {
+      model.addAttribute("index", new index());
+
+      return "poker";
+    }
   }
 
   private final Logger logger = LoggerFactory.getLogger(PokerController.class);
@@ -437,6 +578,13 @@ public class PokerController {
   public SseEmitter sample() {
     final SseEmitter emitter = new SseEmitter();
     this.ready.AsyncReadySend(emitter);
+    return emitter;
+  }
+
+  @GetMapping("/drop3")
+  public SseEmitter dropSse() {
+    final SseEmitter emitter = new SseEmitter();
+    this.drop.AsyncDropSend(emitter);
     return emitter;
   }
 }

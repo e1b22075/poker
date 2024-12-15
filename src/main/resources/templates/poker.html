@@ -27,6 +27,18 @@
       });
     };
   </script>
+  <script>
+    window.addEventListener('load', function () {
+      var dropsse = new EventSource('/drop3');
+      dropsse.onopen = function (event) {
+        console.log("SSE connection established."); // 接続が確立された場合にコンソールに表示 };
+      }
+      dropsse.onmessage = function (event) {
+        console.log(event.data);
+        window.location.href = '/poker/drop2';
+      }
+    })
+  </script>
 </head>
 
 <body>
@@ -35,6 +47,9 @@
   <a href="/logout">ログアウト</a>
   <div th:if="${message}">
     <h3 th:text="${message}"></h3>
+  </div>
+  <div th:if="${turn}">
+    <h2>あなたは[[${turn}]]ターン目です。</h2>
   </div>
   <div th:if="${coin}">
     <h2>あなたのコインは[[${coin}]]枚です。</h2>

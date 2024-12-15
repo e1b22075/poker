@@ -14,24 +14,29 @@ import hakata.poker.model.match;
 import hakata.poker.model.matchMapper;
 
 @Service
-public class AsyncReady {
-  int count = 1;
+public class AsyncDrop {
   boolean dbUpdated = false;
   private final Logger logger = LoggerFactory.getLogger(AsyncReady.class);
   @Autowired
   private matchMapper matchMapper;
 
   @Transactional
-  public void syncNewMatch(match match) {
-    matchMapper.insertMatchandIsActive(match);
-    // 非同期でDB更新したことを共有する際に利用する
+  public void syncDrop1(int id) {
+    matchMapper.updateuser1StateById(id, "drop");
+    this.dbUpdated = true;
+    return;
+  }
+
+  @Transactional
+  public void syncDrop2(int id) {
+    matchMapper.updateuser2StateById(id, "drop");
     this.dbUpdated = true;
     return;
   }
 
   @Async
-  public void AsyncReadySend(SseEmitter emitter) {
-    String massage = "準備が完了しました";
+  public void AsyncDropSend(SseEmitter emitter) {
+    String massage = "drop";
     try {
       while (true) {// 無限ループ
         // DBが更新されていなければ0.5s休み
@@ -40,7 +45,7 @@ public class AsyncReady {
           continue;
         }
         emitter.send(massage);
-        TimeUnit.MILLISECONDS.sleep(1000);
+        TimeUnit.MILLISECONDS.sleep(10);
         dbUpdated = false;
       }
     } catch (Exception e) {
