@@ -15,7 +15,6 @@ import hakata.poker.model.User;
 import hakata.poker.model.Room;
 import hakata.poker.model.RoomMapper;
 
-
 @Service
 public class AsyncRoom {
   private final Logger logger = LoggerFactory.getLogger(AsyncRoom.class);
@@ -28,7 +27,29 @@ public class AsyncRoom {
   public void syncEnterRoom(int userIndex, User loginUser, int roomId) {
     int userid = loginUser.getId();
     String userName = loginUser.getUserName();
-    rMapper.updateUser2ByRoomId(userid,userName,roomId);
+    if (userIndex == 1) {
+      rMapper.updateUser1ByRoomId(userid, userName, roomId);
+    } else if (userIndex == 2) {
+      rMapper.updateUser2ByRoomId(userid, userName, roomId);
+    } else {
+      logger.warn("エラー:満員です");
+    }
+    this.dbUpdated = true;
+  }
+
+  @Transactional
+  public void syncLeaveRoom(User loginUser, int roomId) {
+    int userid = loginUser.getId();
+    Room leavedRoom = rMapper.selectAllById(roomId);
+    int user1Id = leavedRoom.getUser1id();
+    int user2Id = leavedRoom.getUser2id();
+    if (user1Id == userid) {
+      rMapper.updateUser1ResetByRoomId( roomId);
+    } else if (user2Id == userid) {
+      rMapper.updateUser2ResetByRoomId( roomId);
+    } else {
+      logger.warn("エラー:退室済みです");
+    }
     this.dbUpdated = true;
   }
 
@@ -39,8 +60,6 @@ public class AsyncRoom {
   public Room syncShowRoomById(int roomId) {
     return rMapper.selectAllById(roomId);
   }
-
-
 
   @Async
   public void asyncShowRoomsList(SseEmitter emitter) {

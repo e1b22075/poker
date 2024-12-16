@@ -16,10 +16,22 @@
           var bgn_tr = "<tr>";
           var end_tr = "</tr>";
           var room_name = "<td>" + rooms_list[i].roomName + "</td>";
-          var player1 = "<td>" + rooms_list[i].user1Name + "</td>";
-          var status1 = "<td>" + rooms_list[i].user1Status + "</td>";
-          var player2 = "<td>" + rooms_list[i].user2Name + "</td>";
-          var status2 = "<td>" + rooms_list[i].user2Status + "</td>";
+          var player1;
+          if(rooms_list[i].user1Name != null){
+            player1 = "<td>" + rooms_list[i].user1Name + "</td>";
+          }else{
+            player1 = "<td>募集中</td>";
+          }
+          var status1 = "<td>" +
+            (rooms_list[i].user1Status === false ? "準備中" : "準備完了") + "</td>";
+          var player2;
+          if (rooms_list[i].user2Name != null) {
+            player2 = "<td>" + rooms_list[i].user2Name + "</td>";
+          } else {
+            player2 = "<td>募集中</td>";
+          }
+          var status2 = "<td>" +
+            (rooms_list[i].user2Status === false ? "準備中" : "準備完了") + "</td>";
           var operation = "<td>" +
             (rooms_list[i].user2id === 0 || rooms_list[i].user1id === 0
               ? "<a href='/room/step2?roomId=" + rooms_list[i].id + "'>入室</a>"
