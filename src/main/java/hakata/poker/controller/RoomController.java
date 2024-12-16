@@ -80,8 +80,26 @@ public class RoomController {
     return "room.html";
   }
 
+  @GetMapping("/leaveRoom")
+  @Transactional
+  public String leaveRoom(@RequestParam Integer roomId, ModelMap model, Principal prin) {
+    String loginUser = prin.getName(); // ログインユーザ情報
+    // ログインユーザーが所属しているルームを取得
+    acRoom.syncLeaveRoom(loginUser, roomId);
+
+    // 再びroom1の処理を実行してルーム一覧を表示
+    return room1(model, prin);
+  }
+
   @GetMapping("/step3")
   public SseEmitter room3() {
+    final SseEmitter sseEmitter = new SseEmitter(60 * 1000L);
+    this.acRoom.asyncShowRoomsList(sseEmitter);
+    return sseEmitter;
+  }
+
+  @GetMapping("/Asyncr2")
+  public SseEmitter async_r2() {
     final SseEmitter sseEmitter = new SseEmitter(60 * 1000L);
     this.acRoom.asyncShowRoomsList(sseEmitter);
     return sseEmitter;

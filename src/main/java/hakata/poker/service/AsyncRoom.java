@@ -38,17 +38,15 @@ public class AsyncRoom {
   }
 
   @Transactional
-  public void syncLeaveRoom(User loginUser, int roomId) {
-    int userid = loginUser.getId();
+  public void syncLeaveRoom(String userName, int roomId) {
     Room leavedRoom = rMapper.selectAllById(roomId);
-    int user1Id = leavedRoom.getUser1id();
-    int user2Id = leavedRoom.getUser2id();
-    if (user1Id == userid) {
-      rMapper.updateUser1ResetByRoomId( roomId);
-    } else if (user2Id == userid) {
-      rMapper.updateUser2ResetByRoomId( roomId);
-    } else {
-      logger.warn("エラー:退室済みです");
+    String user1Name = leavedRoom.getUser1Name();
+    String user2Name = leavedRoom.getUser2Name();
+    if (user1Name.equals(userName)) {
+      rMapper.updateUser1ResetByRoomId(roomId);
+    }
+    if (user2Name.equals(userName)) {
+      rMapper.updateUser2ResetByRoomId(roomId);
     }
     this.dbUpdated = true;
   }
