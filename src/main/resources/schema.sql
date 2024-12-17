@@ -27,7 +27,7 @@ CREATE TABLE hand (
     hand3id INTEGER NOT NULL,
     hand4id INTEGER NOT NULL,
     hand5id INTEGER NOT NULL,
-    coin INTEGER NOT NULL,
+    turn INTEGER NOT NULL,
     roleid INTEGER,
     rolenum INTEGER,
     isActive BOOLEAN
@@ -40,6 +40,10 @@ CREATE TABLE match (
     user2id INTEGER,
     user1coin INTEGER,
     user2coin INTEGER,
+    user1state VARCHAR,
+    user2state VARCHAR,
+    user1hand INTEGER,
+    user2hand INTEGER,
     bet INTEGER,
     isActive BOOLEAN
 );

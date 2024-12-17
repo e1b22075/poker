@@ -8,7 +8,7 @@ public class Hand {
   int hand3id;
   int hand4id;
   int hand5id;
-  int coin;
+  int turn;
   int roleid;
   int rolenum;
   boolean isActive;
@@ -17,16 +17,16 @@ public class Hand {
     this.isActive = isActive;
   }
 
-  public void setCoin(int coin) {
-    this.coin = coin;
+  public void setTurn(int turn) {
+    this.turn = turn;
   }
 
   public void setHand1id(int hand1id) {
     this.hand1id = hand1id;
   }
 
-  public int getCoin() {
-    return coin;
+  public int getTurn() {
+    return turn;
   }
 
   public void setHand2id(int hand2id) {

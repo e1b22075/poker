@@ -35,6 +35,13 @@ import hakata.poker.model.UserMapper;
 import hakata.poker.model.HandMapper;
 import hakata.poker.service.AsyncRoom;
 import hakata.poker.service.AsyncUser;
+import hakata.poker.model.match;
+import hakata.poker.model.matchMapper;
+import hakata.poker.model.Entry;
+import hakata.poker.service.AsyncReady;
+import hakata.poker.service.AsyncDrop;
+import hakata.poker.service.Asyncresult;
+import hakata.poker.model.index;
 
 @Controller
 public class PokerController {
@@ -49,8 +56,46 @@ public class PokerController {
   private UserMapper userMapper;
 
   @Autowired
+  private matchMapper matchMapper;
+
+  @Autowired
   private AsyncUser acUser;
 
+  @Autowired
+  private Entry entry;
+
+  @Autowired
+  private AsyncReady ready;
+
+  @Autowired
+  private AsyncDrop drop;
+
+  @Autowired
+  private Asyncresult result;
+
+  @GetMapping("ready")
+  public String ready(ModelMap model, Principal prin) {
+    int userid;
+    ArrayList<String> users;
+    match match = new match();
+    String loginUser = prin.getName(); // ログインユーザ情報
+    model.addAttribute("login_user", loginUser);
+    entry.addUser(loginUser);
+    System.out.println(entry.getUsers());
+    if (entry.getCount() == 2) {
+      users = entry.getUsers();
+      userid = userMapper.selectid(users.get(0));
+      match.setUser1id(userid);
+      userid = userMapper.selectid(users.get(1));
+      match.setUser2id(userid);
+      match.setUser1coin(5);
+      match.setUser2coin(5);
+      match.setBet(1);
+      this.ready.syncNewMatch(match);
+
+    }
+    return "ready.html";
+  }
 
   @GetMapping("poker")
   public String login(ModelMap model, Principal prin) {
@@ -62,9 +107,8 @@ public class PokerController {
   @GetMapping("poker/card")
   public String showCard(ModelMap model, Principal prin) {
     int userid;
-    int cpuid;
-    int coin = 5;
-    String cpuname = "CPU";
+    int turn = 1;
+    match match;
     // ログインユーザ情報の受け渡し
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
@@ -81,37 +125,30 @@ public class PokerController {
     hand.setHand3id(myCards.get(2).getId());
     hand.setHand4id(myCards.get(3).getId());
     hand.setHand5id(myCards.get(4).getId());
-    hand.setCoin(coin);
+    hand.setTurn(turn);
     userid = userMapper.selectid(loginUser);
     hand.setUserid(userid);
     myCards.sort(Comparator.comparing(Cards::getNum));
 
     handMapper.insertHandandIsActive(hand);
+
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", coin);
+
     model.addAttribute("index", new PlayerIndex());
 
-    Hand CPUhand = new Hand();
-    CPUhand.setActive(true);
-    ArrayList<Cards> CPUCards = cardsMapper.select5RandomCard();
-    for (Cards card : CPUCards) {
-      cardsMapper.updateisActiveTrueById(card.getId());
+    match = matchMapper.selectAllById(userid);
+
+    if (match.getUser1id() == userid) {
+      model.addAttribute("coin", match.getUser1coin());
+    } else if (match.getUser2id() == userid) {
+      model.addAttribute("coin", match.getUser2coin());
     }
 
-    CPUhand.setHand1id(CPUCards.get(0).getId());
-    CPUhand.setHand2id(CPUCards.get(1).getId());
-    CPUhand.setHand3id(CPUCards.get(2).getId());
-    CPUhand.setHand4id(CPUCards.get(3).getId());
-    CPUhand.setHand5id(CPUCards.get(4).getId());
-    CPUhand.setCoin(coin);
-    cpuid = userMapper.selectid(cpuname);
-    CPUhand.setUserid(cpuid);
-    CPUCards.sort(Comparator.comparing(Cards::getNum));
+    model.addAttribute("rays", match.getBet());
 
-    handMapper.insertHandandIsActive(CPUhand);
-    model.addAttribute("CPUCards", CPUCards);
-    model.addAttribute("coin", coin);
-    model.addAttribute("index", new PlayerIndex());
+    model.addAttribute("myCards", myCards);
+    model.addAttribute("turn", hand.getTurn());
+    model.addAttribute("index", new index());
 
     return "poker.html";
   }
@@ -119,42 +156,26 @@ public class PokerController {
   @PostMapping("/result")
   public String formResult(@ModelAttribute PlayerIndex index, ModelMap model, Principal prin) {
     int userid;
-    int cpuid;
     Hand userhand;
-    Hand cpuhand;
     ArrayList<Cards> myCards = new ArrayList<Cards>();
-    ArrayList<Cards> CPUCards = new ArrayList<Cards>();
     Cards userdrawCards;
-    Cards cpudrawCards;
+    match match;
 
-    int myflag1 = 0; //ロイヤルストレートフラッシュ
-    int myflag2 = 0; //ストレートフラッシュ
-    int myflag3 = 0; //フォア・カード
-    int myflag4 = 0; //フルハウス
-    int myflag5 = 0; //フラッシュ
-    int myflag6 = 0; //ストレート
-    int myflag7 = 0; //スリーカード
-    int myflag8 = 0; //ツウ・ペア
-    int myflag9 = 0; //ワン・ペア
-
-    int cpuflag1 = 0;
-    int cpuflag2 = 0;
-    int cpuflag3 = 0;
-    int cpuflag4 = 0;
-    int cpuflag5 = 0;
-    int cpuflag6 = 0;
-    int cpuflag7 = 0;
-    int cpuflag8 = 0;
-    int cpuflag9 = 0;
+    int myflag1 = 0; // ロイヤルストレートフラッシュ
+    int myflag2 = 0; // ストレートフラッシュ
+    int myflag3 = 0; // フォア・カード
+    int myflag4 = 0; // フルハウス
+    int myflag5 = 0; // フラッシュ
+    int myflag6 = 0; // ストレート
+    int myflag7 = 0; // スリーカード
+    int myflag8 = 0; // ツウ・ペア
+    int myflag9 = 0; // ワン・ペア
 
     int myonepairnum = 0;
-    int cpuonepairnum = 0;
 
     String myrole;
-    String cpurole;
 
     int myresultflag = 10;
-    int cpuresultflag = 10;
 
     String result;
 
@@ -189,40 +210,25 @@ public class PokerController {
     userhand.setHand4id(myCards.get(3).getId());
     userhand.setHand5id(myCards.get(4).getId());
     handMapper.insertHandandIsActive(userhand);
+
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", userhand.getCoin());
-    model.addAttribute("index", new PlayerIndex());
 
-    String cpuname = "CPU";
-    cpuid = userMapper.selectid(cpuname);
-    cpuhand = handMapper.selectByUserId(cpuid);
-    handMapper.updateIsActivefalsetotrueByfalseAndUserId(cpuid);
+    match = matchMapper.selectAllById(userid);
 
-    CPUCards.add(cardsMapper.selectAllById(cpuhand.getHand1id()));
-    CPUCards.add(cardsMapper.selectAllById(cpuhand.getHand2id()));
-    CPUCards.add(cardsMapper.selectAllById(cpuhand.getHand3id()));
-    CPUCards.add(cardsMapper.selectAllById(cpuhand.getHand4id()));
-    CPUCards.add(cardsMapper.selectAllById(cpuhand.getHand5id()));
-
-    for (Integer indes : index.getId()) {
-      cpudrawCards = cardsMapper.selectRandomCard();
-      while (cpudrawCards.getActive()) {
-        cpudrawCards = cardsMapper.selectRandomCard();
-      }
-      CPUCards.set(indes - 1, cpudrawCards);
-      cardsMapper.updateisActiveTrueById(CPUCards.get(indes - 1).getId());
+    if (match.getUser1id() == userid) {
+      model.addAttribute("coin", match.getUser1coin());
+    } else if (match.getUser2id() == userid) {
+      model.addAttribute("coin", match.getUser2coin());
     }
-    CPUCards.sort(Comparator.comparing(Cards::getNum));
-    cpuhand.setHand1id(CPUCards.get(0).getId());
-    cpuhand.setHand2id(CPUCards.get(1).getId());
-    cpuhand.setHand3id(CPUCards.get(2).getId());
-    cpuhand.setHand4id(CPUCards.get(3).getId());
-    cpuhand.setHand5id(CPUCards.get(4).getId());
-    handMapper.insertHandandIsActive(cpuhand);
-    model.addAttribute("CPUCards", CPUCards);
-    model.addAttribute("coin", cpuhand.getCoin());
-    model.addAttribute("index", new PlayerIndex());
 
+    model.addAttribute("rays", match.getBet());
+
+    model.addAttribute("myCards", myCards);
+    model.addAttribute("turn", userhand.getTurn());
+
+    model.addAttribute("myCards", myCards);
+
+    model.addAttribute("index", new index());
 
     // ストレートの判定
     if (myCards.get(4).getNum() == myCards.get(3).getNum() + 1 && myCards.get(3).getNum() == myCards.get(2).getNum() + 1
@@ -281,7 +287,9 @@ public class PokerController {
       }
     }
     // ツウ・ペアの判定
-    else if ((myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(2).getNum() == myCards.get(3).getNum()) || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum()) || (myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())) {
+    else if ((myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(2).getNum() == myCards.get(3).getNum())
+        || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())
+        || (myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())) {
       userhand.setRoleid(8);
       myflag8 = 1;
     }
@@ -342,178 +350,6 @@ public class PokerController {
       myresultflag = 9;
     }
 
-    //ここからCPUの手札
-    // ストレートの判定
-    if (CPUCards.get(4).getNum() == CPUCards.get(3).getNum() + 1 && CPUCards.get(3).getNum() == CPUCards.get(2).getNum() + 1
-        && CPUCards.get(2).getNum() == CPUCards.get(1).getNum() + 1
-        && CPUCards.get(1).getNum() == CPUCards.get(0).getNum() + 1) {
-      cpuhand.setRoleid(6);
-      cpuflag6 = 1;
-    }
-    // フラッシュの判定
-    if (CPUCards.get(0).getCardtype() == CPUCards.get(1).getCardtype()
-        && CPUCards.get(1).getCardtype() == CPUCards.get(2).getCardtype()
-        && CPUCards.get(2).getCardtype() == CPUCards.get(3).getCardtype()
-        && CPUCards.get(3).getCardtype() == CPUCards.get(4).getCardtype()) {
-      cpuhand.setRoleid(5);
-      cpuflag5 = 1;
-    }
-    // ロイヤルストレートフラッシュの判定
-    if (cpuflag5 == 1 && CPUCards.get(0).getNum() == 1 && CPUCards.get(1).getNum() == 10
-        && CPUCards.get(2).getNum() == 11 && CPUCards.get(3).getNum() == 12 && CPUCards.get(4).getNum() == 13) {
-      cpuhand.setRoleid(1);
-      cpuflag1 = 1;
-    }
-    // ストレートフラッシュの判定
-    else if (cpuflag6 == 1 && cpuflag5 == 1) {
-      cpuhand.setRoleid(2);
-      cpuflag2 = 1;
-    }
-
-    // フォーカードの判定
-    if ((CPUCards.get(0).getNum() == CPUCards.get(1).getNum() && CPUCards.get(1).getNum() == CPUCards.get(2).getNum()
-        && CPUCards.get(2).getNum() == CPUCards.get(3).getNum())
-        || (CPUCards.get(1).getNum() == CPUCards.get(2).getNum() && CPUCards.get(2).getNum() == CPUCards.get(3).getNum()
-            && CPUCards.get(3).getNum() == CPUCards.get(4).getNum())) {
-      cpuhand.setRoleid(3);
-      cpuflag3 = 1;
-    }
-    // スリーカードの判定
-    else if ((CPUCards.get(0).getNum() == CPUCards.get(1).getNum() && CPUCards.get(1).getNum() == CPUCards.get(2).getNum())
-        || (CPUCards.get(1).getNum() == CPUCards.get(2).getNum() && CPUCards.get(2).getNum() == CPUCards.get(3).getNum())
-        || (CPUCards.get(2).getNum() == CPUCards.get(3).getNum() && CPUCards.get(3).getNum() == CPUCards.get(4).getNum())) {
-      cpuhand.setRoleid(7);
-      cpuflag7 = 1;
-
-      // フルハウスの判定
-      if (CPUCards.get(0).getNum() == CPUCards.get(1).getNum() && CPUCards.get(1).getNum() == CPUCards.get(2).getNum()) {
-        if (CPUCards.get(3).getNum() == CPUCards.get(4).getNum()) {
-          cpuhand.setRoleid(4);
-          cpuflag4 = 1;
-        }
-      } else if (CPUCards.get(2).getNum() == CPUCards.get(3).getNum()
-          && CPUCards.get(3).getNum() == CPUCards.get(4).getNum()) {
-        if (CPUCards.get(0).getNum() == CPUCards.get(1).getNum()) {
-          cpuhand.setRoleid(4);
-          cpuflag4 = 1;
-        }
-      }
-    }
-    // ツウ・ペアの判定
-    else if ((CPUCards.get(0).getNum() == CPUCards.get(1).getNum() && CPUCards.get(2).getNum() == CPUCards.get(3).getNum())
-        || (CPUCards.get(1).getNum() == CPUCards.get(2).getNum() && CPUCards.get(3).getNum() == CPUCards.get(4).getNum())
-        || (CPUCards.get(0).getNum() == CPUCards.get(1).getNum() && CPUCards.get(3).getNum() == CPUCards.get(4).getNum())) {
-      cpuhand.setRoleid(8);
-      cpuflag8 = 1;
-    }
-    // ワン・ペアの判定
-    else if ((CPUCards.get(0).getNum() == CPUCards.get(1).getNum())
-        || (CPUCards.get(1).getNum() == CPUCards.get(2).getNum()) || (CPUCards.get(2).getNum() == CPUCards.get(3).getNum())
-        || (CPUCards.get(3).getNum() == CPUCards.get(4).getNum())) {
-      cpuhand.setRoleid(9);
-      cpuflag9 = 1;
-
-      // ワンペア時の数値を格納
-      if (CPUCards.get(0).getNum() == CPUCards.get(1).getNum()) {
-        cpuonepairnum = CPUCards.get(1).getNum();
-      } else if (CPUCards.get(1).getNum() == CPUCards.get(2).getNum()) {
-        cpuonepairnum = CPUCards.get(2).getNum();
-      } else if (CPUCards.get(2).getNum() == CPUCards.get(3).getNum()) {
-        cpuonepairnum = CPUCards.get(3).getNum();
-      } else if (CPUCards.get(3).getNum() == CPUCards.get(4).getNum()) {
-        cpuonepairnum = CPUCards.get(4).getNum();
-      }
-    }
-
-    if (cpuflag1 == 1) {
-      cpurole = "CPUの役はロイヤルストレートフラッシュです。";
-      model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 1;
-    } else if (cpuflag2 == 1) {
-      cpurole = "CPUの役はストレートフラッシュです。";
-      model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 2;
-    } else if (cpuflag3 == 1) {
-      cpurole = "CPUの役はフォア・カードです。";
-      model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 3;
-    } else if (cpuflag4 == 1) {
-      cpurole = "CPUの役はフルハウスです。";
-      model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 4;
-    } else if (cpuflag5 == 1) {
-      cpurole = "CPUの役はフラッシュです。";
-      model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 5;
-    } else if (cpuflag6 == 1) {
-      cpurole = "CPUの役はストレーÞです。";
-      model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 6;
-    } else if (cpuflag7 == 1) {
-      cpurole = "CPUの役はスリーカードです。";
-      model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 7;
-    } else if (cpuflag8 == 1) {
-      cpurole = "CPUの役はツウ・ペアです。";
-      model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 8;
-    } else if (cpuflag9 == 1) {
-      cpurole = "CPUの役はワン・ペアです。";
-      model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 9;
-    }
-
-
-    //resultflagの大小関係で勝利者を判定
-    if (myresultflag < cpuresultflag) {
-      result = "あなたの勝利です!";
-      model.addAttribute("result", result);
-    }
-    else if (myresultflag > cpuresultflag) {
-      result = "CPUの勝利です...";
-      model.addAttribute("result", result);
-    }
-    //フォア・カード同士の比較
-    else if (myresultflag == cpuresultflag && cpuresultflag == 3) {
-      if (myCards.get(3).getNum() > CPUCards.get(3).getNum()) {
-        result = "あなたの勝利です!";
-        model.addAttribute("result", result);
-      } else if (myCards.get(3).getNum() < CPUCards.get(3).getNum()) {
-        result = "CPUの勝利です...";
-        model.addAttribute("result", result);
-      }
-    }
-    //フルハウス同士の比較
-    else if (myresultflag == cpuresultflag && cpuresultflag == 4) {
-      if (myCards.get(2).getNum() > CPUCards.get(2).getNum()) {
-        result = "あなたの勝利です!";
-        model.addAttribute("result", result);
-      } else if (myCards.get(2).getNum() < CPUCards.get(2).getNum()) {
-        result = "CPUの勝利です...";
-        model.addAttribute("result", result);
-      }
-    }
-    //スリーカード同士の比較
-    else if (myresultflag == cpuresultflag && cpuresultflag == 7) {
-      if (myCards.get(2).getNum() > CPUCards.get(2).getNum()) {
-        result = "あなたの勝利です!";
-        model.addAttribute("result", result);
-      } else if (myCards.get(2).getNum() < CPUCards.get(2).getNum()) {
-        result = "CPUの勝利です...";
-        model.addAttribute("result", result);
-      }
-    }
-    //ハイカード同士の比較
-    else if (myresultflag == cpuresultflag && cpuresultflag == 10) {
-      if (myCards.get(4).getNum() > CPUCards.get(4).getNum()) {
-        result = "あなたの勝利です!";
-        model.addAttribute("result", result);
-      } else if (myCards.get(4).getNum() < CPUCards.get(4).getNum()) {
-        result = "CPUの勝利です...";
-        model.addAttribute("result", result);
-      }
-    }
-
     return "select";
   }
 
@@ -521,6 +357,7 @@ public class PokerController {
   public String showCall(ModelMap model, Principal prin) {
     int userid;
     int cpuid;
+    match match;
     String cpuname = "CPU";
     // ログインユーザ情報の受け渡し
     String loginUser = prin.getName();
@@ -529,6 +366,7 @@ public class PokerController {
     ArrayList<Cards> myCards = new ArrayList<Cards>();
     userid = userMapper.selectid(loginUser);
     Hand hand = handMapper.selectByUserId(userid);
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
 
     myCards.add(cardsMapper.selectAllById(hand.getHand1id()));
     myCards.add(cardsMapper.selectAllById(hand.getHand2id()));
@@ -537,24 +375,41 @@ public class PokerController {
     myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
 
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", hand.getCoin());
-    model.addAttribute("index", new PlayerIndex());
 
-    ArrayList<Cards> CPUCards = new ArrayList<Cards>();
-    cpuid = userMapper.selectid(cpuname);
-    Hand CPUhand = handMapper.selectByUserId(cpuid);
+    hand.setTurn(hand.getTurn() + 1);
+    handMapper.insertHandandIsActive(hand);
 
-    CPUCards.add(cardsMapper.selectAllById(CPUhand.getHand1id()));
-    CPUCards.add(cardsMapper.selectAllById(CPUhand.getHand2id()));
-    CPUCards.add(cardsMapper.selectAllById(CPUhand.getHand3id()));
-    CPUCards.add(cardsMapper.selectAllById(CPUhand.getHand4id()));
-    CPUCards.add(cardsMapper.selectAllById(CPUhand.getHand5id()));
+    match = matchMapper.selectAllById(userid);
 
-    model.addAttribute("CPUCards", CPUCards);
-    model.addAttribute("coin", hand.getCoin());
-    model.addAttribute("index", new PlayerIndex());
+    if (match.getUser1id() == userid) {
+      model.addAttribute("coin", match.getUser1coin());
+    } else if (match.getUser2id() == userid) {
+      model.addAttribute("coin", match.getUser2coin());
+    }
 
-    return "poker.html";
+    model.addAttribute("rays", match.getBet());
+
+    model.addAttribute("turn", hand.getTurn());
+
+    model.addAttribute("myCards", myCards);
+    if (hand.getTurn() >= 3) {
+      if (match.getUser1id() == userid) {
+        this.result.syncUser1(match.getId(), hand.getId());
+        System.out.println("ユーザー1の書き込み");
+      } else if (match.getUser2id() == userid) {
+        this.result.syncUser2(match.getId(), hand.getId());
+        System.out.println("ユーザー2の書き込み");
+      }
+      match = matchMapper.selectAllById(userid);
+      if (match.getUser1hand() != 0 && match.getUser2hand() != 0) {
+
+      }
+      return "wait";
+    } else {
+      model.addAttribute("index", new index());
+
+      return "poker.html";
+    }
   }
 
   @GetMapping("poker/drop")
@@ -562,57 +417,113 @@ public class PokerController {
     int userid;
     int coin;
     int cpuid;
-    String cpuname = "CPU";
+    match match;
     // ログインユーザ情報の受け渡し
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
     // ここまで
     String message = "ドロップしました";
-    ArrayList<Cards> myCards = new ArrayList<Cards>();
+
     userid = userMapper.selectid(loginUser);
     Hand userhand = handMapper.selectByUserId(userid);
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
-    coin = userhand.getCoin() - 1;
-    userhand.setCoin(coin);
-
-    myCards.add(cardsMapper.selectAllById(userhand.getHand1id()));
-    myCards.add(cardsMapper.selectAllById(userhand.getHand2id()));
-    myCards.add(cardsMapper.selectAllById(userhand.getHand3id()));
-    myCards.add(cardsMapper.selectAllById(userhand.getHand4id()));
-    myCards.add(cardsMapper.selectAllById(userhand.getHand5id()));
+    userhand.setTurn(1);
 
     handMapper.insertHandandIsActive(userhand);
-    model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", userhand.getCoin());
-    model.addAttribute("index", new PlayerIndex());
+
+    match = matchMapper.selectAllById(userid);
+
+    if (match.getUser1id() == userid) {
+      match.setUser1coin(match.getUser1coin() - 1);
+      model.addAttribute("coin", match.getUser1coin());
+      matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin());
+      drop.syncDrop1(match.getId());
+    } else if (match.getUser2id() == userid) {
+      match.setUser2coin(match.getUser2coin() - 1);
+      model.addAttribute("coin", match.getUser2coin());
+      matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin());
+      drop.syncDrop2(match.getId());
+    }
+    match.setBet(1);
+    matchMapper.updateBetById(match.getId(), 1);
+    model.addAttribute("rays", match.getBet());
+
+    model.addAttribute("turn", userhand.getTurn());
+
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
+
+    cardsMapper.updateAllfalsetotrueByfalse();
+
     model.addAttribute("message", message);
 
+    model.addAttribute("index", new index());
 
-    ArrayList<Cards> CPUCards = new ArrayList<Cards>();
-    cpuid = userMapper.selectid(cpuname);
-    Hand CPUhand = handMapper.selectByUserId(cpuid);
+    return "drop.html";
+  }
 
-    CPUCards.add(cardsMapper.selectAllById(CPUhand.getHand1id()));
-    CPUCards.add(cardsMapper.selectAllById(CPUhand.getHand2id()));
-    CPUCards.add(cardsMapper.selectAllById(CPUhand.getHand3id()));
-    CPUCards.add(cardsMapper.selectAllById(CPUhand.getHand4id()));
-    CPUCards.add(cardsMapper.selectAllById(CPUhand.getHand5id()));
+  @GetMapping("poker/drop2")
+  public String showDrop2(ModelMap model, Principal prin) {
+    int userid;
+    int coin;
+    int cpuid;
+    match match;
+    // ログインユーザ情報の受け渡し
+    String loginUser = prin.getName();
+    model.addAttribute("login_user", loginUser);
+    // ここまで
+    String message = "相手がドロップしました";
 
-    model.addAttribute("CPUCards", CPUCards);
-    model.addAttribute("cpucoin", CPUhand.getCoin());
-    model.addAttribute("index", new PlayerIndex());
+    userid = userMapper.selectid(loginUser);
+    Hand userhand = handMapper.selectByUserId(userid);
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
+    userhand.setTurn(1);
 
-    return "poker.html";
+    handMapper.insertHandandIsActive(userhand);
+
+    match = matchMapper.selectAllById(userid);
+
+    if (match.getUser1id() == userid) {
+      match.setUser1coin(match.getUser1coin() + 1);
+      matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin());
+      drop.syncDrop1(match.getId());
+    } else if (match.getUser2id() == userid) {
+      match.setUser2coin(match.getUser2coin() + 1);
+      matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin());
+      drop.syncDrop2(match.getId());
+    }
+    match.setBet(1);
+    matchMapper.updateBetById(match.getId(), 1);
+    model.addAttribute("rays", match.getBet());
+
+    model.addAttribute("turn", userhand.getTurn());
+
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
+
+    cardsMapper.updateAllfalsetotrueByfalse();
+
+    model.addAttribute("message", message);
+
+    model.addAttribute("index", new index());
+
+    return "drop.html";
   }
 
   @GetMapping("poker/rays")
   public String rays(ModelMap model, Principal prin) {
-    int id;
+    int userid;
     String loginUser = prin.getName(); // ログインユーザ情報
     model.addAttribute("login_user", loginUser);
-    id = userMapper.selectid(loginUser);
-    Hand hand = handMapper.selectByUserId(id);
-    model.addAttribute("coin", hand.getCoin());
+    match match;
+    userid = userMapper.selectid(loginUser);
+    Hand hand = handMapper.selectByUserId(userid);
+    match = matchMapper.selectAllById(userid);
+
+    if (match.getUser1id() == userid) {
+      model.addAttribute("coin", match.getUser1coin());
+    } else if (match.getUser2id() == userid) {
+      model.addAttribute("coin", match.getUser2coin());
+    }
+
     return "rays.html";
   }
 
@@ -622,39 +533,86 @@ public class PokerController {
     int cpuid;
     Hand userhand;
     Hand cpuhand;
+    match match;
     ArrayList<Cards> myCards = new ArrayList<Cards>();
-    ArrayList<Cards> cpuCards = new ArrayList<Cards>();
-    String cpuname = "CPU";
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
 
     userid = userMapper.selectid(loginUser);
     userhand = handMapper.selectByUserId(userid);
 
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
     myCards.add(cardsMapper.selectAllById(userhand.getHand1id()));
     myCards.add(cardsMapper.selectAllById(userhand.getHand2id()));
     myCards.add(cardsMapper.selectAllById(userhand.getHand3id()));
     myCards.add(cardsMapper.selectAllById(userhand.getHand4id()));
     myCards.add(cardsMapper.selectAllById(userhand.getHand5id()));
-    model.addAttribute("rays", rays);
+
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", userhand.getCoin());
-    model.addAttribute("index", new PlayerIndex());
 
-    cpuid = userMapper.selectid(cpuname);
-    cpuhand = handMapper.selectByUserId(cpuid);
+    userhand.setTurn(userhand.getTurn() + 1);
+    handMapper.insertHandandIsActive(userhand);
 
-    cpuCards.add(cardsMapper.selectAllById(cpuhand.getHand1id()));
-    cpuCards.add(cardsMapper.selectAllById(cpuhand.getHand2id()));
-    cpuCards.add(cardsMapper.selectAllById(cpuhand.getHand3id()));
-    cpuCards.add(cardsMapper.selectAllById(cpuhand.getHand4id()));
-    cpuCards.add(cardsMapper.selectAllById(cpuhand.getHand5id()));
+    match = matchMapper.selectAllById(userid);
 
-    model.addAttribute("CPUCards", cpuCards);
-    model.addAttribute("coin", cpuhand.getCoin());
-    model.addAttribute("index", new PlayerIndex());
+    if (match.getUser1id() == userid) {
+      model.addAttribute("coin", match.getUser1coin());
+    } else if (match.getUser2id() == userid) {
+      model.addAttribute("coin", match.getUser2coin());
+    }
 
-    return "poker";
+    match.setBet(match.getBet() + rays);
+    matchMapper.updateBetById(match.getId(), match.getBet());
+    model.addAttribute("rays", match.getBet());
+
+    model.addAttribute("turn", userhand.getTurn());
+    if (userhand.getTurn() >= 3) {
+      if (match.getUser1id() == userid) {
+        System.out.println("ユーザー１の書き込み");
+        this.result.syncUser1(match.getId(), userhand.getId());
+      } else if (match.getUser2id() == userid) {
+        System.out.println("ユーザー2の書き込み");
+        this.result.syncUser2(match.getId(), userhand.getId());
+      }
+      return "wait";
+    } else {
+      model.addAttribute("index", new index());
+
+      return "poker";
+    }
+  }
+
+  @GetMapping("poker/result")
+  public String result(ModelMap model, Principal prin) {
+    int userid;
+    int userid2;
+    String loginUser = prin.getName(); // ログインユーザ情報
+    model.addAttribute("login_user", loginUser);
+    match match;
+    String message;
+    userid = userMapper.selectid(loginUser);
+    Hand userhand = handMapper.selectByUserId(userid);
+    Hand hand;
+    match = matchMapper.selectAllById(userid);
+    if (match.getUser1hand() != 0 && match.getUser2hand() != 0) {
+      if (match.getUser1id() == userid) {
+        userid2 = match.getUser2id();
+        hand = handMapper.selectByUserId(userid2);
+        message = "あなたの負けです";
+        this.result.syncresult(userid);
+        model.addAttribute("message", message);
+      } else if (match.getUser2id() == userid) {
+        userid2 = match.getUser1id();
+        hand = handMapper.selectByUserId(userid2);
+        message = "あなたの勝ちです";
+        this.result.syncresult(userid);
+        model.addAttribute("message", message);
+      }
+
+      return "result";
+    } else {
+      return "wait";
+    }
   }
 
   private final Logger logger = LoggerFactory.getLogger(PokerController.class);
@@ -678,6 +636,27 @@ public class PokerController {
       logger.warn("Exception:" + e.getClass().getName() + ":" + e.getMessage());
       emitter.complete();
     }
+    return emitter;
+  }
+
+  @GetMapping("/start")
+  public SseEmitter sample() {
+    final SseEmitter emitter = new SseEmitter();
+    this.ready.AsyncReadySend(emitter);
+    return emitter;
+  }
+
+  @GetMapping("/drop3")
+  public SseEmitter dropSse() {
+    final SseEmitter emitter = new SseEmitter();
+    this.drop.AsyncDropSend(emitter);
+    return emitter;
+  }
+
+  @GetMapping("/re")
+  public SseEmitter resultSse() {
+    final SseEmitter emitter = new SseEmitter();
+    this.result.AsyncReusltSend(emitter);
     return emitter;
   }
 }

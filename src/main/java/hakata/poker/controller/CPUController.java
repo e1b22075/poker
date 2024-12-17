@@ -37,6 +37,7 @@ import hakata.poker.model.UserMapper;
 import hakata.poker.model.HandMapper;
 import hakata.poker.service.AsyncRoom;
 import hakata.poker.service.AsyncUser;
+import hakata.poker.model.index;
 
 @Controller
 @RequestMapping("/cpu")
@@ -87,7 +88,7 @@ public class CPUController {
     hand.setHand3id(myCards.get(2).getId());
     hand.setHand4id(myCards.get(3).getId());
     hand.setHand5id(myCards.get(4).getId());
-    hand.setCoin(coin);
+    hand.setTurn(coin);
     userid = userMapper.selectid(loginUser);
     hand.setUserid(userid);
     myCards.sort(Comparator.comparing(Cards::getNum));
@@ -109,7 +110,7 @@ public class CPUController {
     CPUhand.setHand3id(CPUCards.get(2).getId());
     CPUhand.setHand4id(CPUCards.get(3).getId());
     CPUhand.setHand5id(CPUCards.get(4).getId());
-    CPUhand.setCoin(coin);
+    CPUhand.setTurn(coin);
     cpuid = userMapper.selectid(cpuname);
     CPUhand.setUserid(cpuid);
     CPUCards.sort(Comparator.comparing(Cards::getNum));
@@ -122,7 +123,7 @@ public class CPUController {
     return "cpu_poker.html";
   }
 
-  //カードタイプを区別する関数
+  // カードタイプを区別する関数
   public int determinType(ArrayList<Cards> cards, int a) {
     int cardtype = 0;
     if (cards.get(a).getCardtype().equals("spade")) {
@@ -227,8 +228,10 @@ public class CPUController {
     userhand.setHand5id(myCards.get(4).getId());
     handMapper.insertHandandIsActive(userhand);
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", userhand.getCoin());
+
     model.addAttribute("myindex", new PlayerIndex());
+
+    model.addAttribute("coin", userhand.getTurn());
 
     String cpuname = "CPU";
     cpuid = userMapper.selectid(cpuname);
@@ -259,7 +262,10 @@ public class CPUController {
     cpuhand.setHand5id(CPUCards.get(4).getId());
     handMapper.insertHandandIsActive(cpuhand);
     model.addAttribute("CPUCards", CPUCards);
+
     model.addAttribute("cpuindex", new CPUIndex());
+
+    model.addAttribute("coin", cpuhand.getTurn());
 
     // ストレートの判定
     if (myCards.get(4).getNum() == myCards.get(3).getNum() + 1 && myCards.get(3).getNum() == myCards.get(2).getNum() + 1
@@ -553,7 +559,7 @@ public class CPUController {
       result = "CPUの勝利です...";
       model.addAttribute("result", result);
     }
-    //ロイヤルストレートフラッシュ同士の比較
+    // ロイヤルストレートフラッシュ同士の比較
     else if (myresultflag == cpuresultflag && cpuresultflag == 1) {
       if (determinType(myCards, 4) < determinType(CPUCards, 4)) {
         result = "あなたの勝利です!";
@@ -583,8 +589,10 @@ public class CPUController {
         model.addAttribute("result", result);
       }
     }
-    //ストレートフラッシュ・フラッシュ・ストレート同士の比較
-    else if ((myresultflag == cpuresultflag && cpuresultflag == 2) || (myresultflag == cpuresultflag && cpuresultflag == 5) || (myresultflag == cpuresultflag && cpuresultflag == 6)) {
+    // ストレートフラッシュ・フラッシュ・ストレート同士の比較
+    else if ((myresultflag == cpuresultflag && cpuresultflag == 2)
+        || (myresultflag == cpuresultflag && cpuresultflag == 5)
+        || (myresultflag == cpuresultflag && cpuresultflag == 6)) {
       if (myCards.get(4).getNum() > CPUCards.get(4).getNum()) {
         result = "あなたの勝利です!";
         model.addAttribute("result", result);
@@ -592,13 +600,13 @@ public class CPUController {
         result = "CPUの勝利です...";
         model.addAttribute("result", result);
       } else if (myCards.get(4).getNum() == CPUCards.get(4).getNum()) {
-          if (determinType(myCards, 4) < determinType(CPUCards, 4)) {
-            result = "あなたの勝利です!";
-            model.addAttribute("result", result);
-          } else if (determinType(myCards, 4) > determinType(CPUCards, 4)) {
-            result = "CPUの勝利です...";
-            model.addAttribute("result", result);
-          }
+        if (determinType(myCards, 4) < determinType(CPUCards, 4)) {
+          result = "あなたの勝利です!";
+          model.addAttribute("result", result);
+        } else if (determinType(myCards, 4) > determinType(CPUCards, 4)) {
+          result = "CPUの勝利です...";
+          model.addAttribute("result", result);
+        }
       }
     }
     // スリーカード同士の比較
@@ -611,7 +619,7 @@ public class CPUController {
         model.addAttribute("result", result);
       }
     }
-    //ツウ・ペア同士の比較
+    // ツウ・ペア同士の比較
     else if (myresultflag == cpuresultflag && cpuresultflag == 8) {
       if (myCards.get(3).getNum() > CPUCards.get(3).getNum()) {
         result = "あなたの勝利です!";
@@ -623,7 +631,7 @@ public class CPUController {
 
       }
     }
-    //ワン・ペア同士の比較
+    // ワン・ペア同士の比較
     else if (myresultflag == cpuresultflag && cpuresultflag == 9) {
       if (myonepairnum > cpuonepairnum) {
         result = "あなたの勝利です!";
@@ -686,8 +694,10 @@ public class CPUController {
     myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
 
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", hand.getCoin());
+
     model.addAttribute("myindex", Playerindex);
+
+    model.addAttribute("coin", hand.getTurn());
 
     ArrayList<Cards> CPUCards = new ArrayList<Cards>();
     cpuid = userMapper.selectid(cpuname);
@@ -700,8 +710,10 @@ public class CPUController {
     CPUCards.add(cardsMapper.selectAllById(CPUhand.getHand5id()));
 
     model.addAttribute("CPUCards", CPUCards);
-    model.addAttribute("coin", hand.getCoin());
+
     model.addAttribute("cpuindex", CPUindex);
+
+    model.addAttribute("coin", hand.getTurn());
 
     return "cpu_poker.html";
   }
@@ -727,8 +739,8 @@ public class CPUController {
     userid = userMapper.selectid(loginUser);
     Hand userhand = handMapper.selectByUserId(userid);
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
-    coin = userhand.getCoin() - 1;
-    userhand.setCoin(coin);
+    coin = userhand.getTurn() - 1;
+    userhand.setTurn(coin);
 
     myCards.add(cardsMapper.selectAllById(userhand.getHand1id()));
     myCards.add(cardsMapper.selectAllById(userhand.getHand2id()));
@@ -738,8 +750,12 @@ public class CPUController {
 
     handMapper.insertHandandIsActive(userhand);
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", userhand.getCoin());
+
     model.addAttribute("myindex", Playerindex);
+
+    model.addAttribute("coin", userhand.getTurn());
+    model.addAttribute("index", new index());
+
     model.addAttribute("message", message);
 
     ArrayList<Cards> CPUCards = new ArrayList<Cards>();
@@ -753,7 +769,11 @@ public class CPUController {
     CPUCards.add(cardsMapper.selectAllById(CPUhand.getHand5id()));
 
     model.addAttribute("CPUCards", CPUCards);
+
     model.addAttribute("cpuindex", CPUindex);
+
+    model.addAttribute("cpucoin", CPUhand.getTurn());
+    model.addAttribute("index", new index());
 
     return "cpu_poker.html";
   }
@@ -765,7 +785,7 @@ public class CPUController {
     model.addAttribute("login_user", loginUser);
     id = userMapper.selectid(loginUser);
     Hand hand = handMapper.selectByUserId(id);
-    model.addAttribute("coin", hand.getCoin());
+    model.addAttribute("coin", hand.getTurn());
     return "cpu_rays.html";
   }
 
@@ -796,8 +816,11 @@ public class CPUController {
     myCards.add(cardsMapper.selectAllById(userhand.getHand5id()));
     model.addAttribute("rays", rays);
     model.addAttribute("myCards", myCards);
-    model.addAttribute("coin", userhand.getCoin());
+
     model.addAttribute("myindex", Playerindex);
+
+    model.addAttribute("coin", userhand.getTurn());
+    model.addAttribute("index", new index());
 
     cpuid = userMapper.selectid(cpuname);
     cpuhand = handMapper.selectByUserId(cpuid);
@@ -809,7 +832,11 @@ public class CPUController {
     cpuCards.add(cardsMapper.selectAllById(cpuhand.getHand5id()));
 
     model.addAttribute("CPUCards", cpuCards);
+
     model.addAttribute("cpuindex", CPUindex);
+
+    model.addAttribute("coin", cpuhand.getTurn());
+    model.addAttribute("index", new index());
 
     return "cpu_poker";
   }
