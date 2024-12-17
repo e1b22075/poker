@@ -63,8 +63,24 @@
       <h2 th:text="${result}"></h2>
     </div>
 
+    <div th:each="a : ${myresultflag}">
+      <h3>[[${a}]]</h3>
+    </div>
+
+    <div th:each="a : ${myonepairkicker0}">
+      <h3>[[${a}]]</h3>
+    </div>
+
+    <div th:each="a : ${myonepairkicker1}">
+      <h3>[[${a}]]</h3>
+    </div>
+
+    <div th:each="a : ${myonepairkicker2}">
+      <h3>[[${a}]]</h3>
+    </div>
+
     <h2>どうしますか？</h2>
-    <a href="/poker/call"><button>コール</button></a>
-    <a href="/poker/rays"><button>レイズ</button></a>
-    <a href="/poker/drop"><button>ドロップ</button></a>
+    <a href="/cpu/poker/call"><button>コール</button></a>
+    <a href="/cpu/poker/rays"><button>レイズ</button></a>
+    <a href="/cpu/poker/drop"><button>ドロップ</button></a>
   </div>
