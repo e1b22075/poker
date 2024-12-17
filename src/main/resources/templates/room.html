@@ -82,28 +82,6 @@
       </tbody>
     </table>
   </div>
-
-  <div th:if="${room2}">
-    部屋名: [[${room2.roomName}]]
-    <h3>プレイヤー一覧</h3>
-    <ul>
-      <li th:text="${room2.user1id != 0 ? room2.user1Name : '募集中'}">
-        (<span th:text="${room2.user1Status != false ? '準備完了' : '待機中'}"></span>)
-      </li>
-      <li th:text="${room2.user2id != 0 ? room2.user2Name : '募集中'}">
-        (<span th:text="${room2.user2Status != false ? '準備完了' : '待機中'}"></span>)
-      </li>
-    </ul>
-    <br>
-    <a href="/room/changeStatus"><button>準備</button></a>
-    <a th:href="@{/room/leaveRoom(roomId=${room2.id})}">退室</a>
-    <br>
-    <a href="/poker">pokerを開始</a>
-    <br>
-    <a href="/cpu/poker">pokerを開始(CPU)</a>
-    <br>
-    <a href="/help">helpへのアクセス</a>
-  </div>
 </body>
 
 </html>

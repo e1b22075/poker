@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.springframework.org/schema/security">
+
+<head>
+  <meta charset="utf-8">
+  <title>poker</title>
+  <script>
+    window.onload = function () {
+      var sse = new EventSource('/room/update'); // サーバーのエンドポイントを指定
+      sse.onmessage = function (event) {
+        console.log("SSEメッセージ受信");
+        console.log(event.data);
+
+        var room_data = JSON.parse(event.data); // JSONデータとして解析
+
+        // DOM要素の更新
+        document.getElementById("room_name").innerText = room_data.roomName;
+
+        // プレイヤー1の表示更新
+        var player1_element = document.getElementById("player1");
+        player1_element.innerText = room_data.user1id !== 0 ? room_data.user1Name : '募集中';
+        player1_element.nextElementSibling.innerText = room_data.user1Status ? '準備完了' : '準備中';
+
+        // プレイヤー2の表示更新
+        var player2_element = document.getElementById("player2");
+        player2_element.innerText = room_data.user2id !== 0 ? room_data.user2Name : '募集中';
+        player2_element.nextElementSibling.innerText = room_data.user2Status ? '準備完了' : '準備中';
+      };
+    }
+  </script>
+</head>
+
+<body>
+  <div th:if="${room2}">
+    <h1 id="welcome_message">[[${login_user}]]が<span id="room_name">[[${room2.roomName}]]</span>に入室しました</h1>
+    <a href="/logout">ログアウト</a>
+    <br>
+    <h3>プレイヤー一覧</h3>
+    <ul>
+      <!-- プレイヤー1の動的表示エリア -->
+      <li>
+        <span id="player1" th:text="${room2.user1id != 0 ? room2.user1Name : '募集中'}"></span>
+        (<span id="player1_status" th:text="${room2.user1Status != false ? '準備完了' : '準備中'}"></span>)
+      </li>
+      <!-- プレイヤー2の動的表示エリア -->
+      <li>
+        <span id="player2" th:text="${room2.user2id != 0 ? room2.user2Name : '募集中'}"></span>
+        (<span id="player2_status" th:text="${room2.user2Status != false ? '準備完了' : '準備中'}"></span>)
+      </li>
+    </ul>
+    <br>
+    <a th:href="@{/room/changeStatus(roomId=${room2.id})}"><button>準備</button></a>
+    <br>
+    <a th:href="@{/room/leaveRoom(roomId=${room2.id})}">退室</a>
+    <br>
+    <a href="/poker">pokerを開始</a>
+    <br>
+    <a href="/cpu/poker">pokerを開始(CPU)</a>
+    <br>
+    <a href="/help">helpへのアクセス</a>
+  </div>
+</body>
+
+</html>
