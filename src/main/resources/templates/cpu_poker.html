@@ -43,26 +43,41 @@
     <h2>あなたは[[${rays}]]枚賭けてます。</h2>
   </div>
   <div th:if="!${myCards}">
-    <h2><a href="/poker/card">カードを引く</a></h2>
+    <h2><a href="/cpu/poker/card">カードを引く</a></h2>
   </div>
   <div th:if="${myCards}">
     <h4>自分の手札</h4>
-    <form action="#" th:action="@{/result}" th:object="${index}" method="post">
+    <form action="#" th:action="@{/cpu/result}" th:object="${myindex}" method="post">
+      <input type="hidden" name="type" value="player" /> <!-- プレイヤーのフォームと指定 -->
       <div th:each="item, iterStat : ${myCards}">
         <label>
-          <input type="checkbox" th:value="${iterStat.index+1}" th:text="${item.num} + ' ' +  ${item.cardtype}"
-            th:field="*{id}" />
+          <input type="checkbox" th:value="${iterStat.index+1}" th:text="${item.num} + ' ' +  ${item.cardtype}" th:field="*{id}" />
         </label>
       </div>
-      <h4>CPUの手札</h4>
+      <p><input type="submit" value="プレイヤーのカードを交換する" /> </p>
+    </form>
+  </div>
+
+  <div th:if="${CPUCards}">
+    <h4>CPUの手札</h4>
+    <form action="#" th:action="@{/cpu/result}" th:object="${cpuindex}" method="post">
+      <input type="hidden" name="type" value="cpu" /> <!-- CPUのフォームと指定 -->
       <div th:each="item, iterStat : ${CPUCards}">
         <label>
           <input type="checkbox" th:value="${iterStat.index+1}" th:text="${item.num} + ' ' +  ${item.cardtype}"
             th:field="*{id}" />
         </label>
       </div>
-      <p><input type="submit" value="カードを交換する" /> </p>
+      <p><input type="submit" value="CPUのカードを交換する" /> </p>
     </form>
+  </div>
+
+  <div th:each="a : ${myindex}">
+    <h3>[[${a}]]</h3>
+  </div>
+
+  <div th:if="${cpuindex}">
+    <h3 th:text="${cpuindex}"></h3>
   </div>
 
   <!-- ワンペアなどの役を表示 -->
