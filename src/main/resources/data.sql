@@ -120,8 +120,8 @@ INSERT INTO hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,coin,roleid,rol
 INSERT INTO match(user1id,user2id,user1coin,user2coin,bet,isActive) VALUES
 (1,2,5,5,1,false);
 
-INSERT INTO room (roomName,user1id,user1Name,user1Status,user2id,user2Name,user2Status) VALUES ('テストの部屋',1,'おくだ',true,NULL,NULL,false);
-INSERT INTO room (roomName,user1id,user1Name,user1Status,user2id,user2Name,user2Status) VALUES ('テストの部屋2',NULL,NULL,true,NULL,NULL,false);
+INSERT INTO room (roomName,user1id,user1Name,user1Status,user2id,user2Name,user2Status) VALUES ('CPUと対戦',1,'おくだ',true,NULL,NULL,false);
+INSERT INTO room (roomName,user1id,user1Name,user1Status,user2id,user2Name,user2Status) VALUES ('ユーザと対戦',NULL,NULL,false,NULL,NULL,false);
 
 
 INSERT INTO role (roleName) VALUES ('ロイヤルストレートフラッシュ');
