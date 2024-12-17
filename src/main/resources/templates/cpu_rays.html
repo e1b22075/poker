@@ -36,7 +36,7 @@
   <div th:if="${coin}">
     <h2>あなたのコインは[[${coin}]]枚です。</h2>
     <p>どの程度上乗せしますか？</p>
-    <form action="#" th:action="@{/rays}" method="post">
+    <form action="#" th:action="@{/cpu/rays}" method="post">
       <select name="rays">
         <div th:each="i : ${#numbers.sequence(0,4)}">
           <option th:if="${coin} >= ${i}" th:value="${i}" th:text="${i}">

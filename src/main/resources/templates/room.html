@@ -16,10 +16,22 @@
           var bgn_tr = "<tr>";
           var end_tr = "</tr>";
           var room_name = "<td>" + rooms_list[i].roomName + "</td>";
-          var player1 = "<td>" + rooms_list[i].user1Name + "</td>";
-          var status1 = "<td>" + rooms_list[i].user1Status + "</td>";
-          var player2 = "<td>" + rooms_list[i].user2Name + "</td>";
-          var status2 = "<td>" + rooms_list[i].user2Status + "</td>";
+          var player1;
+          if(rooms_list[i].user1Name != null){
+            player1 = "<td>" + rooms_list[i].user1Name + "</td>";
+          }else{
+            player1 = "<td>募集中</td>";
+          }
+          var status1 = "<td>" +
+            (rooms_list[i].user1Status === false ? "準備中" : "準備完了") + "</td>";
+          var player2;
+          if (rooms_list[i].user2Name != null) {
+            player2 = "<td>" + rooms_list[i].user2Name + "</td>";
+          } else {
+            player2 = "<td>募集中</td>";
+          }
+          var status2 = "<td>" +
+            (rooms_list[i].user2Status === false ? "準備中" : "準備完了") + "</td>";
           var operation = "<td>" +
             (rooms_list[i].user2id === 0 || rooms_list[i].user1id === 0
               ? "<a href='/room/step2?roomId=" + rooms_list[i].id + "'>入室</a>"
@@ -70,29 +82,9 @@
       </tbody>
     </table>
   </div>
+
   <a href="/ready">試験用の準備</a>
-  <br>
-  <div th:if="${room2}">
-    部屋名: [[${room2.roomName}]]
-    <h3>プレイヤー一覧</h3>
-    <ul>
-      <li th:text="${room2.user1id != 0 ? room2.user1Name : '募集中'}">
-        (<span th:text="${room2.user1Status != false ? '準備完了' : '待機中'}"></span>)
-      </li>
-      <li th:text="${room2.user2id != 0 ? room2.user2Name : '募集中'}">
-        (<span th:text="${room2.user2Status != false ? '準備完了' : '待機中'}"></span>)
-      </li>
-    </ul>
-    <br>
-    <a href="/room/changeStatus"><button>準備</button></a>
-    <a href="/room/step1">退室</a>
-    <br>
-    <a href="/poker">pokerを開始</a>
-    <br>
-    <a href="/cpu/poker">pokerを開始(CPU)</a>
-    <br>
-    <a href="/help">helpへのアクセス</a>
-  </div>
+
 </body>
 
 </html>

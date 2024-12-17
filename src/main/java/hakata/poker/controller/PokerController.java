@@ -25,7 +25,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import hakata.poker.model.Room;
 import hakata.poker.model.RoomMapper;
-import hakata.poker.model.index;
+import hakata.poker.model.PlayerIndex;
 import hakata.poker.service.AsyncCount;
 import hakata.poker.model.Cards;
 import hakata.poker.model.CardsMapper;
@@ -131,6 +131,11 @@ public class PokerController {
 
     handMapper.insertHandandIsActive(hand);
 
+    model.addAttribute("myCards", myCards);
+ 
+    model.addAttribute("index", new PlayerIndex());
+
+
     match = matchMapper.selectAllById(userid);
 
     if (match.getUser1id() == userid) {
@@ -138,6 +143,7 @@ public class PokerController {
     } else if (match.getUser2id() == userid) {
       model.addAttribute("coin", match.getUser2coin());
     }
+
 
     model.addAttribute("rays", match.getBet());
 
@@ -149,7 +155,7 @@ public class PokerController {
   }
 
   @PostMapping("/result")
-  public String formResult(@ModelAttribute index index, ModelMap model, Principal prin) {
+  public String formResult(@ModelAttribute PlayerIndex index, ModelMap model, Principal prin) {
     int userid;
     Hand userhand;
     ArrayList<Cards> myCards = new ArrayList<Cards>();
@@ -205,7 +211,13 @@ public class PokerController {
     userhand.setHand4id(myCards.get(3).getId());
     userhand.setHand5id(myCards.get(4).getId());
     handMapper.insertHandandIsActive(userhand);
+
+    model.addAttribute("myCards", myCards);
+   
+    
+
     match = matchMapper.selectAllById(userid);
+
 
     if (match.getUser1id() == userid) {
       model.addAttribute("coin", match.getUser1coin());
@@ -217,6 +229,7 @@ public class PokerController {
 
     model.addAttribute("myCards", myCards);
     model.addAttribute("turn", userhand.getTurn());
+
 
     model.addAttribute("myCards", myCards);
 
@@ -366,8 +379,12 @@ public class PokerController {
     myCards.add(cardsMapper.selectAllById(hand.getHand4id()));
     myCards.add(cardsMapper.selectAllById(hand.getHand5id()));
 
+
+    model.addAttribute("myCards", myCards);
+
     hand.setTurn(hand.getTurn() + 1);
     handMapper.insertHandandIsActive(hand);
+
 
     match = matchMapper.selectAllById(userid);
 
@@ -377,7 +394,10 @@ public class PokerController {
       model.addAttribute("coin", match.getUser2coin());
     }
 
+
+    model.addAttribute("coin", hand.getCoin());
     model.addAttribute("rays", match.getBet());
+
 
     model.addAttribute("turn", hand.getTurn());
 
@@ -421,6 +441,10 @@ public class PokerController {
 
     handMapper.insertHandandIsActive(userhand);
 
+    model.addAttribute("myCards", myCards);
+    
+
+
     match = matchMapper.selectAllById(userid);
 
     if (match.getUser1id() == userid) {
@@ -443,6 +467,7 @@ public class PokerController {
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
 
     cardsMapper.updateAllfalsetotrueByfalse();
+
 
     model.addAttribute("message", message);
 
@@ -493,7 +518,9 @@ public class PokerController {
 
     model.addAttribute("message", message);
 
+
     model.addAttribute("index", new index());
+
 
     return "drop.html";
   }
@@ -540,10 +567,12 @@ public class PokerController {
 
     model.addAttribute("myCards", myCards);
 
+
     userhand.setTurn(userhand.getTurn() + 1);
     handMapper.insertHandandIsActive(userhand);
 
     match = matchMapper.selectAllById(userid);
+
 
     if (match.getUser1id() == userid) {
       model.addAttribute("coin", match.getUser1coin());
@@ -567,6 +596,7 @@ public class PokerController {
       return "wait";
     } else {
       model.addAttribute("index", new index());
+
 
       return "poker";
     }

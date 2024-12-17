@@ -12,69 +12,85 @@
   <br>
   <a href="/room/step1">戻る</a>
   <br>
-  <h2>目次</h2>
+  <h2 id="mokuji">目次</h2>
   <ol>
-    <li>目次</li>
-    <li>ゲームルール</li>
-    <li>用語</li>
-    <li>役一覧</li>
+    <li><a href="#mokuji">目次</a></li>
+    <li><a href="#rule">ゲームルール</a></li>
+    <li><a href="#term">用語</a></li>
+    <li><a href="#role">役一覧</a></li>
   </ol>
-  <h2>ゲームルール</h2>
+  <h2 id="rule">ゲームルール</h2>
+  <p>※簡易版であるため、公式ルールとは異なる点が存在する</p>
+  <h3>ゲームの概要</h3>
+  <ul>
+    <li>ゲーム開始時に掛け金として<a href="#coin">coin</a>が5枚配布される</li>
+    <li>最終的に最も持ち<a href="#coin">coin</a>が多い者がゲームの勝者となる</li>
+    <li>手札はトランプ52枚(JOKER抜き)からランダムに5枚配布される</li>
+    <li>手札を引き直した場合もトランプ52枚(JOKER抜き)からランダムに引き直した枚数分配布される</li>
+  </ul>
+  <h3>ゲームフロー</h3>
   <ol>
-    <li>カードを5枚引く</li>
-    <li>コール，ドロップ，レイズを行う</li>
-    <li>カードの引き直しを行う</li>
-    <li>2,3を繰り返す</li>
-    <li>勝負し，勝敗を決定する</li>
+    <li>カードを5枚引き、それを手札とする</li>
+    <li><a href="#call">コール</a>、<a href="#rase">レイズ</a>、<a href="#drop">ドロップ</a>を選択</li>
+    <li><a href="#call">コール</a>、<a href="#rase">レイズ</a>を選択した場合、カードの引き直したいカードに「✔」をつける</li>
+    <li>2,3を最大2回繰り返す</li>
+    <li>引き直しを最大まで続けた者同士が役を比較し，勝敗を決定する</li>
+    <li>勝者はプレイヤーが賭けた<a href="#coin">coin</a>の合計を全て入手し、敗者は<a href="#coin">coin</a>を1失う</li>
+    <li>1～6を最大3回繰り返す</li>
+    <li>最終的に最も持ち<a href="#coin">coin</a>が多い者が最終勝者となる</li>
   </ol>
-  <h3>用語</h3>
-  <p>コール：継続</p>
-  <p>ドロップ：リタイア</p>
-  <p>レイズ：上乗せ</p>
-  <h2>役一覧</h2>
+  <h3 id="term">用語</h3>
+  <ul>
+    <li id="coin"><b>coin</b>：掛け金。無くなるとゲームに敗北する</li>
+    <li id="call"><b>コール</b>：ゲーム続行。coinを維持して不要なカードを選び引き直すことができる</li>
+    <li id="drop"><b>ドロップ</b>：リタイア。coinを無条件で1枚失ってゲームから降りる。</li>
+    <li id="rase"><b>レイズ</b>：上乗せ。coinを上乗せして不要なカードを選び引き直すことができる。</li>
+  </ul>
+  <p>※相手がレイズを選択した場合、他プレイヤーは同量のcoinをレイズしなければゲームに参加できない</li>
+  <h2 id="role">役一覧</h2>
   <p>強い順に説明します</p>
   <ul>
-    <li>ロイヤルストレートフラッシュ:同種札で数字が1番高い順位にそろったもので、10・J・Q・K・Aとなる<br>
+    <li><b>ロイヤルストレートフラッシュ</b>:同種札で数字が1番高い順位にそろったもので、10・J・Q・K・Aとなる<br>
       <img th:src="@{/image/dia/10.png}" /><img th:src="@{/image/dia/11.png}" /><img
         th:src="@{/image/dia/12.png}" /><img th:src="@{/image/dia/13.png}" /><img th:src="@{/image/dia/1.png}" />
     </li>
     <br>
-    <li>ストレートフラッシュ:同種札で数字が順番に並んでいるもの。ただし…K・A・2…とは続かない<br>
+    <li><b>ストレートフラッシュ</b>:同種札で数字が順番に並んでいるもの。ただし…K・A・2…とは続かない<br>
       <img th:src="@{/image/dia/1.png}" /><img th:src="@{/image/dia/2.png}" /><img th:src="@{/image/dia/3.png}" /><img
         th:src="@{/image/dia/4.png}" /><img th:src="@{/image/dia/5.png}" />
     </li>
     <br>
-    <li>フォアカード:同位札が4枚そろったもの<br>
+    <li><b>フォアカード</b>:同位札が4枚そろったもの<br>
       <img th:src="@{/image/dia/3.png}" /><img th:src="@{/image/clover/3.png}" /><img
         th:src="@{/image/spade/3.png}" /><img th:src="@{/image/heart/3.png}" /><img th:src="@{/image/heart/12.png}" />
     </li>
     <br>
-    <li>フルハウス:同位札が3枚と同位札が2枚の役<br>
+    <li><b>フルハウス</b>:同位札が3枚と同位札が2枚の役<br>
       <img th:src="@{/image/spade/2.png}" /><img th:src="@{/image/clover/2.png}" /><img
         th:src="@{/image/dia/3.png}" /><img th:src="@{/image/spade/3.png}" /><img th:src="@{/image/heart/3.png}" />
     </li>
     <br>
-    <li>フラッシュ:同種札が5枚そろったもの<br>
+    <li><b>フラッシュ</b>:同種札が5枚そろったもの<br>
       <img th:src="@{/image/dia/5.png}" /><img th:src="@{/image/dia/6.png}" /><img th:src="@{/image/dia/7.png}" /><img
         th:src="@{/image/dia/10.png}" /><img th:src="@{/image/dia/13.png}" />
     </li>
     <br>
-    <li>ストレート:スートの種類関係なく5枚のカードの数字が続いているもの<br>
+    <li><b>ストレート</b>:スートの種類関係なく5枚のカードの数字が続いているもの<br>
       <img th:src="@{/image/dia/1.png}" /><img th:src="@{/image/clover/2.png}" /><img
         th:src="@{/image/dia/3.png}" /><img th:src="@{/image/spade/4.png}" /><img th:src="@{/image/heart/5.png}" />
     </li>
     <br>
-    <li>スリーカード:同位札が3枚そろったもの<br>
+    <li><b>スリーカード</b>:同位札が3枚そろったもの<br>
       <img th:src="@{/image/dia/3.png}" /><img th:src="@{/image/spade/3.png}" /><img
         th:src="@{/image/heart/3.png}" /><img th:src="@{/image/spade/7.png}" /><img th:src="@{/image/clover/9.png}" />
     </li>
     <br>
-    <li>ツウペア:2枚ずつの同位札が2組<br>
+    <li><b>ツウペア</b>:2枚ずつの同位札が2組<br>
       <img th:src="@{/image/dia/5.png}" /><img th:src="@{/image/clover/9.png}" /><img
         th:src="@{/image/dia/9.png}" /><img th:src="@{/image/dia/12.png}" /><img th:src="@{/image/spade/12.png}" />
     </li>
     <br>
-    <li>ワンペア:同位札が2枚そろったもの<br>
+    <li><b>ワンペア</b>:同位札が2枚そろったもの<br>
       <img th:src="@{/image/dia/1.png}" /><img th:src="@{/image/clover/4.png}" /><img
         th:src="@{/image/dia/6.png}" /><img th:src="@{/image/spade/6.png}" /><img th:src="@{/image/heart/9.png}" />
     </li>
