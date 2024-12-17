@@ -37,6 +37,7 @@ import hakata.poker.model.UserMapper;
 import hakata.poker.model.HandMapper;
 import hakata.poker.service.AsyncRoom;
 import hakata.poker.service.AsyncUser;
+import hakata.poker.model.index;
 
 @Controller
 @RequestMapping("/cpu")
@@ -122,7 +123,7 @@ public class CPUController {
     return "cpu_poker.html";
   }
 
-  //カードタイプを区別する関数
+  // カードタイプを区別する関数
   public int determinType(ArrayList<Cards> cards, int a) {
     int cardtype = 0;
     if (cards.get(a).getCardtype().equals("spade")) {
@@ -231,8 +232,6 @@ public class CPUController {
     model.addAttribute("myindex", new PlayerIndex());
 
     model.addAttribute("coin", userhand.getTurn());
-
-
 
     String cpuname = "CPU";
     cpuid = userMapper.selectid(cpuname);
@@ -560,7 +559,7 @@ public class CPUController {
       result = "CPUの勝利です...";
       model.addAttribute("result", result);
     }
-    //ロイヤルストレートフラッシュ同士の比較
+    // ロイヤルストレートフラッシュ同士の比較
     else if (myresultflag == cpuresultflag && cpuresultflag == 1) {
       if (determinType(myCards, 4) < determinType(CPUCards, 4)) {
         result = "あなたの勝利です!";
@@ -590,8 +589,10 @@ public class CPUController {
         model.addAttribute("result", result);
       }
     }
-    //ストレートフラッシュ・フラッシュ・ストレート同士の比較
-    else if ((myresultflag == cpuresultflag && cpuresultflag == 2) || (myresultflag == cpuresultflag && cpuresultflag == 5) || (myresultflag == cpuresultflag && cpuresultflag == 6)) {
+    // ストレートフラッシュ・フラッシュ・ストレート同士の比較
+    else if ((myresultflag == cpuresultflag && cpuresultflag == 2)
+        || (myresultflag == cpuresultflag && cpuresultflag == 5)
+        || (myresultflag == cpuresultflag && cpuresultflag == 6)) {
       if (myCards.get(4).getNum() > CPUCards.get(4).getNum()) {
         result = "あなたの勝利です!";
         model.addAttribute("result", result);
@@ -599,13 +600,13 @@ public class CPUController {
         result = "CPUの勝利です...";
         model.addAttribute("result", result);
       } else if (myCards.get(4).getNum() == CPUCards.get(4).getNum()) {
-          if (determinType(myCards, 4) < determinType(CPUCards, 4)) {
-            result = "あなたの勝利です!";
-            model.addAttribute("result", result);
-          } else if (determinType(myCards, 4) > determinType(CPUCards, 4)) {
-            result = "CPUの勝利です...";
-            model.addAttribute("result", result);
-          }
+        if (determinType(myCards, 4) < determinType(CPUCards, 4)) {
+          result = "あなたの勝利です!";
+          model.addAttribute("result", result);
+        } else if (determinType(myCards, 4) > determinType(CPUCards, 4)) {
+          result = "CPUの勝利です...";
+          model.addAttribute("result", result);
+        }
       }
     }
     // スリーカード同士の比較
@@ -618,7 +619,7 @@ public class CPUController {
         model.addAttribute("result", result);
       }
     }
-    //ツウ・ペア同士の比較
+    // ツウ・ペア同士の比較
     else if (myresultflag == cpuresultflag && cpuresultflag == 8) {
       if (myCards.get(3).getNum() > CPUCards.get(3).getNum()) {
         result = "あなたの勝利です!";
@@ -630,7 +631,7 @@ public class CPUController {
 
       }
     }
-    //ワン・ペア同士の比較
+    // ワン・ペア同士の比較
     else if (myresultflag == cpuresultflag && cpuresultflag == 9) {
       if (myonepairnum > cpuonepairnum) {
         result = "あなたの勝利です!";
@@ -713,7 +714,6 @@ public class CPUController {
     model.addAttribute("cpuindex", CPUindex);
 
     model.addAttribute("coin", hand.getTurn());
- 
 
     return "cpu_poker.html";
   }
@@ -774,7 +774,6 @@ public class CPUController {
 
     model.addAttribute("cpucoin", CPUhand.getTurn());
     model.addAttribute("index", new index());
-ｈ
 
     return "cpu_poker.html";
   }
@@ -823,7 +822,6 @@ public class CPUController {
     model.addAttribute("coin", userhand.getTurn());
     model.addAttribute("index", new index());
 
-
     cpuid = userMapper.selectid(cpuname);
     cpuhand = handMapper.selectByUserId(cpuid);
 
@@ -839,7 +837,6 @@ public class CPUController {
 
     model.addAttribute("coin", cpuhand.getTurn());
     model.addAttribute("index", new index());
-
 
     return "cpu_poker";
   }
