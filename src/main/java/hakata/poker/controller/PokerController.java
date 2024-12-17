@@ -25,7 +25,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import hakata.poker.model.Room;
 import hakata.poker.model.RoomMapper;
-import hakata.poker.model.index;
+import hakata.poker.model.PlayerIndex;
 import hakata.poker.service.AsyncCount;
 import hakata.poker.model.Cards;
 import hakata.poker.model.CardsMapper;
@@ -89,7 +89,7 @@ public class PokerController {
     handMapper.insertHandandIsActive(hand);
     model.addAttribute("myCards", myCards);
     model.addAttribute("coin", coin);
-    model.addAttribute("index", new index());
+    model.addAttribute("index", new PlayerIndex());
 
     Hand CPUhand = new Hand();
     CPUhand.setActive(true);
@@ -111,13 +111,13 @@ public class PokerController {
     handMapper.insertHandandIsActive(CPUhand);
     model.addAttribute("CPUCards", CPUCards);
     model.addAttribute("coin", coin);
-    model.addAttribute("index", new index());
+    model.addAttribute("index", new PlayerIndex());
 
     return "poker.html";
   }
 
   @PostMapping("/result")
-  public String formResult(@ModelAttribute index index, ModelMap model, Principal prin) {
+  public String formResult(@ModelAttribute PlayerIndex index, ModelMap model, Principal prin) {
     int userid;
     int cpuid;
     Hand userhand;
@@ -191,7 +191,7 @@ public class PokerController {
     handMapper.insertHandandIsActive(userhand);
     model.addAttribute("myCards", myCards);
     model.addAttribute("coin", userhand.getCoin());
-    model.addAttribute("index", new index());
+    model.addAttribute("index", new PlayerIndex());
 
     String cpuname = "CPU";
     cpuid = userMapper.selectid(cpuname);
@@ -221,7 +221,7 @@ public class PokerController {
     handMapper.insertHandandIsActive(cpuhand);
     model.addAttribute("CPUCards", CPUCards);
     model.addAttribute("coin", cpuhand.getCoin());
-    model.addAttribute("index", new index());
+    model.addAttribute("index", new PlayerIndex());
 
 
     // ストレートの判定
@@ -538,7 +538,7 @@ public class PokerController {
 
     model.addAttribute("myCards", myCards);
     model.addAttribute("coin", hand.getCoin());
-    model.addAttribute("index", new index());
+    model.addAttribute("index", new PlayerIndex());
 
     ArrayList<Cards> CPUCards = new ArrayList<Cards>();
     cpuid = userMapper.selectid(cpuname);
@@ -552,7 +552,7 @@ public class PokerController {
 
     model.addAttribute("CPUCards", CPUCards);
     model.addAttribute("coin", hand.getCoin());
-    model.addAttribute("index", new index());
+    model.addAttribute("index", new PlayerIndex());
 
     return "poker.html";
   }
@@ -584,7 +584,7 @@ public class PokerController {
     handMapper.insertHandandIsActive(userhand);
     model.addAttribute("myCards", myCards);
     model.addAttribute("coin", userhand.getCoin());
-    model.addAttribute("index", new index());
+    model.addAttribute("index", new PlayerIndex());
     model.addAttribute("message", message);
 
 
@@ -600,7 +600,7 @@ public class PokerController {
 
     model.addAttribute("CPUCards", CPUCards);
     model.addAttribute("cpucoin", CPUhand.getCoin());
-    model.addAttribute("index", new index());
+    model.addAttribute("index", new PlayerIndex());
 
     return "poker.html";
   }
@@ -639,7 +639,7 @@ public class PokerController {
     model.addAttribute("rays", rays);
     model.addAttribute("myCards", myCards);
     model.addAttribute("coin", userhand.getCoin());
-    model.addAttribute("index", new index());
+    model.addAttribute("index", new PlayerIndex());
 
     cpuid = userMapper.selectid(cpuname);
     cpuhand = handMapper.selectByUserId(cpuid);
@@ -652,7 +652,7 @@ public class PokerController {
 
     model.addAttribute("CPUCards", cpuCards);
     model.addAttribute("coin", cpuhand.getCoin());
-    model.addAttribute("index", new index());
+    model.addAttribute("index", new PlayerIndex());
 
     return "poker";
   }
