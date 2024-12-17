@@ -264,7 +264,8 @@ public class CPUController {
     // ストレートの判定
     if (myCards.get(4).getNum() == myCards.get(3).getNum() + 1 && myCards.get(3).getNum() == myCards.get(2).getNum() + 1
         && myCards.get(2).getNum() == myCards.get(1).getNum() + 1
-        && myCards.get(1).getNum() == myCards.get(0).getNum() + 1) {
+        && myCards.get(1).getNum() == myCards.get(0).getNum() + 1
+        && myCards.get(0).getNum() != 1) {
       userhand.setRoleid(6);
       myflag6 = 1;
     }
