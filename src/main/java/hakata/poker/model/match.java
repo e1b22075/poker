@@ -7,6 +7,25 @@ public class match {
   int user1coin;
   int user2coin;
 
+  public void setUser1hand(int user1hand) {
+    this.user1hand = user1hand;
+  }
+
+  public void setUser2hand(int user2hand) {
+    this.user2hand = user2hand;
+  }
+
+  int user1hand;
+  int user2hand;
+
+  public int getUser1hand() {
+    return user1hand;
+  }
+
+  public int getUser2hand() {
+    return user2hand;
+  }
+
   public match() {
   }
 

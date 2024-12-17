@@ -42,6 +42,8 @@ CREATE TABLE match (
     user2coin INTEGER,
     user1state VARCHAR,
     user2state VARCHAR,
+    user1hand INTEGER,
+    user2hand INTEGER,
     bet INTEGER,
     isActive BOOLEAN
 );

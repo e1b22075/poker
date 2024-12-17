@@ -4,8 +4,17 @@
 <head>
   <meta charset="utf-8">
   <title>poker</title>
-  <script th:inline="javascript" th:if="${myCards}">
-
+  <script>
+    window.onload = function () {
+      var sse = new EventSource('/re');
+      sse.onopen = function (event) {
+        console.log("SSE connection established."); // 接続が確立された場合にコンソールに表示 };
+      }
+      sse.onmessage = function (event) {
+        console.log(event.data);
+        window.location.href = '/poker/showResult';
+      }
+    };
 
   </script>
 
@@ -13,8 +22,9 @@
 </head>
 
 <body>
-  <h1>[[${login_user}]]さん、結果が出ました</h1>
+  <h1>[[${login_user}]]さん、結果をお待ちください</h1>
   <p id="p1"></p>
+  <a href="/poker/result"><button>結果を表示</button></a>
   <a href="/logout">ログアウト</a>
   <div th:if="${turn}">
     <h2>あなたは[[${turn}]]ターン目です。</h2>

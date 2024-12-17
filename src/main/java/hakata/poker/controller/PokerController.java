@@ -40,6 +40,7 @@ import hakata.poker.model.matchMapper;
 import hakata.poker.model.Entry;
 import hakata.poker.service.AsyncReady;
 import hakata.poker.service.AsyncDrop;
+import hakata.poker.service.Asyncresult;
 
 @Controller
 public class PokerController {
@@ -67,6 +68,9 @@ public class PokerController {
 
   @Autowired
   private AsyncDrop drop;
+
+  @Autowired
+  private Asyncresult result;
 
   @GetMapping("ready")
   public String ready(ModelMap model, Principal prin) {
@@ -379,7 +383,18 @@ public class PokerController {
 
     model.addAttribute("myCards", myCards);
     if (hand.getTurn() >= 3) {
-      return "result";
+      if (match.getUser1id() == userid) {
+        this.result.syncUser1(match.getId(), hand.getId());
+        System.out.println("ユーザー1の書き込み");
+      } else if (match.getUser2id() == userid) {
+        this.result.syncUser2(match.getId(), hand.getId());
+        System.out.println("ユーザー2の書き込み");
+      }
+      match = matchMapper.selectAllById(userid);
+      if (match.getUser1hand() != 0 && match.getUser2hand() != 0) {
+
+      }
+      return "wait";
     } else {
       model.addAttribute("index", new index());
 
@@ -542,11 +557,51 @@ public class PokerController {
 
     model.addAttribute("turn", userhand.getTurn());
     if (userhand.getTurn() >= 3) {
-      return "result";
+      if (match.getUser1id() == userid) {
+        System.out.println("ユーザー１の書き込み");
+        this.result.syncUser1(match.getId(), userhand.getId());
+      } else if (match.getUser2id() == userid) {
+        System.out.println("ユーザー2の書き込み");
+        this.result.syncUser2(match.getId(), userhand.getId());
+      }
+      return "wait";
     } else {
       model.addAttribute("index", new index());
 
       return "poker";
+    }
+  }
+
+  @GetMapping("poker/result")
+  public String result(ModelMap model, Principal prin) {
+    int userid;
+    int userid2;
+    String loginUser = prin.getName(); // ログインユーザ情報
+    model.addAttribute("login_user", loginUser);
+    match match;
+    String message;
+    userid = userMapper.selectid(loginUser);
+    Hand userhand = handMapper.selectByUserId(userid);
+    Hand hand;
+    match = matchMapper.selectAllById(userid);
+    if (match.getUser1hand() != 0 && match.getUser2hand() != 0) {
+      if (match.getUser1id() == userid) {
+        userid2 = match.getUser2id();
+        hand = handMapper.selectByUserId(userid2);
+        message = "あなたの負けです";
+        this.result.syncresult(userid);
+        model.addAttribute("message", message);
+      } else if (match.getUser2id() == userid) {
+        userid2 = match.getUser1id();
+        hand = handMapper.selectByUserId(userid2);
+        message = "あなたの勝ちです";
+        this.result.syncresult(userid);
+        model.addAttribute("message", message);
+      }
+
+      return "result";
+    } else {
+      return "wait";
     }
   }
 
@@ -585,6 +640,13 @@ public class PokerController {
   public SseEmitter dropSse() {
     final SseEmitter emitter = new SseEmitter();
     this.drop.AsyncDropSend(emitter);
+    return emitter;
+  }
+
+  @GetMapping("/re")
+  public SseEmitter resultSse() {
+    final SseEmitter emitter = new SseEmitter();
+    this.result.AsyncReusltSend(emitter);
     return emitter;
   }
 }
