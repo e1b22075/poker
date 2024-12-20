@@ -58,13 +58,21 @@ public class AsyncRoom {
   public void syncChangeStatusByuName_and_rId(String userName, int roomId) {
     Room changedRoom = rMapper.selectAllById(roomId);
     String user1Name = changedRoom.getUser1Name();
-    String user2Name = changedRoom.getUser2Name();
-    if (user1Name.equals(userName)) {
-      rMapper.updateUser1changeStatusByRoomId(roomId);
+    String user2Name;
+    if (changedRoom.getUser2Name() == null) {
+      if (user1Name.equals(userName)) {
+        rMapper.updateUser1changeStatusByRoomId(roomId);
+      }
+    } else {
+      user2Name = changedRoom.getUser2Name();
+      if (user1Name.equals(userName)) {
+        rMapper.updateUser1changeStatusByRoomId(roomId);
+      }
+      if (user2Name.equals(userName)) {
+        rMapper.updateUser2changeStatusByRoomId(roomId);
+      }
     }
-    if (user2Name.equals(userName)) {
-      rMapper.updateUser2changeStatusByRoomId(roomId);
-    }
+
     this.dbUpdated = true;
   }
 
