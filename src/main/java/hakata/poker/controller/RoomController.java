@@ -77,13 +77,41 @@ public class RoomController {
     model.addAttribute("room2", true);
 
     model.addAttribute("room2", room2);
-    return "room.html";
+    return "ready_room.html";
+  }
+
+  @GetMapping("/leaveRoom")
+  @Transactional
+  public String leaveRoom(@RequestParam Integer roomId, ModelMap model, Principal prin) {
+    String loginUser = prin.getName(); // ログインユーザ情報
+    // ログインユーザーが所属しているルームを取得
+    acRoom.syncLeaveRoom(loginUser, roomId);
+
+    // 再びroom1の処理を実行してルーム一覧を表示
+    return room1(model, prin);
+  }
+
+  @GetMapping("/changeStatus")
+  @Transactional
+  public String changeStatus(@RequestParam Integer roomId, ModelMap model, Principal prin) {
+    String loginUser = prin.getName(); // ログインユーザ情報
+    acRoom.syncChangeStatusByuName_and_rId(loginUser, roomId);
+
+    // 再びroom1の処理を実行してルーム一覧を表示
+    return room2(roomId, model, prin);
   }
 
   @GetMapping("/step3")
   public SseEmitter room3() {
     final SseEmitter sseEmitter = new SseEmitter(60 * 1000L);
     this.acRoom.asyncShowRoomsList(sseEmitter);
+    return sseEmitter;
+  }
+
+  @GetMapping("/Asyncr2")
+  public SseEmitter asyncr2(@RequestParam Integer roomId) {
+    final SseEmitter sseEmitter = new SseEmitter(60 * 1000L);
+    this.acRoom.asyncShowRoomInfo(roomId, sseEmitter);
     return sseEmitter;
   }
 

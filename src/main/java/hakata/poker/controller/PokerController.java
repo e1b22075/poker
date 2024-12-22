@@ -150,7 +150,7 @@ public class PokerController {
     model.addAttribute("turn", hand.getTurn());
     model.addAttribute("index", new index());
 
-    return "poker.html";
+    return "select.html";
   }
 
   @PostMapping("/result")
@@ -209,6 +209,7 @@ public class PokerController {
     userhand.setHand3id(myCards.get(2).getId());
     userhand.setHand4id(myCards.get(3).getId());
     userhand.setHand5id(myCards.get(4).getId());
+    userhand.setTurn(userhand.getTurn() + 1);
     handMapper.insertHandandIsActive(userhand);
 
     model.addAttribute("myCards", myCards);
@@ -349,8 +350,19 @@ public class PokerController {
       model.addAttribute("myrole", myrole);
       myresultflag = 9;
     }
+    if (userhand.getTurn() >= 3) {
+      if (match.getUser1id() == userid) {
+        this.result.syncUser1(match.getId(), userhand.getId());
+        System.out.println("ユーザー1の書き込み");
+      } else if (match.getUser2id() == userid) {
+        this.result.syncUser2(match.getId(), userhand.getId());
+        System.out.println("ユーザー2の書き込み");
+      }
 
-    return "select";
+      return "wait";
+    } else {
+      return "select";
+    }
   }
 
   @GetMapping("poker/call")
@@ -376,7 +388,6 @@ public class PokerController {
 
     model.addAttribute("myCards", myCards);
 
-    hand.setTurn(hand.getTurn() + 1);
     handMapper.insertHandandIsActive(hand);
 
     match = matchMapper.selectAllById(userid);
@@ -392,24 +403,10 @@ public class PokerController {
     model.addAttribute("turn", hand.getTurn());
 
     model.addAttribute("myCards", myCards);
-    if (hand.getTurn() >= 3) {
-      if (match.getUser1id() == userid) {
-        this.result.syncUser1(match.getId(), hand.getId());
-        System.out.println("ユーザー1の書き込み");
-      } else if (match.getUser2id() == userid) {
-        this.result.syncUser2(match.getId(), hand.getId());
-        System.out.println("ユーザー2の書き込み");
-      }
-      match = matchMapper.selectAllById(userid);
-      if (match.getUser1hand() != 0 && match.getUser2hand() != 0) {
 
-      }
-      return "wait";
-    } else {
-      model.addAttribute("index", new index());
+    model.addAttribute("index", new index());
 
-      return "poker.html";
-    }
+    return "poker.html";
   }
 
   @GetMapping("poker/drop")
@@ -550,7 +547,6 @@ public class PokerController {
 
     model.addAttribute("myCards", myCards);
 
-    userhand.setTurn(userhand.getTurn() + 1);
     handMapper.insertHandandIsActive(userhand);
 
     match = matchMapper.selectAllById(userid);
@@ -566,20 +562,10 @@ public class PokerController {
     model.addAttribute("rays", match.getBet());
 
     model.addAttribute("turn", userhand.getTurn());
-    if (userhand.getTurn() >= 3) {
-      if (match.getUser1id() == userid) {
-        System.out.println("ユーザー１の書き込み");
-        this.result.syncUser1(match.getId(), userhand.getId());
-      } else if (match.getUser2id() == userid) {
-        System.out.println("ユーザー2の書き込み");
-        this.result.syncUser2(match.getId(), userhand.getId());
-      }
-      return "wait";
-    } else {
-      model.addAttribute("index", new index());
 
-      return "poker";
-    }
+    model.addAttribute("index", new index());
+
+    return "poker";
   }
 
   @GetMapping("poker/result")

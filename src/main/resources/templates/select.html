@@ -5,33 +5,33 @@
   <meta charset="utf-8">
   <title>poker</title>
   <script th:inline="javascript" th:if="${myCards}">
-    window.onload = function () {
-      var counter = 4000; //初期値を60に設定
-      var sse = new EventSource('/step1');
+    window.addEventListener('load', function () {
 
-      sse.onmessage = function (event) {
-        counter--;
-        console.log(counter);
-        document.getElementById("p1").textContent = counter;
 
-        if (counter <= 0) {
-          sse.close(); //SSE接続を閉じる
-          window.location.href = "/room";
-        }
-      };
+
+      var dropsse = new EventSource('/drop3');
+      dropsse.onopen = function (event) {
+        console.log("SSE connection established."); // 接続が確立された場合にコンソールに表示 };
+      }
+      dropsse.onmessage = function (event) {
+        console.log(event.data);
+        dropsse.close;
+        window.location.href = '/poker/drop2';
+      }
 
       window.addEventListener('beforeunload', function () {
-        if (sse) {
-          sse.close();
-        }
+
+        if (dropsse) dropsse.close();
       });
-    };
+    });
+
+
   </script>
 </head>
 
 <body>
   <h1>[[${login_user}]]</h1>
-  <p id="p1"></p>
+  <p id="timer">残り時間:</p>
   <a href="/logout">ログアウト</a>
   <div th:if="${turn}">
     <h2>あなたは[[${turn}]]ターン目です。</h2>
@@ -74,3 +74,25 @@
     <a href="/poker/rays"><button>レイズ</button></a>
     <a href="/poker/drop"><button>ドロップ</button></a>
   </div>
+
+  <script th:inline="javascript" th:if="${myCards}">
+    // 設定する制限時間（秒）
+    const limitTime = 20;
+    let remainingTime = limitTime;
+
+
+    const timerElement = document.getElementById('timer');
+
+    // タイマーの更新と処理
+    function updateTimer() {
+      timerElement.textContent = `残り時間: ${remainingTime}秒`;
+      if (remainingTime <= 0) {
+        window.location.href = "/poker/drop";
+      }
+      remainingTime--;
+    }
+
+    // タイマーを1秒ごとに更新
+    const timerInterval = setInterval(updateTimer, 1000);
+  </script>
+</body>
