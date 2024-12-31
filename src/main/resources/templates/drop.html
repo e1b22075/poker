@@ -8,10 +8,13 @@
 
 <body>
   <h1> [[${login_user}]]さん</h1>
-  <p id="timer">残り時間: 5秒</p>
+  <p id="timer">次のゲームまで: 5秒</p>
   <a href="/logout">ログアウト</a>
   <div th:if="${message}">
     <h3 th:text="${message}"></h3>
+  </div>
+  <div th:if="${coin}">
+    <h2>あなたのコインは[[${coin}]]枚です。</h2>
   </div>
   <script th:inline="javascript">
     // 設定する制限時間（秒）
@@ -23,7 +26,7 @@
 
     // タイマーの更新と処理
     function updateTimer() {
-      timerElement.textContent = `残り時間: ${remainingTime}秒`;
+      timerElement.textContent = `次のゲームまで: ${remainingTime}秒`;
       if (remainingTime <= 0) {
         window.location.href = "/poker";
       }

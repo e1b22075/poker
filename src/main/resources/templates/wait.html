@@ -6,13 +6,14 @@
   <title>poker</title>
   <script>
     window.onload = function () {
-      var sse = new EventSource('/re');
+      var sse = new EventSource('/result');
       sse.onopen = function (event) {
         console.log("SSE connection established."); // 接続が確立された場合にコンソールに表示 };
       }
       sse.onmessage = function (event) {
         console.log(event.data);
-        window.location.href = '/poker/showResult';
+        if (sse) sse.close();
+        window.location.href = '/poker/result2';
       }
     };
 

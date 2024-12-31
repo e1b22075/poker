@@ -41,7 +41,7 @@ public class AsyncReady {
         }
         emitter.send(massage);
         TimeUnit.MILLISECONDS.sleep(1000);
-        dbUpdated = false;
+        this.dbUpdated = false;
       }
     } catch (Exception e) {
       // 例外の名前とメッセージだけ表示する
