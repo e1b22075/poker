@@ -91,7 +91,11 @@ public class CPUController {
     hand.setTurn(coin);
     userid = userMapper.selectid(loginUser);
     hand.setUserid(userid);
-    myCards.sort(Comparator.comparing(Cards::getNum));
+
+    myCards.sort(Comparator.comparingInt((Cards card) -> {
+      int num = card.getNum();
+      return num == 1 ? Integer.MAX_VALUE : num; // 1を最大値として扱う
+    }));
 
     handMapper.insertHandandIsActive(hand);
     model.addAttribute("myCards", myCards);
@@ -113,7 +117,11 @@ public class CPUController {
     CPUhand.setTurn(coin);
     cpuid = userMapper.selectid(cpuname);
     CPUhand.setUserid(cpuid);
-    CPUCards.sort(Comparator.comparing(Cards::getNum));
+
+    CPUCards.sort(Comparator.comparingInt((Cards card) -> {
+      int num = card.getNum();
+      return num == 1 ? Integer.MAX_VALUE : num; // 1を最大値として扱う
+    }));
 
     handMapper.insertHandandIsActive(CPUhand);
     model.addAttribute("CPUCards", CPUCards);
@@ -150,38 +158,21 @@ public class CPUController {
     Cards userdrawCards;
     Cards cpudrawCards;
 
-    int myflag1 = 0; // ロイヤルストレートフラッシュ
-    int myflag2 = 0; // ストレートフラッシュ
-    int myflag3 = 0; // フォア・カード
-    int myflag4 = 0; // フルハウス
-    int myflag5 = 0; // フラッシュ
-    int myflag6 = 0; // ストレート
-    int myflag7 = 0; // スリーカード
-    int myflag8 = 0; // ツウ・ペア
-    int myflag9 = 0; // ワン・ペア
+    int myflashflag = 0; // プレイヤーのフラッシュのフラグ
+    int mystraightflag = 0; // プレイヤーのストレートのフラグ
 
-    int cpuflag1 = 0;
-    int cpuflag2 = 0;
-    int cpuflag3 = 0;
-    int cpuflag4 = 0;
-    int cpuflag5 = 0;
-    int cpuflag6 = 0;
-    int cpuflag7 = 0;
-    int cpuflag8 = 0;
-    int cpuflag9 = 0;
+    int cpuflashflag = 0; // CPUのフラッシュのフラグ
+    int cpustraightflag = 0; // CPUのストレートのフラグ
 
-    int myonepairnum = 0;
-    int cpuonepairnum = 0;
-    int myonepairkicker[] = new int[3];
-    int cpuonepairkicker[] = new int[3];
-    int mytwopairkicker = 0;
-    int cputwopairkicker = 0;
+    int myonepairkickernum = 0;
+    int cpuonepairkickernum = 0;
+    int myonepairkickerid = 0;
+    int cpuonepairkickerid = 0;
+    int mytwopairid = 0;
+    int cputwopairid = 0;
 
     String myrole;
     String cpurole;
-
-    int myresultflag = 10;
-    int cpuresultflag = 10;
 
     String result;
 
@@ -220,7 +211,11 @@ public class CPUController {
       }
     }
 
-    myCards.sort(Comparator.comparing(Cards::getNum));
+    myCards.sort(Comparator.comparingInt((Cards card) -> {
+      int num = card.getNum();
+      return num == 1 ? Integer.MAX_VALUE : num; // 1を最大値として扱う
+    }));
+
     userhand.setHand1id(myCards.get(0).getId());
     userhand.setHand2id(myCards.get(1).getId());
     userhand.setHand3id(myCards.get(2).getId());
@@ -254,7 +249,12 @@ public class CPUController {
         cardsMapper.updateisActiveTrueById(CPUCards.get(indes - 1).getId());
       }
     }
-    CPUCards.sort(Comparator.comparing(Cards::getNum));
+
+    CPUCards.sort(Comparator.comparingInt((Cards card) -> {
+      int num = card.getNum();
+      return num == 1 ? Integer.MAX_VALUE : num; // 1を最大値として扱う
+    }));
+
     cpuhand.setHand1id(CPUCards.get(0).getId());
     cpuhand.setHand2id(CPUCards.get(1).getId());
     cpuhand.setHand3id(CPUCards.get(2).getId());
@@ -267,13 +267,13 @@ public class CPUController {
 
     model.addAttribute("coin", cpuhand.getTurn());
 
+    userhand.setRoleid(10); //プレイヤーのRoleidをハイカードのid10に設定
+    cpuhand.setRoleid(10); // CPUのRoleidをハイカードのid10に設定
+
     // ストレートの判定
-    if (myCards.get(4).getNum() == myCards.get(3).getNum() + 1 && myCards.get(3).getNum() == myCards.get(2).getNum() + 1
-        && myCards.get(2).getNum() == myCards.get(1).getNum() + 1
-        && myCards.get(1).getNum() == myCards.get(0).getNum() + 1
-        && myCards.get(0).getNum() != 1) {
+    if ((myCards.get(4).getNum() == myCards.get(3).getNum() + 1 && myCards.get(3).getNum() == myCards.get(2).getNum() + 1 && myCards.get(2).getNum() == myCards.get(1).getNum() + 1 && myCards.get(1).getNum() == myCards.get(0).getNum() + 1) || (myCards.get(4).getNum() == 1 && myCards.get(3).getNum() == 13 && myCards.get(2).getNum() == 12 && myCards.get(1).getNum() == 11 && myCards.get(0).getNum() == 10)) {
       userhand.setRoleid(6);
-      myflag6 = 1;
+      mystraightflag = 1;
     }
     // フラッシュの判定
     if (myCards.get(0).getCardtype() == myCards.get(1).getCardtype()
@@ -281,18 +281,16 @@ public class CPUController {
         && myCards.get(2).getCardtype() == myCards.get(3).getCardtype()
         && myCards.get(3).getCardtype() == myCards.get(4).getCardtype()) {
       userhand.setRoleid(5);
-      myflag5 = 1;
+      myflashflag = 1;
     }
     // ロイヤルストレートフラッシュの判定
-    if (myflag5 == 1 && myCards.get(0).getNum() == 1 && myCards.get(1).getNum() == 10
-        && myCards.get(2).getNum() == 11 && myCards.get(3).getNum() == 12 && myCards.get(4).getNum() == 13) {
+    if (myflashflag == 1 && myCards.get(4).getNum() == 1 && myCards.get(0).getNum() == 10
+        && myCards.get(1).getNum() == 11 && myCards.get(2).getNum() == 12 && myCards.get(3).getNum() == 13) {
       userhand.setRoleid(1);
-      myflag1 = 1;
     }
     // ストレートフラッシュの判定
-    else if (myflag6 == 1 && myflag5 == 1) {
+    else if (mystraightflag == 1 && myflashflag == 1) {
       userhand.setRoleid(2);
-      myflag2 = 1;
     }
 
     // フォーカードの判定
@@ -301,115 +299,107 @@ public class CPUController {
         || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(2).getNum() == myCards.get(3).getNum()
             && myCards.get(3).getNum() == myCards.get(4).getNum())) {
       userhand.setRoleid(3);
-      myflag3 = 1;
     }
     // スリーカードの判定
     else if ((myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(1).getNum() == myCards.get(2).getNum())
         || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(2).getNum() == myCards.get(3).getNum())
         || (myCards.get(2).getNum() == myCards.get(3).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())) {
       userhand.setRoleid(7);
-      myflag7 = 1;
 
       // フルハウスの判定
       if (myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(1).getNum() == myCards.get(2).getNum()) {
         if (myCards.get(3).getNum() == myCards.get(4).getNum()) {
           userhand.setRoleid(4);
-          myflag4 = 1;
         }
       } else if (myCards.get(2).getNum() == myCards.get(3).getNum()
           && myCards.get(3).getNum() == myCards.get(4).getNum()) {
         if (myCards.get(0).getNum() == myCards.get(1).getNum()) {
           userhand.setRoleid(4);
-          myflag4 = 1;
         }
       }
     }
     // ツウ・ペアの判定
-    else if ((myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(2).getNum() == myCards.get(3).getNum())
-        || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())
+    else if ((myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(2).getNum() == myCards.get(3).getNum()) || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())
         || (myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())) {
       userhand.setRoleid(8);
-      myflag8 = 1;
+
+      // ペアになっていないカードの手札idを保存(カードの数値ではなく、手札の左から何番目にあるかの数字)
+      if (myCards.get(0).getNum() == myCards.get(1).getNum()
+          && myCards.get(2).getNum() == myCards.get(3).getNum()) {
+        userhand.setRolenum(myCards.get(4).getNum());
+        mytwopairid = 4;
+      } else if (myCards.get(1).getNum() == myCards.get(2).getNum()
+          && myCards.get(3).getNum() == myCards.get(4).getNum()) {
+        userhand.setRolenum(myCards.get(0).getNum());
+        mytwopairid = 0;
+      } else if (myCards.get(0).getNum() == myCards.get(1).getNum()
+          && myCards.get(3).getNum() == myCards.get(4).getNum()) {
+        userhand.setRolenum(myCards.get(2).getNum());
+        mytwopairid = 2;
+      }
     }
     // ワン・ペアの判定
-    else if ((myCards.get(0).getNum() == myCards.get(1).getNum())
-        || (myCards.get(1).getNum() == myCards.get(2).getNum()) || (myCards.get(2).getNum() == myCards.get(3).getNum())
+    else if ((myCards.get(0).getNum() == myCards.get(1).getNum()) || (myCards.get(1).getNum() == myCards.get(2).getNum()) || (myCards.get(2).getNum() == myCards.get(3).getNum())
         || (myCards.get(3).getNum() == myCards.get(4).getNum())) {
       userhand.setRoleid(9);
-      myflag9 = 1;
 
       // ワンペア時の数値を格納
       if (myCards.get(0).getNum() == myCards.get(1).getNum()) {
-        myonepairnum = myCards.get(1).getNum();
-        for (int i = 2; i <= 0; i--) {
-          myonepairkicker[i] = myCards.get(i + 2).getNum();
-        }
+        userhand.setRolenum(myCards.get(1).getNum());
+        myonepairkickernum = myCards.get(4).getNum();
+        myonepairkickerid = 4;
       } else if (myCards.get(1).getNum() == myCards.get(2).getNum()) {
-        myonepairnum = myCards.get(2).getNum();
-        for (int i = 2; i < 0; i--) {
-          myonepairkicker[i] = myCards.get(i + 2).getNum();
-        }
-        myonepairkicker[0] = myCards.get(0).getNum();
+        userhand.setRolenum(myCards.get(2).getNum());
+        myonepairkickernum = myCards.get(4).getNum();
+        myonepairkickerid = 4;
       } else if (myCards.get(2).getNum() == myCards.get(3).getNum()) {
-        myonepairnum = myCards.get(3).getNum();
-        myonepairkicker[2] = myCards.get(4).getNum();
-        for (int i = 1; i <= 0; i--) {
-          myonepairkicker[i] = myCards.get(i).getNum();
-        }
+        userhand.setRolenum(myCards.get(3).getNum());
+        myonepairkickernum = myCards.get(4).getNum();
+        myonepairkickerid = 4;
       } else if (myCards.get(3).getNum() == myCards.get(4).getNum()) {
-        myonepairnum = myCards.get(4).getNum();
-        for (int i = 2; i <= 0; i--) {
-          myonepairkicker[i] = myCards.get(i).getNum();
-        }
+        userhand.setRolenum(myCards.get(4).getNum());
+        myonepairkickernum = myCards.get(2).getNum();
+        myonepairkickerid = 2;
       }
     }
 
-    if (myflag1 == 1) {
+    if (userhand.getRoleid() == 1) {
       myrole = "あなたの役はロイヤルストレートフラッシュです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 1;
-    } else if (myflag2 == 1) {
+    } else if (userhand.getRoleid() == 2) {
       myrole = "あなたの役はストレートフラッシュです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 2;
-    } else if (myflag3 == 1) {
+    } else if (userhand.getRoleid() == 3) {
       myrole = "あなたの役はフォア・カードです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 3;
-    } else if (myflag4 == 1) {
+    } else if (userhand.getRoleid() == 4) {
       myrole = "あなたの役はフルハウスです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 4;
-    } else if (myflag5 == 1) {
+    } else if (userhand.getRoleid() == 5) {
       myrole = "あなたの役はフラッシュです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 5;
-    } else if (myflag6 == 1) {
+    } else if (userhand.getRoleid() == 6) {
       myrole = "あなたの役はストレートです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 6;
-    } else if (myflag7 == 1) {
+    } else if (userhand.getRoleid() == 7) {
       myrole = "あなたの役はスリーカードです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 7;
-    } else if (myflag8 == 1) {
+    } else if (userhand.getRoleid() == 8) {
       myrole = "あなたの役はツウ・ペアです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 8;
-    } else if (myflag9 == 1) {
+    } else if (userhand.getRoleid() == 9) {
       myrole = "あなたの役はワン・ペアです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 9;
     }
 
     // ここからCPUの手札
     // ストレートの判定
-    if (CPUCards.get(4).getNum() == CPUCards.get(3).getNum() + 1
+    if ((CPUCards.get(4).getNum() == CPUCards.get(3).getNum() + 1
         && CPUCards.get(3).getNum() == CPUCards.get(2).getNum() + 1
         && CPUCards.get(2).getNum() == CPUCards.get(1).getNum() + 1
-        && CPUCards.get(1).getNum() == CPUCards.get(0).getNum() + 1) {
+        && CPUCards.get(1).getNum() == CPUCards.get(0).getNum() + 1)
+        || ((CPUCards.get(4).getNum() == 1 && CPUCards.get(3).getNum() == 13 && CPUCards.get(2).getNum() == 12 && CPUCards.get(1).getNum() == 11 && CPUCards.get(0).getNum() == 10))) {
       cpuhand.setRoleid(6);
-      cpuflag6 = 1;
     }
     // フラッシュの判定
     if (CPUCards.get(0).getCardtype() == CPUCards.get(1).getCardtype()
@@ -417,27 +407,23 @@ public class CPUController {
         && CPUCards.get(2).getCardtype() == CPUCards.get(3).getCardtype()
         && CPUCards.get(3).getCardtype() == CPUCards.get(4).getCardtype()) {
       cpuhand.setRoleid(5);
-      cpuflag5 = 1;
     }
     // ロイヤルストレートフラッシュの判定
-    if (cpuflag5 == 1 && CPUCards.get(0).getNum() == 1 && CPUCards.get(1).getNum() == 10
-        && CPUCards.get(2).getNum() == 11 && CPUCards.get(3).getNum() == 12 && CPUCards.get(4).getNum() == 13) {
+    if (cpuflashflag == 1 && CPUCards.get(4).getNum() == 1 && CPUCards.get(0).getNum() == 10
+        && CPUCards.get(1).getNum() == 11 && CPUCards.get(2).getNum() == 12 && CPUCards.get(3).getNum() == 13) {
       cpuhand.setRoleid(1);
-      cpuflag1 = 1;
     }
     // ストレートフラッシュの判定
-    else if (cpuflag6 == 1 && cpuflag5 == 1) {
+    else if (cpustraightflag == 1 && cpuflashflag == 1) {
       cpuhand.setRoleid(2);
-      cpuflag2 = 1;
     }
 
-    // フォーカードの判定
+    // フォア・カードの判定
     if ((CPUCards.get(0).getNum() == CPUCards.get(1).getNum() && CPUCards.get(1).getNum() == CPUCards.get(2).getNum()
         && CPUCards.get(2).getNum() == CPUCards.get(3).getNum())
         || (CPUCards.get(1).getNum() == CPUCards.get(2).getNum() && CPUCards.get(2).getNum() == CPUCards.get(3).getNum()
             && CPUCards.get(3).getNum() == CPUCards.get(4).getNum())) {
       cpuhand.setRoleid(3);
-      cpuflag3 = 1;
     }
     // スリーカードの判定
     else if ((CPUCards.get(0).getNum() == CPUCards.get(1).getNum()
@@ -447,20 +433,17 @@ public class CPUController {
         || (CPUCards.get(2).getNum() == CPUCards.get(3).getNum()
             && CPUCards.get(3).getNum() == CPUCards.get(4).getNum())) {
       cpuhand.setRoleid(7);
-      cpuflag7 = 1;
 
       // フルハウスの判定
       if (CPUCards.get(0).getNum() == CPUCards.get(1).getNum()
           && CPUCards.get(1).getNum() == CPUCards.get(2).getNum()) {
         if (CPUCards.get(3).getNum() == CPUCards.get(4).getNum()) {
           cpuhand.setRoleid(4);
-          cpuflag4 = 1;
         }
       } else if (CPUCards.get(2).getNum() == CPUCards.get(3).getNum()
           && CPUCards.get(3).getNum() == CPUCards.get(4).getNum()) {
         if (CPUCards.get(0).getNum() == CPUCards.get(1).getNum()) {
           cpuhand.setRoleid(4);
-          cpuflag4 = 1;
         }
       }
     }
@@ -472,7 +455,21 @@ public class CPUController {
         || (CPUCards.get(0).getNum() == CPUCards.get(1).getNum()
             && CPUCards.get(3).getNum() == CPUCards.get(4).getNum())) {
       cpuhand.setRoleid(8);
-      cpuflag8 = 1;
+
+      //ペアになっていないカードの手札idを保存(カードの数値ではなく、手札の左から何番目にあるかの数字)
+      if(CPUCards.get(0).getNum() == CPUCards.get(1).getNum()
+          && CPUCards.get(2).getNum() == CPUCards.get(3).getNum()) {
+        cpuhand.setRolenum(CPUCards.get(4).getNum());
+        cputwopairid = 4;
+      } else if (CPUCards.get(1).getNum() == CPUCards.get(2).getNum()
+          && CPUCards.get(3).getNum() == CPUCards.get(4).getNum()) {
+        cpuhand.setRolenum(CPUCards.get(0).getNum());
+        cputwopairid = 0;
+      } else if (CPUCards.get(0).getNum() == CPUCards.get(1).getNum()
+          && CPUCards.get(3).getNum() == CPUCards.get(4).getNum()) {
+        cpuhand.setRolenum(CPUCards.get(2).getNum());
+        cputwopairid = 2;
+      }
     }
     // ワン・ペアの判定
     else if ((CPUCards.get(0).getNum() == CPUCards.get(1).getNum())
@@ -480,88 +477,77 @@ public class CPUController {
         || (CPUCards.get(2).getNum() == CPUCards.get(3).getNum())
         || (CPUCards.get(3).getNum() == CPUCards.get(4).getNum())) {
       cpuhand.setRoleid(9);
-      cpuflag9 = 1;
 
       // ワンペア時の数値を格納
       if (CPUCards.get(0).getNum() == CPUCards.get(1).getNum()) {
-        cpuonepairnum = CPUCards.get(1).getNum();
-        for (int i = 2; i <= 0; i--) {
-          cpuonepairkicker[i] = CPUCards.get(i + 2).getNum();
-        }
+        cpuhand.setRolenum(CPUCards.get(1).getNum());
+        cpuonepairkickernum = myCards.get(4).getNum();
+        cpuonepairkickerid = 4;
       } else if (CPUCards.get(1).getNum() == CPUCards.get(2).getNum()) {
-        cpuonepairnum = CPUCards.get(2).getNum();
-        for (int i = 2; i < 0; i--) {
-          cpuonepairkicker[i] = CPUCards.get(i + 2).getNum();
-        }
-        cpuonepairkicker[0] = CPUCards.get(0).getNum();
+        cpuhand.setRolenum(CPUCards.get(2).getNum());
+        cpuonepairkickernum = myCards.get(4).getNum();
+        cpuonepairkickerid = 4;
       } else if (CPUCards.get(2).getNum() == CPUCards.get(3).getNum()) {
-        cpuonepairnum = CPUCards.get(3).getNum();
-        myonepairkicker[2] = myCards.get(4).getNum();
-        for (int i = 1; i <= 0; i--) {
-          myonepairkicker[i] = myCards.get(i).getNum();
-        }
+        cpuhand.setRolenum(CPUCards.get(3).getNum());
+        cpuonepairkickernum = myCards.get(4).getNum();
+        cpuonepairkickerid = 4;
       } else if (CPUCards.get(3).getNum() == CPUCards.get(4).getNum()) {
-        cpuonepairnum = CPUCards.get(4).getNum();
-        for (int i = 2; i <= 0; i--) {
-          myonepairkicker[i] = myCards.get(i).getNum();
-        }
+        cpuhand.setRolenum(CPUCards.get(4).getNum());
+        cpuonepairkickernum = myCards.get(2).getNum();
+        cpuonepairkickerid = 2;
       }
     }
 
-    model.addAttribute("myresultflag", myresultflag);
-
-    model.addAttribute("myonepairkicker0", myonepairkicker[0]);
-    model.addAttribute("myonepairkicker1", myonepairkicker[1]);
-    model.addAttribute("myonepairkicker2", myonepairkicker[2]);
-
-    if (cpuflag1 == 1) {
+    if (cpuhand.getRoleid() == 1) {
       cpurole = "CPUの役はロイヤルストレートフラッシュです。";
       model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 1;
-    } else if (cpuflag2 == 1) {
+    } else if (cpuhand.getRoleid() == 2) {
       cpurole = "CPUの役はストレートフラッシュです。";
       model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 2;
-    } else if (cpuflag3 == 1) {
+    } else if (cpuhand.getRoleid() == 3) {
       cpurole = "CPUの役はフォア・カードです。";
       model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 3;
-    } else if (cpuflag4 == 1) {
+    } else if (cpuhand.getRoleid() == 4) {
       cpurole = "CPUの役はフルハウスです。";
       model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 4;
-    } else if (cpuflag5 == 1) {
+    } else if (cpuhand.getRoleid() == 5) {
       cpurole = "CPUの役はフラッシュです。";
       model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 5;
-    } else if (cpuflag6 == 1) {
+    } else if (cpuhand.getRoleid() == 6) {
       cpurole = "CPUの役はストレートです。";
       model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 6;
-    } else if (cpuflag7 == 1) {
+    } else if (cpuhand.getRoleid() == 7) {
       cpurole = "CPUの役はスリーカードです。";
       model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 7;
-    } else if (cpuflag8 == 1) {
+    } else if (cpuhand.getRoleid() == 8) {
       cpurole = "CPUの役はツウ・ペアです。";
       model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 8;
-    } else if (cpuflag9 == 1) {
+    } else if (cpuhand.getRoleid() == 9) {
       cpurole = "CPUの役はワン・ペアです。";
       model.addAttribute("cpurole", cpurole);
-      cpuresultflag = 9;
+    }
+
+
+    int a1 = myCards.get(4).getNum();
+    int a2 = CPUCards.get(4).getNum();
+    // 5枚目のカードが1の時、数値比較の都合上14にする
+    if (myCards.get(4).getNum() == 1) {
+      a1 = 14;
+    }
+    if (CPUCards.get(4).getNum() == 1) {
+      a2 = 14;
     }
 
     // resultflagの大小関係で勝利者を判定
-    if (myresultflag < cpuresultflag) {
+    if (userhand.getRoleid() < cpuhand.getRoleid()) {
       result = "あなたの勝利です!";
       model.addAttribute("result", result);
-    } else if (myresultflag > cpuresultflag) {
+    } else if (userhand.getRoleid() > cpuhand.getRoleid()) {
       result = "CPUの勝利です...";
       model.addAttribute("result", result);
     }
     // ロイヤルストレートフラッシュ同士の比較
-    else if (myresultflag == cpuresultflag && cpuresultflag == 1) {
+    else if (userhand.getRoleid() == cpuhand.getRoleid() && cpuhand.getRoleid() == 1) {
       if (determinType(myCards, 4) < determinType(CPUCards, 4)) {
         result = "あなたの勝利です!";
         model.addAttribute("result", result);
@@ -571,7 +557,7 @@ public class CPUController {
       }
     }
     // フォア・カード同士の比較
-    else if (myresultflag == cpuresultflag && cpuresultflag == 3) {
+    else if (userhand.getRoleid() == cpuhand.getRoleid() && cpuhand.getRoleid() == 3) {
       if (myCards.get(3).getNum() > CPUCards.get(3).getNum()) {
         result = "あなたの勝利です!";
         model.addAttribute("result", result);
@@ -580,8 +566,8 @@ public class CPUController {
         model.addAttribute("result", result);
       }
     }
-    // フルハウス同士の比較
-    else if (myresultflag == cpuresultflag && cpuresultflag == 4) {
+    // フルハウス・スリーカード同士の比較
+    else if ((userhand.getRoleid() == cpuhand.getRoleid() && cpuhand.getRoleid() == 4) || (userhand.getRoleid() == cpuhand.getRoleid() && cpuhand.getRoleid() == 7)) {
       if (myCards.get(2).getNum() > CPUCards.get(2).getNum()) {
         result = "あなたの勝利です!";
         model.addAttribute("result", result);
@@ -591,16 +577,16 @@ public class CPUController {
       }
     }
     // ストレートフラッシュ・フラッシュ・ストレート同士の比較
-    else if ((myresultflag == cpuresultflag && cpuresultflag == 2)
-        || (myresultflag == cpuresultflag && cpuresultflag == 5)
-        || (myresultflag == cpuresultflag && cpuresultflag == 6)) {
-      if (myCards.get(4).getNum() > CPUCards.get(4).getNum()) {
+    else if ((userhand.getRoleid() == cpuhand.getRoleid() && cpuhand.getRoleid() == 2)
+        || (userhand.getRoleid() == cpuhand.getRoleid() && cpuhand.getRoleid() == 5)
+        || (userhand.getRoleid() == cpuhand.getRoleid() && cpuhand.getRoleid() == 6)) {
+      if (a1 > a2) {
         result = "あなたの勝利です!";
         model.addAttribute("result", result);
-      } else if (myCards.get(4).getNum() < CPUCards.get(4).getNum()) {
+      } else if (a1 < a2) {
         result = "CPUの勝利です...";
         model.addAttribute("result", result);
-      } else if (myCards.get(4).getNum() == CPUCards.get(4).getNum()) {
+      } else if (a1 == a2) {
         if (determinType(myCards, 4) < determinType(CPUCards, 4)) {
           result = "あなたの勝利です!";
           model.addAttribute("result", result);
@@ -610,18 +596,8 @@ public class CPUController {
         }
       }
     }
-    // スリーカード同士の比較
-    else if (myresultflag == cpuresultflag && cpuresultflag == 7) {
-      if (myCards.get(2).getNum() > CPUCards.get(2).getNum()) {
-        result = "あなたの勝利です!";
-        model.addAttribute("result", result);
-      } else if (myCards.get(2).getNum() < CPUCards.get(2).getNum()) {
-        result = "CPUの勝利です...";
-        model.addAttribute("result", result);
-      }
-    }
     // ツウ・ペア同士の比較
-    else if (myresultflag == cpuresultflag && cpuresultflag == 8) {
+    else if (userhand.getRoleid() == cpuhand.getRoleid() && cpuhand.getRoleid() == 8) {
       if (myCards.get(3).getNum() > CPUCards.get(3).getNum()) {
         result = "あなたの勝利です!";
         model.addAttribute("result", result);
@@ -629,41 +605,65 @@ public class CPUController {
         result = "CPUの勝利です...";
         model.addAttribute("result", result);
       } else if (myCards.get(3).getNum() == CPUCards.get(3).getNum()) {
-
+          if (userhand.getRolenum() > cpuhand.getRolenum()) {
+            result = "あなたの勝利です!";
+            model.addAttribute("result", result);
+          } else if (userhand.getRolenum() < cpuhand.getRolenum()) {
+            result = "CPUの勝利です...";
+            model.addAttribute("result", result);
+          } else if (userhand.getRolenum() == cpuhand.getRolenum()) {
+              if (determinType(myCards, mytwopairid) < determinType(CPUCards, cputwopairid)) {
+                result = "あなたの勝利です!";
+                model.addAttribute("result", result);
+              } else if (determinType(myCards, mytwopairid) > determinType(CPUCards, cputwopairid)) {
+                result = "CPUの勝利です...";
+                model.addAttribute("result", result);
+              }
+          }
       }
     }
     // ワン・ペア同士の比較
-    else if (myresultflag == cpuresultflag && cpuresultflag == 9) {
-      if (myonepairnum > cpuonepairnum) {
+    else if (userhand.getRoleid() == cpuhand.getRoleid() && cpuhand.getRoleid() == 9) {
+      if (userhand.getRolenum() > cpuhand.getRolenum()) {
         result = "あなたの勝利です!";
         model.addAttribute("result", result);
-      } else if (myonepairnum < cpuonepairnum) {
+      } else if (userhand.getRolenum() < cpuhand.getRolenum()) {
         result = "CPUの勝利です...";
         model.addAttribute("result", result);
-      } else if (myonepairnum == cpuonepairnum) {
-        int i = 2;
-        while (i <= 0) {
-          if (myonepairkicker[i] > cpuonepairkicker[i]) {
+      } else if (userhand.getRolenum() == cpuhand.getRolenum()) {
+          if (myonepairkickernum > cpuonepairkickernum) {
             result = "あなたの勝利です!";
             model.addAttribute("result", result);
-            break;
-          } else if (myonepairkicker[i] < cpuonepairkicker[i]) {
+          } else if (myonepairkickernum < cpuonepairkickernum) {
             result = "CPUの勝利です...";
             model.addAttribute("result", result);
-            break;
+          } else if (myonepairkickernum ==  cpuonepairkickernum) {
+              if (determinType(myCards, myonepairkickerid) < determinType(CPUCards, cpuonepairkickerid)) {
+                result = "あなたの勝利です!";
+                model.addAttribute("result", result);
+              } else if (determinType(myCards, myonepairkickerid) > determinType(CPUCards, cpuonepairkickerid)) {
+                result = "CPUの勝利です...";
+                model.addAttribute("result", result);
+              }
           }
-          i--;
-        }
       }
     }
     // ハイカード同士の比較
-    else if (myresultflag == cpuresultflag && cpuresultflag == 10) {
+    else if (userhand.getRoleid() == cpuhand.getRoleid() && cpuhand.getRoleid() == 10) {
       if (myCards.get(4).getNum() > CPUCards.get(4).getNum()) {
         result = "あなたの勝利です!";
         model.addAttribute("result", result);
       } else if (myCards.get(4).getNum() < CPUCards.get(4).getNum()) {
         result = "CPUの勝利です...";
         model.addAttribute("result", result);
+      } else if (myCards.get(4).getNum() == CPUCards.get(4).getNum()) {
+          if (determinType(myCards, 4) < determinType(CPUCards, 4)) {
+            result = "あなたの勝利です!";
+            model.addAttribute("result", result);
+          } else if (determinType(myCards, 4) > determinType(CPUCards, 4)) {
+              result = "CPUの勝利です...";
+              model.addAttribute("result", result);
+          }
       }
     }
 
