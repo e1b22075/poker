@@ -54,13 +54,7 @@
             th:field="*{id}" />
         </label>
       </div>
-      <h4>CPUの手札</h4>
-      <div th:each="item, iterStat : ${CPUCards}">
-        <label>
-          <input type="checkbox" th:value="${iterStat.index+1}" th:text="${item.num} + ' ' +  ${item.cardtype}"
-            th:field="*{id}" />
-        </label>
-      </div>
+
       <p><input type="submit" value="カードを交換する" /> </p>
     </form>
   </div>

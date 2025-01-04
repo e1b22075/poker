@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.springframework.org/schema/security">
+
+<head>
+  <meta charset="UTF-8">
+
+  <title>poker</title>
+  <script>
+    window.onload = function () {
+      var posse = new EventSource('/start');
+      posse.onopen = function (event) {
+        console.log("SSE connection established."); // 接続が確立された場合にコンソールに表示 };
+      }
+      posse.onmessage = function (event) {
+        console.log(event.data);
+        if (posse) posse.close();
+        window.location.href = '/poker';
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <h1> [[${login_user}]]さん</h1>
+  <h2>相手を待っています</h2>
+  <p>準備ができるまで待機してください。</p>
+  <a th:href="@{/room/changeStatus(roomId=${room2.id})}"><button>戻る</button></a>
+</body>
+
+</html>

@@ -28,7 +28,7 @@
     function updateTimer() {
       timerElement.textContent = `次のゲームまで: ${remainingTime}秒`;
       if (remainingTime <= 0) {
-        window.location.href = "/poker";
+        window.location.href = "/drop_reset";
       }
       remainingTime--;
     }

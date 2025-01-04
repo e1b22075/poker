@@ -41,7 +41,10 @@ public interface matchMapper {
   @Update("UPDATE match SET user2hand =#{handid} WHERE id =#{id} AND isActive = true")
   void updateUser2HandById(int id, int handid);
 
-  @Insert("INSERT INTO match (user1id,user2id,user1coin,user2coin,bet,isActive) VALUES (#{user1id},#{user2id},#{user1coin},#{user2coin},#{bet},true);")
+  @Update("UPDATE match SET round =#{round} WHERE id =#{id} AND isActive = true")
+  void updateRoundById(int id, int round);
+
+  @Insert("INSERT INTO match (user1id,user2id,user1coin,user2coin,bet,round,isActive) VALUES (#{user1id},#{user2id},#{user1coin},#{user2coin},#{bet},#{round},true);")
   @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
   void insertMatchandIsActive(match match);
 
