@@ -8,6 +8,9 @@
 
 <body>
   <h1> [[${login_user}]]さん</h1>
+  <div th:if="${round}">
+    <h1>第[[${round}]]ラウンド</h1>
+  </div>
   <p id="timer">次のゲームまで: 5秒</p>
   <a href="/logout">ログアウト</a>
   <div th:if="${message}">

@@ -31,6 +31,9 @@
 
 <body>
   <h1>[[${login_user}]]</h1>
+  <div th:if="${round}">
+    <h1>第[[${round}]]ラウンド</h1>
+  </div>
   <p id="timer">残り時間:</p>
   <a href="/logout">ログアウト</a>
   <div th:if="${turn}">
