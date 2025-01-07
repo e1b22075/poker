@@ -6,11 +6,16 @@ updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP);
 
 CREATE TABLE cards (
     id IDENTITY,
-    rid INTEGER NOT NULL,
     num INTEGER NOT NULL,
     cardtype VARCHAR NOT NULL,
-    isActive BOOLEAN,
-    PRIMARY KEY (id,rid)
+    isActive BOOLEAN
+);
+
+CREATE TABLE cards2 (
+    id IDENTITY,
+    num INTEGER NOT NULL,
+    cardtype VARCHAR NOT NULL,
+    isActive BOOLEAN
 );
 
 CREATE TABLE hand (
