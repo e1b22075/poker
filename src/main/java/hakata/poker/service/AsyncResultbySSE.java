@@ -14,43 +14,30 @@ import hakata.poker.model.matchMapper;
 import hakata.poker.model.match;
 
 @Service
-public class Asyncresult {
-
+public class AsyncResultbySSE {
   boolean dbUpdated = false;
   private final Logger logger = LoggerFactory.getLogger(AsyncReady.class);
   @Autowired
   private matchMapper matchMapper;
 
   @Transactional
-  public void syncUser1(int id, int handid) {
-    matchMapper.updateUser1HandById(id, handid);
-    return;
-  }
-
-  @Transactional
-  public void syncUser2(int id, int handid) {
-    matchMapper.updateUser2HandById(id, handid);
-    return;
-  }
-
-  @Transactional
-  public void syncresult(int id) {
-    match match = matchMapper.selectAllById(id);
-    matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
-    matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
-    matchMapper.updateBetById(match.getId(), 1);
-    System.out.println("ここまでの処理");
+  public void syncResult1(int id, int coin, int bet) {
+    matchMapper.updateuser1CoinById(id, coin + bet);
     this.dbUpdated = true;
-    System.out.println(dbUpdated);
+    return;
+  }
+
+  @Transactional
+  public void syncResult2(int id, int coin, int bet) {
+    matchMapper.updateuser1CoinById(id, coin + bet);
+    this.dbUpdated = true;
     return;
   }
 
   @Async
   public void AsyncReusltSend(SseEmitter emitter) {
     String massage = "result";
-    System.out.println("ここつながるか");
     try {
-
       while (true) {// 無限ループ
         // DBが更新されていなければ0.5s休み
         if (false == dbUpdated) {
@@ -58,7 +45,7 @@ public class Asyncresult {
           continue;
         }
         emitter.send(massage);
-        TimeUnit.MILLISECONDS.sleep(1000);
+        TimeUnit.MILLISECONDS.sleep(100);
         dbUpdated = false;
       }
     } catch (Exception e) {

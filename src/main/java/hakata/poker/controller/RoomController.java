@@ -29,6 +29,9 @@ import hakata.poker.model.RoomMapper;
 import hakata.poker.model.User;
 import hakata.poker.model.UserMapper;
 import hakata.poker.service.AsyncRoom;
+import hakata.poker.model.match;
+import hakata.poker.model.matchMapper;
+import hakata.poker.service.AsyncReady;
 
 @Controller
 @RequestMapping("/room")
@@ -39,6 +42,12 @@ public class RoomController {
 
   @Autowired
   private UserMapper userMapper;
+
+  @Autowired
+  private matchMapper matchMapper;
+
+  @Autowired
+  private AsyncReady ready;
 
   @Autowired
   private AsyncRoom acRoom;
@@ -84,6 +93,7 @@ public class RoomController {
   @Transactional
   public String leaveRoom(@RequestParam Integer roomId, ModelMap model, Principal prin) {
     String loginUser = prin.getName(); // ログインユーザ情報
+
     // ログインユーザーが所属しているルームを取得
     acRoom.syncLeaveRoom(loginUser, roomId);
 
@@ -94,11 +104,58 @@ public class RoomController {
   @GetMapping("/changeStatus")
   @Transactional
   public String changeStatus(@RequestParam Integer roomId, ModelMap model, Principal prin) {
+    int userid;
+    match match = new match();
     String loginUser = prin.getName(); // ログインユーザ情報
-    acRoom.syncChangeStatusByuName_and_rId(loginUser,roomId);
-
+    acRoom.syncChangeStatusByuName_and_rId(loginUser, roomId);
+    model.addAttribute("login_user", loginUser);
     // 再びroom1の処理を実行してルーム一覧を表示
-    return room2(roomId,model, prin);
+    User user1 = userMapper.selectAllByName(loginUser);
+    Room enteredRoom = roomMapper.selectAllById(roomId);
+    int userIndex = 0;
+    if (enteredRoom.getUser1id() == user1.getId()) {
+      userIndex = 1;
+    } else if (enteredRoom.getUser2id() == user1.getId()) {
+      userIndex = 2;
+    }
+    Room room2 = acRoom.syncShowRoomById(roomId);
+    /*
+     * ArrayList<User> users1 = userMapper.selectAll();
+     * model.addAttribute("users", users1);
+     */
+    model.addAttribute("room2", true);
+
+    model.addAttribute("room2", room2);
+    if (userIndex == 1 && !enteredRoom.getUser1Status()) {
+      return room2(roomId, model, prin);
+    } else if (userIndex == 2 && !enteredRoom.getUser2Status()) {
+      return room2(roomId, model, prin);
+    }
+    if (enteredRoom.getUser1Status() && enteredRoom.getUser2Status()) {
+      if (matchMapper.selectAllById(room2.getUser1id()) != null || matchMapper
+          .selectAllById(room2.getUser2id()) != null) {
+        match = matchMapper.selectAllById(room2.getUser1id());
+        model.addAttribute("round", match.getRound() / 2 + 1);
+        model.addAttribute("coin", match.getUser1coin());
+        model.addAttribute("bet", match.getBet());
+        return "poker";
+      }
+      userid = userMapper.selectid(room2.getUser1Name());
+      match.setUser1id(userid);
+      userid = userMapper.selectid(room2.getUser2Name());
+      match.setUser2id(userid);
+      match.setUser1coin(5);
+      match.setUser2coin(5);
+      match.setBet(1);
+      match.setRound(1);
+      this.ready.syncNewMatch(match);
+      model.addAttribute("round", match.getRound() / 2 + 1);
+      model.addAttribute("coin", match.getUser1coin());
+      model.addAttribute("bet", match.getBet());
+      return "poker.html";
+    }
+
+    return "ready2.html";
   }
 
   @GetMapping("/step3")
@@ -108,11 +165,17 @@ public class RoomController {
     return sseEmitter;
   }
 
-  @GetMapping("/Asyncr2")
+  @GetMapping("/update")
   public SseEmitter asyncr2(@RequestParam Integer roomId) {
     final SseEmitter sseEmitter = new SseEmitter(60 * 1000L);
-    this.acRoom.asyncShowRoomInfo(roomId,sseEmitter);
+    this.acRoom.asyncShowRoomInfo(roomId, sseEmitter);
     return sseEmitter;
   }
 
+  @GetMapping("/start")
+  public SseEmitter sample() {
+    final SseEmitter emitter = new SseEmitter();
+    this.ready.AsyncReadySend(emitter);
+    return emitter;
+  }
 }

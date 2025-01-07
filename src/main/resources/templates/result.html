@@ -15,30 +15,40 @@
 <body>
   <h1>[[${login_user}]]さん、結果が出ました</h1>
   <p id="p1"></p>
+  <p id="timer">次の試合まで</p>
   <a href="/logout">ログアウト</a>
   <div th:if="${turn}">
     <h2>あなたは[[${turn}]]ターン目です。</h2>
   </div>
+
+  <div th:if="${message}">
+    <h3 th:text="${message}"></h3>
+  </div>
   <div th:if="${coin}">
     <h2>あなたのコインは[[${coin}]]枚です。</h2>
   </div>
-  <div th:if="${rays}">
-    <h2>あなたは[[${rays}]]枚賭けてます。</h2>
+
+  <div th:if="${result}">
+    <h2 th:text="${result}"></h2>
   </div>
-  <h2>現在の手札</h2>
-  <div th:if="${myCards}">
-    <div th:each="item, iterStat : ${myCards}">
-      <tr>
-        <td>[[${item.num}]] [[${item.cardtype}]]</td>
-      </tr>
-    </div>
-
-    <div th:if="${myrole}">
-      <h3 th:text="${myrole}"></h3>
-    </div>
-
-
-    <div th:if="${result}">
-      <h2 th:text="${result}"></h2>
-    </div>
   </div>
+  <script th:inline="javascript">
+    // 設定する制限時間（秒）
+    const limitTime = 5;
+    let remainingTime = limitTime;
+
+
+    const timerElement = document.getElementById('timer');
+
+    // タイマーの更新と処理
+    function updateTimer() {
+      timerElement.textContent = `次の試合まで: ${remainingTime}秒`;
+      if (remainingTime <= 0) {
+        window.location.href = "/poker/reset";
+      }
+      remainingTime--;
+    }
+
+    // タイマーを1秒ごとに更新
+    const timerInterval = setInterval(updateTimer, 1000);
+  </script>
