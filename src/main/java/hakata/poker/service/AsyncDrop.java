@@ -45,7 +45,7 @@ public class AsyncDrop {
           continue;
         }
         emitter.send(massage);
-        TimeUnit.MILLISECONDS.sleep(10);
+        TimeUnit.MILLISECONDS.sleep(100);
         dbUpdated = false;
       }
     } catch (Exception e) {

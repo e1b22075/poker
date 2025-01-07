@@ -6,13 +6,14 @@
   <title>poker</title>
   <script>
     window.onload = function () {
-      var sse = new EventSource('/re');
+      var sse = new EventSource('/result');
       sse.onopen = function (event) {
         console.log("SSE connection established."); // 接続が確立された場合にコンソールに表示 };
       }
       sse.onmessage = function (event) {
         console.log(event.data);
-        window.location.href = '/poker/showResult';
+        if (sse) sse.close();
+        window.location.href = '/poker/result2';
       }
     };
 
@@ -23,9 +24,17 @@
 
 <body>
   <h1>[[${login_user}]]さん、結果をお待ちください</h1>
+  <div th:if="${round}">
+    <h1>第[[${round}]]ラウンド</h1>
+  </div>
   <p id="p1"></p>
   <a href="/poker/result"><button>結果を表示</button></a>
+  <br>
   <a href="/logout">ログアウト</a>
+  <br>
+  <div th:if="${message}">
+    <h3 th:text="${message}"></h3>
+  </div>
   <div th:if="${turn}">
     <h2>あなたは[[${turn}]]ターン目です。</h2>
   </div>

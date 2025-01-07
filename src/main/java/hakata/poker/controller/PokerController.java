@@ -119,7 +119,7 @@ public class PokerController {
     for (Cards card : myCards) {
       cardsMapper.updateisActiveTrueById(card.getId());
     }
-
+    myCards.sort(Comparator.comparing(Cards::getNum));
     hand.setHand1id(myCards.get(0).getId());
     hand.setHand2id(myCards.get(1).getId());
     hand.setHand3id(myCards.get(2).getId());
@@ -149,8 +149,8 @@ public class PokerController {
     model.addAttribute("myCards", myCards);
     model.addAttribute("turn", hand.getTurn());
     model.addAttribute("index", new index());
-
-    return "poker.html";
+    model.addAttribute("round", match.getRound() / 2 + 1);
+    return "select.html";
   }
 
   @PostMapping("/result")
@@ -209,6 +209,7 @@ public class PokerController {
     userhand.setHand3id(myCards.get(2).getId());
     userhand.setHand4id(myCards.get(3).getId());
     userhand.setHand5id(myCards.get(4).getId());
+    userhand.setTurn(userhand.getTurn() + 1);
     handMapper.insertHandandIsActive(userhand);
 
     model.addAttribute("myCards", myCards);
@@ -224,7 +225,6 @@ public class PokerController {
     model.addAttribute("rays", match.getBet());
 
     model.addAttribute("myCards", myCards);
-    model.addAttribute("turn", userhand.getTurn());
 
     model.addAttribute("myCards", myCards);
 
@@ -349,8 +349,21 @@ public class PokerController {
       model.addAttribute("myrole", myrole);
       myresultflag = 9;
     }
-
-    return "select";
+    if (userhand.getTurn() >= 3) {
+      if (match.getUser1id() == userid) {
+        this.result.syncUser1(match.getId(), userhand.getId());
+        System.out.println("ユーザー1の書き込み");
+      } else if (match.getUser2id() == userid) {
+        this.result.syncUser2(match.getId(), userhand.getId());
+        System.out.println("ユーザー2の書き込み");
+      }
+      model.addAttribute("round", match.getRound() / 2 + 1);
+      return "wait";
+    } else {
+      model.addAttribute("round", match.getRound() / 2 + 1);
+      model.addAttribute("turn", userhand.getTurn());
+      return "select";
+    }
   }
 
   @GetMapping("poker/call")
@@ -376,7 +389,6 @@ public class PokerController {
 
     model.addAttribute("myCards", myCards);
 
-    hand.setTurn(hand.getTurn() + 1);
     handMapper.insertHandandIsActive(hand);
 
     match = matchMapper.selectAllById(userid);
@@ -392,24 +404,10 @@ public class PokerController {
     model.addAttribute("turn", hand.getTurn());
 
     model.addAttribute("myCards", myCards);
-    if (hand.getTurn() >= 3) {
-      if (match.getUser1id() == userid) {
-        this.result.syncUser1(match.getId(), hand.getId());
-        System.out.println("ユーザー1の書き込み");
-      } else if (match.getUser2id() == userid) {
-        this.result.syncUser2(match.getId(), hand.getId());
-        System.out.println("ユーザー2の書き込み");
-      }
-      match = matchMapper.selectAllById(userid);
-      if (match.getUser1hand() != 0 && match.getUser2hand() != 0) {
 
-      }
-      return "wait";
-    } else {
-      model.addAttribute("index", new index());
-
-      return "poker.html";
-    }
+    model.addAttribute("index", new index());
+    model.addAttribute("round", match.getRound() / 2 + 1);
+    return "poker.html";
   }
 
   @GetMapping("poker/drop")
@@ -508,6 +506,76 @@ public class PokerController {
     return "drop.html";
   }
 
+  @GetMapping("drop_reset")
+  public String reset2(ModelMap model, Principal prin) {
+    String loginUser = prin.getName(); // ログインユーザ情報
+    model.addAttribute("login_user", loginUser);
+    match match;
+    int userid;
+    userid = userMapper.selectid(loginUser);
+    match = matchMapper.selectAllById(userid);
+    if (match.getUser1coin() <= 0 || match.getUser2coin() <= 0 || match.getRound() >= 5) {
+      if (match.getUser1id() == userid && match.getUser1coin() <= 0) {
+        return "lose";
+      } else if (match.getUser2id() == userid && match.getUser2coin() <= 0) {
+        return "lose";
+      } else if (match.getUser1id() == userid && match.getUser1coin() < match.getUser2coin()) {
+        return "lose";
+      } else if (match.getUser2id() == userid && match.getUser2coin() < match.getUser1coin()) {
+        return "lose";
+      } else {
+        return "win";
+      }
+    }
+
+    matchMapper.updateUser1HandById(match.getId(), 0);
+    matchMapper.updateUser2HandById(match.getId(), 0);
+    match.setRound(match.getRound() + 1);
+    matchMapper.updateRoundById(match.getId(), match.getRound());
+    model.addAttribute("round", match.getRound() / 2 + 1);
+    return "poker.html";
+  }
+
+  @GetMapping("poker/reset")
+  public String reset(ModelMap model, Principal prin) {
+    int userid;
+    int coin;
+    match match;
+    // ログインユーザ情報の受け渡し
+    String loginUser = prin.getName();
+    model.addAttribute("login_user", loginUser);
+    // ここまで
+
+    userid = userMapper.selectid(loginUser);
+
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
+
+    cardsMapper.updateAllfalsetotrueByfalse();
+
+    model.addAttribute("index", new index());
+    match = matchMapper.selectAllById(userid);
+    if (match.getUser1coin() <= 0 || match.getUser2coin() <= 0 || match.getRound() >= 5) {
+      if (match.getUser1id() == userid && match.getUser1coin() <= 0) {
+        return "lose";
+      } else if (match.getUser2id() == userid && match.getUser2coin() <= 0) {
+        return "lose";
+      } else if (match.getUser1id() == userid && match.getUser1coin() < match.getUser2coin()) {
+        return "lose";
+      } else if (match.getUser2id() == userid && match.getUser2coin() < match.getUser1coin()) {
+        return "lose";
+      } else {
+        return "win";
+      }
+    }
+
+    matchMapper.updateUser1HandById(match.getId(), 0);
+    matchMapper.updateUser2HandById(match.getId(), 0);
+    match.setRound(match.getRound() + 1);
+    matchMapper.updateRoundById(match.getId(), match.getRound());
+    model.addAttribute("round", match.getRound() / 2 + 1);
+    return "poker.html";
+  }
+
   @GetMapping("poker/rays")
   public String rays(ModelMap model, Principal prin) {
     int userid;
@@ -523,7 +591,7 @@ public class PokerController {
     } else if (match.getUser2id() == userid) {
       model.addAttribute("coin", match.getUser2coin());
     }
-
+    model.addAttribute("round", match.getRound() / 2 + 1);
     return "rays.html";
   }
 
@@ -550,7 +618,6 @@ public class PokerController {
 
     model.addAttribute("myCards", myCards);
 
-    userhand.setTurn(userhand.getTurn() + 1);
     handMapper.insertHandandIsActive(userhand);
 
     match = matchMapper.selectAllById(userid);
@@ -566,20 +633,10 @@ public class PokerController {
     model.addAttribute("rays", match.getBet());
 
     model.addAttribute("turn", userhand.getTurn());
-    if (userhand.getTurn() >= 3) {
-      if (match.getUser1id() == userid) {
-        System.out.println("ユーザー１の書き込み");
-        this.result.syncUser1(match.getId(), userhand.getId());
-      } else if (match.getUser2id() == userid) {
-        System.out.println("ユーザー2の書き込み");
-        this.result.syncUser2(match.getId(), userhand.getId());
-      }
-      return "wait";
-    } else {
-      model.addAttribute("index", new index());
 
-      return "poker";
-    }
+    model.addAttribute("index", new index());
+    model.addAttribute("round", match.getRound() / 2 + 1);
+    return "poker";
   }
 
   @GetMapping("poker/result")
@@ -594,25 +651,63 @@ public class PokerController {
     Hand userhand = handMapper.selectByUserId(userid);
     Hand hand;
     match = matchMapper.selectAllById(userid);
+    model.addAttribute("round", match.getRound() / 2 + 1);
     if (match.getUser1hand() != 0 && match.getUser2hand() != 0) {
       if (match.getUser1id() == userid) {
         userid2 = match.getUser2id();
         hand = handMapper.selectByUserId(userid2);
         message = "あなたの負けです";
-        this.result.syncresult(userid);
+        result.syncresult(match.getId());
+        drop.syncDrop1(match.getId());
+        match = matchMapper.selectAllById(userid);
         model.addAttribute("message", message);
+        model.addAttribute("coin", match.getUser1coin());
       } else if (match.getUser2id() == userid) {
         userid2 = match.getUser1id();
         hand = handMapper.selectByUserId(userid2);
         message = "あなたの勝ちです";
-        this.result.syncresult(userid);
+        result.syncresult(match.getId());
+        drop.syncDrop2(match.getId());
+        match = matchMapper.selectAllById(userid);
         model.addAttribute("message", message);
+        model.addAttribute("coin", match.getUser2coin());
       }
 
       return "result";
     } else {
       return "wait";
     }
+  }
+
+  @GetMapping("poker/result2")
+  public String result2(ModelMap model, Principal prin) {
+    int userid;
+    int userid2;
+    String loginUser = prin.getName(); // ログインユーザ情報
+    model.addAttribute("login_user", loginUser);
+    match match;
+    String message;
+    userid = userMapper.selectid(loginUser);
+    Hand userhand = handMapper.selectByUserId(userid);
+    Hand hand;
+    match = matchMapper.selectAllById(userid);
+    model.addAttribute("round", match.getRound() / 2 + 1);
+    if (match.getUser1id() == userid) {
+      userid2 = match.getUser2id();
+      hand = handMapper.selectByUserId(userid2);
+      message = "あなたの負けです";
+      model.addAttribute("message", message);
+      model.addAttribute("coin", match.getUser1coin());
+    } else if (match.getUser2id() == userid) {
+      userid2 = match.getUser1id();
+      hand = handMapper.selectByUserId(userid2);
+      message = "あなたの勝ちです";
+      model.addAttribute("message", message);
+      model.addAttribute("coin", match.getUser2coin());
+    }
+
+    return "result";
+
   }
 
   private final Logger logger = LoggerFactory.getLogger(PokerController.class);
@@ -653,10 +748,10 @@ public class PokerController {
     return emitter;
   }
 
-  @GetMapping("/re")
+  @GetMapping("/result")
   public SseEmitter resultSse() {
     final SseEmitter emitter = new SseEmitter();
-    this.result.AsyncReusltSend(emitter);
+    this.drop.AsyncDropSend(emitter);
     return emitter;
   }
 }

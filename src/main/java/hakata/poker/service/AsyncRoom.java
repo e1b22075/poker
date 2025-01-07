@@ -46,12 +46,21 @@ public class AsyncRoom {
   public void syncLeaveRoom(String userName, int roomId) {
     Room leavedRoom = rMapper.selectAllById(roomId);
     String user1Name = leavedRoom.getUser1Name();
-    String user2Name = leavedRoom.getUser2Name();
-    if (user1Name.equals(userName)) {
-      rMapper.updateUser1ResetByRoomId(roomId);
-    }
-    if (user2Name.equals(userName)) {
+    String user2Name;
+    if (leavedRoom.getUser2Name() == null) {
+      if (user1Name.equals(userName)) {
+        rMapper.updateUser1ResetByRoomId(roomId);
+      }
+    } else if (leavedRoom.getUser1Name() == null) {
       rMapper.updateUser2ResetByRoomId(roomId);
+    } else {
+      user2Name = leavedRoom.getUser2Name();
+      if (user1Name.equals(userName)) {
+        rMapper.updateUser1ResetByRoomId(roomId);
+      }
+      if (user2Name.equals(userName)) {
+        rMapper.updateUser2ResetByRoomId(roomId);
+      }
     }
     this.dbUpdated = true;
   }
@@ -59,13 +68,23 @@ public class AsyncRoom {
   public void syncChangeStatusByuName_and_rId(String userName, int roomId) {
     Room changedRoom = rMapper.selectAllById(roomId);
     String user1Name = changedRoom.getUser1Name();
-    String user2Name = changedRoom.getUser2Name();
-    if (user1Name.equals(userName)) {
-      rMapper.updateUser1changeStatusByRoomId(roomId);
-    }
-    if (user2Name.equals(userName)) {
+    String user2Name;
+    if (changedRoom.getUser2Name() == null) {
+      if (user1Name.equals(userName)) {
+        rMapper.updateUser1changeStatusByRoomId(roomId);
+      }
+    } else if (changedRoom.getUser1Name() == null) {
       rMapper.updateUser2changeStatusByRoomId(roomId);
+    } else {
+      user2Name = changedRoom.getUser2Name();
+      if (user1Name.equals(userName)) {
+        rMapper.updateUser1changeStatusByRoomId(roomId);
+      }
+      if (user2Name.equals(userName)) {
+        rMapper.updateUser2changeStatusByRoomId(roomId);
+      }
     }
+
     this.dbUpdated = true;
   }
 

@@ -44,6 +44,7 @@ CREATE TABLE match (
     user1hand INTEGER,
     user2hand INTEGER,
     bet INTEGER,
+    round INTEGER,
     isActive BOOLEAN
 );
 

@@ -7,6 +7,8 @@ public class match {
   int user1coin;
   int user2coin;
 
+  int round;
+
   public void setUser1hand(int user1hand) {
     this.user1hand = user1hand;
   }
@@ -107,5 +109,13 @@ public class match {
   }
 
   boolean isActive;
+
+  public void setRound(int round) {
+    this.round = round;
+  }
+
+  public int getRound() {
+    return round;
+  }
 
 }

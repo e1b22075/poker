@@ -107,6 +107,12 @@ public class RoomController {
     int userid;
     match match = new match();
     String loginUser = prin.getName(); // ログインユーザ情報
+<<<<<<< HEAD
+    acRoom.syncChangeStatusByuName_and_rId(loginUser,roomId);
+
+    // 再びroom2の処理を実行してルーム一覧を表示
+    return room2(roomId,model, prin);
+=======
     acRoom.syncChangeStatusByuName_and_rId(loginUser, roomId);
     model.addAttribute("login_user", loginUser);
     // 再びroom1の処理を実行してルーム一覧を表示
@@ -156,6 +162,7 @@ public class RoomController {
     }
 
     return "ready2.html";
+>>>>>>> 7b8163acef491b5b136ff46989854ca34556974c
   }
 
   @GetMapping("/step3")

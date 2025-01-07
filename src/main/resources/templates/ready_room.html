@@ -49,15 +49,20 @@
       </li>
     </ul>
     <br>
-    <a th:href="@{/room/changeStatus(roomId=${room2.id})}"><button>準備</button></a>
-    <br>
+    <div th:if="${room2.id != 1}">
+      <a th:href="@{/room/changeStatus(roomId=${room2.id})}"><button>準備</button></a>
+      <br>
+    </div>
     <a th:href="@{/room/leaveRoom(roomId=${room2.id})}">退室</a>
     <br>
-    <a href="/poker">pokerを開始</a>
-    <br>
-    <a href="/cpu/poker">pokerを開始(CPU)</a>
-    <br>
-    <a href="/help" target="_blank" rel="noreferrer noopener">helpへのアクセス</a>
+
+
+    <div th:if="${room2.id == 1}">
+      <a th:if="${room2.id}" href="/cpu/poker"><button>pokerを開始(CPU)</button></a>
+      <br>
+    </div>
+    <a href="/help">helpへのアクセス</a>
+
   </div>
 </body>
 
