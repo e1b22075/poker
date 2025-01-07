@@ -2,19 +2,16 @@ package hakata.poker.model;
 
 public class Cards {
   int id;
-  int rid;
   int num;
   String cardtype;
   boolean isActive;
+
   public String getCardtype() {
     return cardtype;
   }
 
   public int getId() {
     return id;
-  }
-  public int getRid() {
-      return rid;
   }
 
   public int getNum() {
@@ -35,9 +32,6 @@ public class Cards {
 
   public void setId(int id) {
     this.id = id;
-  }
-  public void setRid(int rid) {
-      this.rid = rid;
   }
 
   public void setNum(int num) {

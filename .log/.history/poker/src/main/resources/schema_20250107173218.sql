@@ -10,7 +10,7 @@ CREATE TABLE cards (
     rid INTEGER NOT NULL,
     num INTEGER NOT NULL,
     cardtype VARCHAR NOT NULL,
-    isActive BOOLEAN
+    isActive BOOLEAN,
 );
 
 CREATE TABLE hand (
