@@ -5,7 +5,7 @@ public class User {
   String userName;
   String password_hash;
 
-  public User(int id, String userName, String password_hash, String email, java.sql.Timestamp created_at,
+  public User(int id, String userName, String password_hash, java.sql.Timestamp created_at,
       java.sql.Timestamp updated_at) {
     this.id = id;
     this.userName = userName;
@@ -34,6 +34,7 @@ public class User {
   public void setUpdated_at(java.sql.Timestamp updated_at) {
     this.updated_at = updated_at;
   }
+
   public java.sql.Timestamp getCreated_at() {
     return created_at;
   }
@@ -65,6 +66,5 @@ public class User {
   public String getUserName() {
     return userName;
   }
-  
 
 }

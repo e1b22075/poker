@@ -30,6 +30,8 @@ public class SecurityConfig {
             .authenticated()
             .requestMatchers("/error")
             .permitAll()
+            .requestMatchers(AntPathRequestMatcher.antMatcher("/user/**"))
+            .permitAll() // /userへのアクセスを許可
             .requestMatchers(AntPathRequestMatcher.antMatcher("/poker/**"))
             .authenticated()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/**"))

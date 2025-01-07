@@ -97,7 +97,7 @@ public class RoomController {
     String loginUser = prin.getName(); // ログインユーザ情報
     acRoom.syncChangeStatusByuName_and_rId(loginUser,roomId);
 
-    // 再びroom1の処理を実行してルーム一覧を表示
+    // 再びroom2の処理を実行してルーム一覧を表示
     return room2(roomId,model, prin);
   }
 

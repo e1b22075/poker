@@ -28,6 +28,7 @@ public class AsyncRoom {
     int userid = loginUser.getId();
     Room enteredRoom = rMapper.selectAllById(roomId);
     String userName = loginUser.getUserName();
+    
     if (userName.equals(enteredRoom.getUser1Name()) || userName.equals(enteredRoom.getUser2Name())) {
       return;
     }

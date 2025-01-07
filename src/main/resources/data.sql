@@ -1,9 +1,8 @@
-
-INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('おくだ', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('ひらお', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('よしたに', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('まつうら', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('CPU', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO users (userName, password_hash, created_at, updated_at) VALUES ('おくだ', 'isdev', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO users (userName, password_hash, created_at, updated_at) VALUES ('ひらお', 'isdev', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO users (userName, password_hash, created_at, updated_at) VALUES ('よしたに', 'isdev', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO users (userName, password_hash, created_at, updated_at) VALUES ('まつうら', 'isdev', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO users (userName, password_hash, created_at, updated_at) VALUES ('CPU', 'isdev', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
 INSERT INTO cards (num,cardtype,isActive) VALUES (1,'heart',false);
