@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup Page</title>
+  <link rel="stylesheet" href="./css/styles.css">
+  <script src="./js/signup.js" defer></script>
+</head>
+
+<body>
+  <div class="signup-container">
+    <h2>User Signup</h2>
+    <form action="http://localhost:8080/signup" method="post">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required class="signup-input">
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required class="signup-input">
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required class="signup-input">
+
+      <label for="password-confirm">Confirm Password:</label>
+      <input type="password" id="passwordConfirm" name="passwordConfirm" required class="signup-input">
+
+      <button type="submit" class="signup-btn">Signup</button>
+    </form>
+    <!-- エラーメッセージを表示するための場所 -->
+    <div id="error-message" style="color: red;"></div>
+  </div>
+</body>
+
+</html>
