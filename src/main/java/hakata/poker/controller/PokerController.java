@@ -650,12 +650,14 @@ public class PokerController {
     userid = userMapper.selectid(loginUser);
     Hand userhand = handMapper.selectByUserId(userid);
     Hand hand;
+
     match = matchMapper.selectAllById(userid);
     model.addAttribute("round", match.getRound() / 2 + 1);
     if (match.getUser1hand() != 0 && match.getUser2hand() != 0) {
       if (match.getUser1id() == userid) {
         userid2 = match.getUser2id();
         hand = handMapper.selectByUserId(userid2);
+        
         message = "あなたの負けです";
         result.syncresult(match.getId());
         drop.syncDrop1(match.getId());

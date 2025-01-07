@@ -12,7 +12,8 @@
 <body>
   <div class="signup-container">
     <h2>User Signup</h2>
-    <form action="http://localhost:8080/signup" method="post">
+    <form action="/signup" method="post">
+      <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
       <label for="username">Username:</label>
       <input type="text" id="username" name="username" required class="signup-input">
 
