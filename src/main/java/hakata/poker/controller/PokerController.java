@@ -27,6 +27,7 @@ import hakata.poker.model.Room;
 import hakata.poker.model.RoomMapper;
 import hakata.poker.model.PlayerIndex;
 import hakata.poker.service.AsyncCount;
+import hakata.poker.model.CPUIndex;
 import hakata.poker.model.Cards;
 import hakata.poker.model.CardsMapper;
 import hakata.poker.model.Hand;
@@ -119,7 +120,7 @@ public class PokerController {
     for (Cards card : myCards) {
       cardsMapper.updateisActiveTrueById(card.getId());
     }
-    myCards.sort(Comparator.comparing(Cards::getNum));
+
     hand.setHand1id(myCards.get(0).getId());
     hand.setHand2id(myCards.get(1).getId());
     hand.setHand3id(myCards.get(2).getId());
@@ -128,7 +129,11 @@ public class PokerController {
     hand.setTurn(turn);
     userid = userMapper.selectid(loginUser);
     hand.setUserid(userid);
-    myCards.sort(Comparator.comparing(Cards::getNum));
+
+    myCards.sort(Comparator.comparingInt((Cards card) -> {
+      int num = card.getNum();
+      return num == 1 ? Integer.MAX_VALUE : num; // 1を最大値として扱う
+    }));
 
     handMapper.insertHandandIsActive(hand);
 
@@ -161,21 +166,14 @@ public class PokerController {
     Cards userdrawCards;
     match match;
 
-    int myflag1 = 0; // ロイヤルストレートフラッシュ
-    int myflag2 = 0; // ストレートフラッシュ
-    int myflag3 = 0; // フォア・カード
-    int myflag4 = 0; // フルハウス
-    int myflag5 = 0; // フラッシュ
-    int myflag6 = 0; // ストレート
-    int myflag7 = 0; // スリーカード
-    int myflag8 = 0; // ツウ・ペア
-    int myflag9 = 0; // ワン・ペア
+    int myflashflag = 0; // プレイヤーのフラッシュのフラグ
+    int mystraightflag = 0; // プレイヤーのストレートのフラグ
 
-    int myonepairnum = 0;
+    int myonepairkickernum = 0;
+    int myonepairkickerid = 0;
+    int mytwopairid = 0;
 
     String myrole;
-
-    int myresultflag = 10;
 
     String result;
 
@@ -203,7 +201,12 @@ public class PokerController {
       myCards.set(indes - 1, userdrawCards);
       cardsMapper.updateisActiveTrueById(myCards.get(indes - 1).getId());
     }
-    myCards.sort(Comparator.comparing(Cards::getNum));
+
+    myCards.sort(Comparator.comparingInt((Cards card) -> {
+      int num = card.getNum();
+      return num == 1 ? Integer.MAX_VALUE : num; // 1を最大値として扱う
+    }));
+
     userhand.setHand1id(myCards.get(0).getId());
     userhand.setHand2id(myCards.get(1).getId());
     userhand.setHand3id(myCards.get(2).getId());
@@ -231,11 +234,14 @@ public class PokerController {
     model.addAttribute("index", new index());
 
     // ストレートの判定
-    if (myCards.get(4).getNum() == myCards.get(3).getNum() + 1 && myCards.get(3).getNum() == myCards.get(2).getNum() + 1
+    if ((myCards.get(4).getNum() == myCards.get(3).getNum() + 1
+        && myCards.get(3).getNum() == myCards.get(2).getNum() + 1
         && myCards.get(2).getNum() == myCards.get(1).getNum() + 1
-        && myCards.get(1).getNum() == myCards.get(0).getNum() + 1) {
+        && myCards.get(1).getNum() == myCards.get(0).getNum() + 1)
+        || (myCards.get(4).getNum() == 1 && myCards.get(3).getNum() == 13 && myCards.get(2).getNum() == 12
+            && myCards.get(1).getNum() == 11 && myCards.get(0).getNum() == 10)) {
       userhand.setRoleid(6);
-      myflag6 = 1;
+      mystraightflag = 1;
     }
     // フラッシュの判定
     if (myCards.get(0).getCardtype() == myCards.get(1).getCardtype()
@@ -243,18 +249,16 @@ public class PokerController {
         && myCards.get(2).getCardtype() == myCards.get(3).getCardtype()
         && myCards.get(3).getCardtype() == myCards.get(4).getCardtype()) {
       userhand.setRoleid(5);
-      myflag5 = 1;
+      myflashflag = 1;
     }
     // ロイヤルストレートフラッシュの判定
-    if (myflag5 == 1 && myCards.get(0).getNum() == 1 && myCards.get(1).getNum() == 10
-        && myCards.get(2).getNum() == 11 && myCards.get(3).getNum() == 12 && myCards.get(4).getNum() == 13) {
+    if (myflashflag == 1 && myCards.get(4).getNum() == 1 && myCards.get(0).getNum() == 10
+        && myCards.get(1).getNum() == 11 && myCards.get(2).getNum() == 12 && myCards.get(3).getNum() == 13) {
       userhand.setRoleid(1);
-      myflag1 = 1;
     }
     // ストレートフラッシュの判定
-    else if (myflag6 == 1 && myflag5 == 1) {
+    else if (mystraightflag == 1 && myflashflag == 1) {
       userhand.setRoleid(2);
-      myflag2 = 1;
     }
 
     // フォーカードの判定
@@ -263,26 +267,22 @@ public class PokerController {
         || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(2).getNum() == myCards.get(3).getNum()
             && myCards.get(3).getNum() == myCards.get(4).getNum())) {
       userhand.setRoleid(3);
-      myflag3 = 1;
     }
     // スリーカードの判定
     else if ((myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(1).getNum() == myCards.get(2).getNum())
         || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(2).getNum() == myCards.get(3).getNum())
         || (myCards.get(2).getNum() == myCards.get(3).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())) {
       userhand.setRoleid(7);
-      myflag7 = 1;
 
       // フルハウスの判定
       if (myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(1).getNum() == myCards.get(2).getNum()) {
         if (myCards.get(3).getNum() == myCards.get(4).getNum()) {
           userhand.setRoleid(4);
-          myflag4 = 1;
         }
       } else if (myCards.get(2).getNum() == myCards.get(3).getNum()
           && myCards.get(3).getNum() == myCards.get(4).getNum()) {
         if (myCards.get(0).getNum() == myCards.get(1).getNum()) {
           userhand.setRoleid(4);
-          myflag4 = 1;
         }
       }
     }
@@ -291,64 +291,77 @@ public class PokerController {
         || (myCards.get(1).getNum() == myCards.get(2).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())
         || (myCards.get(0).getNum() == myCards.get(1).getNum() && myCards.get(3).getNum() == myCards.get(4).getNum())) {
       userhand.setRoleid(8);
-      myflag8 = 1;
+
+      // ペアになっていないカードの手札idを保存(カードの数値ではなく、手札の左から何番目にあるかの数字)
+      if (myCards.get(0).getNum() == myCards.get(1).getNum()
+          && myCards.get(2).getNum() == myCards.get(3).getNum()) {
+        userhand.setRolenum(myCards.get(4).getNum());
+        mytwopairid = 4;
+      } else if (myCards.get(1).getNum() == myCards.get(2).getNum()
+          && myCards.get(3).getNum() == myCards.get(4).getNum()) {
+        userhand.setRolenum(myCards.get(0).getNum());
+        mytwopairid = 0;
+      } else if (myCards.get(0).getNum() == myCards.get(1).getNum()
+          && myCards.get(3).getNum() == myCards.get(4).getNum()) {
+        userhand.setRolenum(myCards.get(2).getNum());
+        mytwopairid = 2;
+      }
     }
     // ワン・ペアの判定
     else if ((myCards.get(0).getNum() == myCards.get(1).getNum())
         || (myCards.get(1).getNum() == myCards.get(2).getNum()) || (myCards.get(2).getNum() == myCards.get(3).getNum())
         || (myCards.get(3).getNum() == myCards.get(4).getNum())) {
       userhand.setRoleid(9);
-      myflag9 = 1;
 
       // ワンペア時の数値を格納
       if (myCards.get(0).getNum() == myCards.get(1).getNum()) {
-        myonepairnum = myCards.get(1).getNum();
+        userhand.setRolenum(myCards.get(1).getNum());
+        myonepairkickernum = myCards.get(4).getNum();
+        myonepairkickerid = 4;
       } else if (myCards.get(1).getNum() == myCards.get(2).getNum()) {
-        myonepairnum = myCards.get(2).getNum();
+        userhand.setRolenum(myCards.get(2).getNum());
+        myonepairkickernum = myCards.get(4).getNum();
+        myonepairkickerid = 4;
       } else if (myCards.get(2).getNum() == myCards.get(3).getNum()) {
-        myonepairnum = myCards.get(3).getNum();
+        userhand.setRolenum(myCards.get(3).getNum());
+        myonepairkickernum = myCards.get(4).getNum();
+        myonepairkickerid = 4;
       } else if (myCards.get(3).getNum() == myCards.get(4).getNum()) {
-        myonepairnum = myCards.get(4).getNum();
+        userhand.setRolenum(myCards.get(4).getNum());
+        myonepairkickernum = myCards.get(2).getNum();
+        myonepairkickerid = 2;
       }
     }
 
-    if (myflag1 == 1) {
+    if (userhand.getRoleid() == 1) {
       myrole = "あなたの役はロイヤルストレートフラッシュです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 1;
-    } else if (myflag2 == 1) {
+    } else if (userhand.getRoleid() == 2) {
       myrole = "あなたの役はストレートフラッシュです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 2;
-    } else if (myflag3 == 1) {
+    } else if (userhand.getRoleid() == 3) {
       myrole = "あなたの役はフォア・カードです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 3;
-    } else if (myflag4 == 1) {
+    } else if (userhand.getRoleid() == 4) {
       myrole = "あなたの役はフルハウスです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 4;
-    } else if (myflag5 == 1) {
+    } else if (userhand.getRoleid() == 5) {
       myrole = "あなたの役はフラッシュです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 5;
-    } else if (myflag6 == 1) {
+    } else if (userhand.getRoleid() == 6) {
       myrole = "あなたの役はストレートです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 6;
-    } else if (myflag7 == 1) {
+    } else if (userhand.getRoleid() == 7) {
       myrole = "あなたの役はスリーカードです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 7;
-    } else if (myflag8 == 1) {
+    } else if (userhand.getRoleid() == 8) {
       myrole = "あなたの役はツウ・ペアです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 8;
-    } else if (myflag9 == 1) {
+    } else if (userhand.getRoleid() == 9) {
       myrole = "あなたの役はワン・ペアです。";
       model.addAttribute("myrole", myrole);
-      myresultflag = 9;
     }
+
     if (userhand.getTurn() >= 3) {
       if (match.getUser1id() == userid) {
         this.result.syncUser1(match.getId(), userhand.getId());
@@ -369,9 +382,7 @@ public class PokerController {
   @GetMapping("poker/call")
   public String showCall(ModelMap model, Principal prin) {
     int userid;
-    int cpuid;
     match match;
-    String cpuname = "CPU";
     // ログインユーザ情報の受け渡し
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
@@ -379,6 +390,7 @@ public class PokerController {
     ArrayList<Cards> myCards = new ArrayList<Cards>();
     userid = userMapper.selectid(loginUser);
     Hand hand = handMapper.selectByUserId(userid);
+
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
 
     myCards.add(cardsMapper.selectAllById(hand.getHand1id()));
