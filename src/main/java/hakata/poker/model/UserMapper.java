@@ -31,7 +31,7 @@ public interface UserMapper {
   @Update("UPDATE users SET userName=#{newuserName} WHERE id=#{userid}")
   void updateUserName(int userid, String newuserName);
 
-  @Insert("INSERT INTO users (userName) VALUES (#{userName});")
+  @Insert("INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES (#{userName}, #{password_hash}, #{email}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);")
   @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
   void insertUser(User user);
 }
