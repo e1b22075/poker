@@ -123,3 +123,40 @@ body {
   background-color: #0056b3;
   /* 背景色 */
 }
+
+
+.signup-container {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 5px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  width: 300px;
+}
+
+/* サインアップの入力フィールドのスタイル設定 */
+.signup-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  outline: none;
+}
+
+/* サインアップボタンのスタイル設定 */
+.signup-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #3498db;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+/* サインアップボタンをホバーした時のスタイル設定 */
+.signup-btn:hover {
+  background-color: #2980b9;
+}
