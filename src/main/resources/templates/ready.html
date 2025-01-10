@@ -15,7 +15,7 @@
       sse.onmessage = function (event) {
         console.log(event.data);
         if (sse) sse.close();
-        window.location.href = '/poker';
+        window.location.href = "@{/room/changeStatus(roomId=${room2.id})}";
       }
     }
   </script>

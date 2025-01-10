@@ -1,6 +1,8 @@
 package hakata.poker.service;
 
 import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,34 +23,40 @@ public class AsyncReady {
   @Autowired
   private matchMapper matchMapper;
 
+  private final Map<Integer, Boolean> dbUpdatedMap = new ConcurrentHashMap<>();
+
   @Transactional
   public void syncNewMatch(match match) {
     matchMapper.insertMatchandIsActive(match);
     // 非同期でDB更新したことを共有する際に利用する
-    this.dbUpdated = true;
+    dbUpdatedMap.put(match.getRid(), true);
     return;
   }
 
   @Async
-  public void AsyncReadySend(SseEmitter emitter) {
-    String massage = "準備が完了しました";
+  public void AsyncReadySend(SseEmitter emitter, int roomId) {
+    String message = "Ready Go!!";
+
+    System.out.println("送信前: " + message + " (ルームID: " + roomId + ")");
     try {
-      while (true) {// 無限ループ
-        // DBが更新されていなければ0.5s休み
-        if (false == dbUpdated) {
+      while (true) {
+        // 指定のルームIDの状態を確認
+        if (dbUpdatedMap.getOrDefault(roomId, false) == false) {
           TimeUnit.MILLISECONDS.sleep(500);
           continue;
         }
-        emitter.send(massage);
-        TimeUnit.MILLISECONDS.sleep(1000);
-        this.dbUpdated = false;
+
+        // メッセージ送信
+        emitter.send(message);
+
+        // 状態をリセット
+        dbUpdatedMap.put(roomId, false);
       }
     } catch (Exception e) {
-      // 例外の名前とメッセージだけ表示する
-      logger.warn("Exception:" + e.getClass().getName() + ":" + e.getMessage());
+      logger.warn("Exception: " + e.getClass().getName() + ": " + e.getMessage());
     } finally {
       emitter.complete();
+      System.out.println("AsyncDropSend complete for roomId: " + roomId);
     }
-    System.out.println("AsyncMatch complete");
   }
 }

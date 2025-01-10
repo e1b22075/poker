@@ -7,16 +7,22 @@
   <title>poker</title>
   <script>
     window.onload = function () {
-      var posse = new EventSource('/start');
+      var posse = new EventSource('/start/' + [[${ rid }]]);
       posse.onopen = function (event) {
         console.log("SSE connection established."); // 接続が確立された場合にコンソールに表示 };
-      }
+      };
       posse.onmessage = function (event) {
         console.log(event.data);
         if (posse) posse.close();
         window.location.href = '/poker';
-      }
+      };
+      posse.onerror = function () {
+        console.log("Connection lost. Retrying...");
+        posse.close(); // 一度接続を閉じる
+        setTimeout(connectSSE, 1000); // 3秒後に再接続
+      };
     }
+
   </script>
 </head>
 
