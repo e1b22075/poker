@@ -538,7 +538,7 @@ public class CPUController {
       a2 = 14;
     }
 
-    // resultflagの大小関係で勝利者を判定
+    //Roleidの大小関係で勝利者を判定
     if (userhand.getRoleid() < cpuhand.getRoleid()) {
       result = "あなたの勝利です!";
       model.addAttribute("result", result);

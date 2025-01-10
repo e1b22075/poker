@@ -11,6 +11,9 @@ public class Hand {
   int turn;
   int roleid;
   int rolenum;
+  int onepairkickernum;
+  int onepairkickerid;
+  int twopairid;
   boolean isActive;
 
   public void setActive(boolean isActive) {
@@ -95,5 +98,29 @@ public class Hand {
 
   public int getUserid() {
     return userid;
+  }
+
+  public int getOnepairkickernum() {
+    return onepairkickernum;
+  }
+
+  public int getOnepairkickerid() {
+    return onepairkickerid;
+  }
+
+  public int getTwopairid() {
+    return twopairid;
+  }
+
+  public void setOnepairkickernum(int onepairkickernum) {
+    this.onepairkickernum = onepairkickernum;
+  }
+
+  public void setOnepairkickerid(int onepairkickerid) {
+    this.onepairkickerid = onepairkickerid;
+  }
+
+  public void setTwopairid(int twopairid) {
+    this.twopairid = twopairid;
   }
 }

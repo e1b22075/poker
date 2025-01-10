@@ -296,15 +296,15 @@ public class PokerController {
       if (myCards.get(0).getNum() == myCards.get(1).getNum()
           && myCards.get(2).getNum() == myCards.get(3).getNum()) {
         userhand.setRolenum(myCards.get(4).getNum());
-        mytwopairid = 4;
+        userhand.setTwopairid(4);
       } else if (myCards.get(1).getNum() == myCards.get(2).getNum()
           && myCards.get(3).getNum() == myCards.get(4).getNum()) {
         userhand.setRolenum(myCards.get(0).getNum());
-        mytwopairid = 0;
+        userhand.setTwopairid(0);
       } else if (myCards.get(0).getNum() == myCards.get(1).getNum()
           && myCards.get(3).getNum() == myCards.get(4).getNum()) {
         userhand.setRolenum(myCards.get(2).getNum());
-        mytwopairid = 2;
+        userhand.setTwopairid(2);
       }
     }
     // ワン・ペアの判定
@@ -316,20 +316,20 @@ public class PokerController {
       // ワンペア時の数値を格納
       if (myCards.get(0).getNum() == myCards.get(1).getNum()) {
         userhand.setRolenum(myCards.get(1).getNum());
-        myonepairkickernum = myCards.get(4).getNum();
-        myonepairkickerid = 4;
+        userhand.setOnepairkickernum(myCards.get(4).getNum());
+        userhand.setOnepairkickerid(4);
       } else if (myCards.get(1).getNum() == myCards.get(2).getNum()) {
         userhand.setRolenum(myCards.get(2).getNum());
-        myonepairkickernum = myCards.get(4).getNum();
-        myonepairkickerid = 4;
+        userhand.setOnepairkickernum(myCards.get(4).getNum());
+        userhand.setOnepairkickerid(4);
       } else if (myCards.get(2).getNum() == myCards.get(3).getNum()) {
         userhand.setRolenum(myCards.get(3).getNum());
-        myonepairkickernum = myCards.get(4).getNum();
-        myonepairkickerid = 4;
+        userhand.setOnepairkickernum(myCards.get(4).getNum());
+        userhand.setOnepairkickerid(4);
       } else if (myCards.get(3).getNum() == myCards.get(4).getNum()) {
         userhand.setRolenum(myCards.get(4).getNum());
-        myonepairkickernum = myCards.get(2).getNum();
-        myonepairkickerid = 2;
+        userhand.setOnepairkickernum(myCards.get(2).getNum());
+        userhand.setOnepairkickerid(2);
       }
     }
 
@@ -651,6 +651,23 @@ public class PokerController {
     return "poker";
   }
 
+
+  // カードタイプを区別する関数
+  public int determinType(ArrayList<Cards> cards, int a) {
+    int cardtype = 0;
+    if (cards.get(a).getCardtype().equals("spade")) {
+      cardtype = 1;
+    } else if (cards.get(a).getCardtype().equals("heart")) {
+      cardtype = 2;
+    } else if (cards.get(a).getCardtype().equals("dia")) {
+      cardtype = 3;
+    } else if (cards.get(a).getCardtype().equals("clover")) {
+      cardtype = 4;
+    }
+    return cardtype;
+  }
+
+
   @GetMapping("poker/result")
   public String result(ModelMap model, Principal prin) {
     int userid;
@@ -658,26 +675,280 @@ public class PokerController {
     String loginUser = prin.getName(); // ログインユーザ情報
     model.addAttribute("login_user", loginUser);
     match match;
-    String message;
+    String message = "";
+
+    ArrayList<Cards> myCards = new ArrayList<Cards>();
+    ArrayList<Cards> RivalCards = new ArrayList<Cards>();
+
     userid = userMapper.selectid(loginUser);
     Hand userhand = handMapper.selectByUserId(userid);
+
+    myCards.add(cardsMapper.selectAllById(userhand.getHand1id()));
+    myCards.add(cardsMapper.selectAllById(userhand.getHand2id()));
+    myCards.add(cardsMapper.selectAllById(userhand.getHand3id()));
+    myCards.add(cardsMapper.selectAllById(userhand.getHand4id()));
+    myCards.add(cardsMapper.selectAllById(userhand.getHand5id()));
+
     Hand hand;
     match = matchMapper.selectAllById(userid);
     model.addAttribute("round", match.getRound() / 2 + 1);
+
     if (match.getUser1hand() != 0 && match.getUser2hand() != 0) {
       if (match.getUser1id() == userid) {
         userid2 = match.getUser2id();
         hand = handMapper.selectByUserId(userid2);
-        message = "あなたの負けです";
+
+        RivalCards.add(cardsMapper.selectAllById(hand.getHand1id()));
+        RivalCards.add(cardsMapper.selectAllById(hand.getHand2id()));
+        RivalCards.add(cardsMapper.selectAllById(hand.getHand3id()));
+        RivalCards.add(cardsMapper.selectAllById(hand.getHand4id()));
+        RivalCards.add(cardsMapper.selectAllById(hand.getHand5id()));
+
+        int a1 = myCards.get(4).getNum();
+        int a2 = RivalCards.get(4).getNum();
+        // 5枚目のカードが1の時、数値比較の都合上14にする
+        if (myCards.get(4).getNum() == 1) {
+          a1 = 14;
+        }
+        if (RivalCards.get(4).getNum() == 1) {
+          a2 = 14;
+        }
+
+        // Roleidの大小関係で勝利者を判定
+        if (userhand.getRoleid() < hand.getRoleid()) {
+          message = "あなたの勝利です!";
+        } else if (userhand.getRoleid() > hand.getRoleid()) {
+          message = "あなたの負けです...";
+        }
+        // ロイヤルストレートフラッシュ同士の比較
+        else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 1) {
+          if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
+            message = "あなたの勝利です!";
+          } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
+            message = "あなたの負けです...";
+          }
+        }
+        // フォア・カード同士の比較
+        else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 3) {
+          if (myCards.get(3).getNum() > RivalCards.get(3).getNum()) {
+            message = "あなたの勝利です!";
+          } else if (myCards.get(3).getNum() < RivalCards.get(3).getNum()) {
+            message = "あなたの負けです...";
+          }
+        }
+        // フルハウス・スリーカード同士の比較
+        else if ((userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 4)
+            || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 7)) {
+          if (myCards.get(2).getNum() > RivalCards.get(2).getNum()) {
+            message = "あなたの勝利です!";
+          } else if (myCards.get(2).getNum() < RivalCards.get(2).getNum()) {
+            message = "あなたの負けです...";
+          }
+        }
+        // ストレートフラッシュ・フラッシュ・ストレート同士の比較
+        else if ((userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 2)
+            || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 5)
+            || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 6)) {
+          if (a1 > a2) {
+            message = "あなたの勝利です!";
+          } else if (a1 < a2) {
+            message = "あなたの負けです...";
+          } else if (a1 == a2) {
+            if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
+              message = "あなたの勝利です!";
+            } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
+              message = "あなたの負けです...";
+            }
+          }
+        }
+        // ツウ・ペア同士の比較
+        else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 8) {
+          if (myCards.get(3).getNum() > RivalCards.get(3).getNum()) {
+            message = "あなたの勝利です!";
+          } else if (myCards.get(3).getNum() < RivalCards.get(3).getNum()) {
+            message = "あなたの負けです...";
+          } else if (myCards.get(3).getNum() == RivalCards.get(3).getNum()) {
+            if (userhand.getRolenum() > hand.getRolenum()) {
+              message = "あなたの勝利です!";
+            } else if (userhand.getRolenum() < hand.getRolenum()) {
+              message = "あなたの負けです...";
+            } else if (userhand.getRolenum() == hand.getRolenum()) {
+              if (determinType(myCards, userhand.getTwopairid()) < determinType(RivalCards, hand.getTwopairid())) {
+                message = "あなたの勝利です!";
+              } else if (determinType(myCards, userhand.getTwopairid()) > determinType(RivalCards, hand.getTwopairid())) {
+                message = "あなたの負けです...";
+              }
+            }
+          }
+        }
+        // ワン・ペア同士の比較
+        else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 9) {
+          if (userhand.getRolenum() > hand.getRolenum()) {
+            message = "あなたの勝利です!";
+          } else if (userhand.getRolenum() < hand.getRolenum()) {
+            message = "あなたの負けです...";
+          } else if (userhand.getRolenum() == hand.getRolenum()) {
+            if (userhand.getOnepairkickernum() > hand.getOnepairkickernum()) {
+              message = "あなたの勝利です!";
+            } else if (userhand.getOnepairkickernum() < hand.getOnepairkickernum()) {
+              message = "あなたの負けです...";
+            } else if (userhand.getOnepairkickernum() == hand.getOnepairkickernum()) {
+              if (determinType(myCards,
+                  userhand.getOnepairkickernum()) < determinType(RivalCards, hand.getOnepairkickerid())) {
+                message = "あなたの勝利です!";
+              } else if (determinType(myCards, userhand.getOnepairkickerid()) > determinType(RivalCards, hand.getOnepairkickerid())) {
+                message = "あなたの負けです...";
+              }
+            }
+          }
+        }
+        // ハイカード同士の比較
+        else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 10) {
+          if (myCards.get(4).getNum() > RivalCards.get(4).getNum()) {
+            message = "あなたの勝利です!";
+          } else if (myCards.get(4).getNum() < RivalCards.get(4).getNum()) {
+            message = "あなたの負けです...";
+          } else if (myCards.get(4).getNum() == RivalCards.get(4).getNum()) {
+            if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
+              message = "あなたの勝利です!";
+            } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
+              message = "あなたの負けです...";
+            }
+          }
+        }
+
         result.syncresult(match.getId());
         drop.syncDrop1(match.getId());
         match = matchMapper.selectAllById(userid);
         model.addAttribute("message", message);
         model.addAttribute("coin", match.getUser1coin());
+
+
       } else if (match.getUser2id() == userid) {
         userid2 = match.getUser1id();
         hand = handMapper.selectByUserId(userid2);
-        message = "あなたの勝ちです";
+
+        RivalCards.add(cardsMapper.selectAllById(hand.getHand1id()));
+        RivalCards.add(cardsMapper.selectAllById(hand.getHand2id()));
+        RivalCards.add(cardsMapper.selectAllById(hand.getHand3id()));
+        RivalCards.add(cardsMapper.selectAllById(hand.getHand4id()));
+        RivalCards.add(cardsMapper.selectAllById(hand.getHand5id()));
+
+        int a1 = myCards.get(4).getNum();
+        int a2 = RivalCards.get(4).getNum();
+        // 5枚目のカードが1の時、数値比較の都合上14にする
+        if (myCards.get(4).getNum() == 1) {
+          a1 = 14;
+        }
+        if (RivalCards.get(4).getNum() == 1) {
+          a2 = 14;
+        }
+
+        // Roleidの大小関係で勝利者を判定
+        if (userhand.getRoleid() < hand.getRoleid()) {
+          message = "あなたの勝利です!";
+        } else if (userhand.getRoleid() > hand.getRoleid()) {
+          message = "あなたの負けです...";
+        }
+        // ロイヤルストレートフラッシュ同士の比較
+        else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 1) {
+          if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
+            message = "あなたの勝利です!";
+          } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
+            message = "あなたの負けです...";
+          }
+        }
+        // フォア・カード同士の比較
+        else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 3) {
+          if (myCards.get(3).getNum() > RivalCards.get(3).getNum()) {
+            message = "あなたの勝利です!";
+          } else if (myCards.get(3).getNum() < RivalCards.get(3).getNum()) {
+            message = "あなたの負けです...";
+          }
+        }
+        // フルハウス・スリーカード同士の比較
+        else if ((userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 4)
+            || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 7)) {
+          if (myCards.get(2).getNum() > RivalCards.get(2).getNum()) {
+            message = "あなたの勝利です!";
+          } else if (myCards.get(2).getNum() < RivalCards.get(2).getNum()) {
+            message = "あなたの負けです...";
+          }
+        }
+        // ストレートフラッシュ・フラッシュ・ストレート同士の比較
+        else if ((userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 2)
+            || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 5)
+            || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 6)) {
+          if (a1 > a2) {
+            message = "あなたの勝利です!";
+          } else if (a1 < a2) {
+            message = "あなたの負けです...";
+          } else if (a1 == a2) {
+            if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
+              message = "あなたの勝利です!";
+            } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
+              message = "あなたの負けです...";
+            }
+          }
+        }
+        // ツウ・ペア同士の比較
+        else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 8) {
+          if (myCards.get(3).getNum() > RivalCards.get(3).getNum()) {
+            message = "あなたの勝利です!";
+          } else if (myCards.get(3).getNum() < RivalCards.get(3).getNum()) {
+            message = "あなたの負けです...";
+          } else if (myCards.get(3).getNum() == RivalCards.get(3).getNum()) {
+            if (userhand.getRolenum() > hand.getRolenum()) {
+              message = "あなたの勝利です!";
+            } else if (userhand.getRolenum() < hand.getRolenum()) {
+              message = "あなたの負けです...";
+            } else if (userhand.getRolenum() == hand.getRolenum()) {
+              if (determinType(myCards, userhand.getTwopairid()) < determinType(RivalCards, hand.getTwopairid())) {
+                message = "あなたの勝利です!";
+              } else if (determinType(myCards, userhand.getTwopairid()) > determinType(RivalCards,
+                  hand.getTwopairid())) {
+                message = "あなたの負けです...";
+              }
+            }
+          }
+        }
+        // ワン・ペア同士の比較
+        else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 9) {
+          if (userhand.getRolenum() > hand.getRolenum()) {
+            message = "あなたの勝利です!";
+          } else if (userhand.getRolenum() < hand.getRolenum()) {
+            message = "あなたの負けです...";
+          } else if (userhand.getRolenum() == hand.getRolenum()) {
+            if (userhand.getOnepairkickernum() > hand.getOnepairkickernum()) {
+              message = "あなたの勝利です!";
+            } else if (userhand.getOnepairkickernum() < hand.getOnepairkickernum()) {
+              message = "あなたの負けです...";
+            } else if (userhand.getOnepairkickernum() == hand.getOnepairkickernum()) {
+              if (determinType(myCards,
+                  userhand.getOnepairkickernum()) < determinType(RivalCards, hand.getOnepairkickerid())) {
+                message = "あなたの勝利です!";
+              } else if (determinType(myCards, userhand.getOnepairkickerid()) > determinType(RivalCards,
+                  hand.getOnepairkickerid())) {
+                message = "あなたの負けです...";
+              }
+            }
+          }
+        }
+        // ハイカード同士の比較
+        else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 10) {
+          if (myCards.get(4).getNum() > RivalCards.get(4).getNum()) {
+            message = "あなたの勝利です!";
+          } else if (myCards.get(4).getNum() < RivalCards.get(4).getNum()) {
+            message = "あなたの負けです...";
+          } else if (myCards.get(4).getNum() == RivalCards.get(4).getNum()) {
+            if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
+              message = "あなたの勝利です!";
+            } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
+              message = "あなたの負けです...";
+            }
+          }
+        }
+
         result.syncresult(match.getId());
         drop.syncDrop2(match.getId());
         match = matchMapper.selectAllById(userid);
