@@ -5,9 +5,10 @@
   <meta charset="utf-8">
   <title>poker</title>
   <script>
-    window.addEventListener('load', function () {
-      const rid = [[${ rid }]];
-      var dropsse = new EventSource('/result/' + [[${ rid }]]);
+    const rid = [[${ rid }]];
+
+    function connectSSE() {
+      var dropsse = new EventSource('/drop3/' + [[${ rid }]]);
       dropsse.onopen = function (event) {
         console.log("SSE connection established."); // 接続が確立された場合にコンソールに表示 };
       };
@@ -21,7 +22,39 @@
         dropsse.close(); // 一度接続を閉じる
         setTimeout(connectSSE, 1000); // 3秒後に再接続
       };
-    })
+
+    }
+
+    function lostSSE() {
+      var sse = new EventSource('/lost2/' + [[${ rid }]]);
+      sse.onopen = function (event) {
+        console.log("SSE connection established."); // 接続が確立された場合にコンソールに表示 };
+      };
+      sse.onmessage = function (event) {
+        console.log(event.data);
+        dropsse.close();
+        window.location.href = '/lost';
+      };
+      sse.onerror = function () {
+        console.log("Connection lost. Retrying...");
+        sse.close(); // 一度接続を閉じる
+        setTimeout(connectSSE, 1000); // 3秒後に再接続
+      };
+      window.addEventListener('beforeunload', function () {
+
+        if (sse) dropsse.close();
+        window.location.href = '/logout';
+      });
+    }
+    window.addEventListener('load', function () {
+      connectSSE();
+      lostSSE();
+    });
+    window.addEventListener('beforeunload', function () {
+
+      if (dropsse) dropsse.close();
+      window.location.href = '/logout';
+    });
 
   </script>
 

@@ -557,6 +557,7 @@ public class PokerController {
     int userid;
     userid = userMapper.selectid(loginUser);
     match = matchMapper.selectAllById(userid);
+    model.addAttribute("rid", match.getRid());
     if (match.getUser1coin() <= 0 || match.getUser2coin() <= 0 || match.getRound() >= 5) {
       if (match.getUser1id() == userid && match.getUser1coin() <= 0) {
         return "lose";
@@ -598,6 +599,7 @@ public class PokerController {
 
     model.addAttribute("index", new index());
     match = matchMapper.selectAllById(userid);
+    model.addAttribute("rid", match.getRid());
     if (match.getUser1coin() <= 0 || match.getUser2coin() <= 0 || match.getRound() >= 5) {
       if (match.getUser1id() == userid && match.getUser1coin() <= 0) {
         return "lose";
@@ -1098,7 +1100,7 @@ public class PokerController {
         model.addAttribute("message", message);
         model.addAttribute("coin", match.getUser2coin());
       }
-
+      model.addAttribute("rid", match.getRid());
       return "result";
     } else {
       model.addAttribute("myCards", myCards);
@@ -1379,7 +1381,7 @@ public class PokerController {
       model.addAttribute("message", message);
       model.addAttribute("coin", match.getUser2coin());
     }
-
+    model.addAttribute("rid", match.getRid());
     return "result";
 
   }
