@@ -388,7 +388,7 @@ INSERT INTO cards (rid,num,cardtype,isActive) VALUES (7,13,'clover',false);
 
 
 
-INSERT INTO hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,turn,roleid,rolenum,isActive) VALUES (1,2,3,4,5,6,7,8,9,false);
+INSERT INTO hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,turn,roleid,rolenum,onepairkickernum,onepairkickerid,twopairid,isActive) VALUES (1,2,3,4,5,6,7,8,9,10,11,12,false);
 
 
 INSERT INTO match(user1id,user2id,user1coin,user2coin,user1state,user2state,user1hand,user2hand,bet,round,isActive) VALUES

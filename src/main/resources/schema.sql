@@ -24,6 +24,9 @@ CREATE TABLE hand (
     turn INTEGER NOT NULL,
     roleid INTEGER,
     rolenum INTEGER,
+    onepairkickernum INTEGER,
+    onepairkickerid INTEGER,
+    twopairid INTEGER,
     isActive BOOLEAN
 );
 
