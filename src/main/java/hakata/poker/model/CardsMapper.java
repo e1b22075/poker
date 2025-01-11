@@ -31,7 +31,7 @@ public interface CardsMapper {
   @Select("SELECT * FROM cards ORDER BY RAND() LIMIT 5")
   ArrayList<Cards> select5RandomCard();
 
-  @Select("SELECT * FROM cards where rid = #{rid} ORDER BY RAND() LIMIT 5")
+  @Select("SELECT * FROM cards where rid = #{rid} AND isActive = false ORDER BY RAND() LIMIT 5")
   ArrayList<Cards> select5RandomCardByrid(int rid);
 
   @Update("UPDATE CARDS SET ISACTIVE=true WHERE id =#{id}")
@@ -46,17 +46,17 @@ public interface CardsMapper {
   void updateAllfalsetotrueByfalse();
 
   @Update("UPDATE CARDS SET ISACTIVE=true WHERE id =#{id} and rid = #{rid}")
-  void updateisActiveTrueByIdAndrid(int id,int rid);
+  void updateisActiveTrueByIdAndrid(int id, int rid);
 
   @Update("UPDATE CARDS SET ISACTIVE=false WHERE id =#{id} and rid = #{rid}")
-  void updateisActiveFalseByIdAndrid(int id,int rid);
+  void updateisActiveFalseByIdAndrid(int id, int rid);
 
   // trueのカードをfalseに
   // 手札引き直すときのリセット処理
   @Update("UPDATE CARDS SET ISACTIVE=false WHERE isActive = true and rid = #{rid}")
   void updateAllfalsetotrueByfalseAndrid(int rid);
-  
-  //CardsService.insertCards(int rid)を使うと52枚insertできます
+
+  // CardsService.insertCards(int rid)を使うと52枚insertできます
   @Insert("INSERT INTO cards (rid,num,cardtype,isActive) VALUES (#{card.rid},#{card.num},#{card.cardtype},#{card.isActive});")
   @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
   void insertCard(Cards card);

@@ -5,17 +5,23 @@
   <meta charset="utf-8">
   <title>poker</title>
   <script>
-    window.onload = function () {
-      var sse = new EventSource('/result');
-      sse.onopen = function (event) {
+    window.addEventListener('load', function () {
+      const rid = [[${ rid }]];
+      var dropsse = new EventSource('/result/' + [[${ rid }]]);
+      dropsse.onopen = function (event) {
         console.log("SSE connection established."); // 接続が確立された場合にコンソールに表示 };
-      }
-      sse.onmessage = function (event) {
+      };
+      dropsse.onmessage = function (event) {
         console.log(event.data);
-        if (sse) sse.close();
+        dropsse.close();
         window.location.href = '/poker/result2';
-      }
-    };
+      };
+      dropsse.onerror = function () {
+        console.log("Connection lost. Retrying...");
+        dropsse.close(); // 一度接続を閉じる
+        setTimeout(connectSSE, 1000); // 3秒後に再接続
+      };
+    })
 
   </script>
 
