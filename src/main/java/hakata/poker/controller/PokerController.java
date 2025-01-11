@@ -135,7 +135,7 @@ public class PokerController {
       return num == 1 ? Integer.MAX_VALUE : num; // 1を最大値として扱う
     }));
 
-    handMapper.insertHandandIsActive(hand);
+    handMapper.insertHandandIsActive2(hand);
 
     model.addAttribute("myCards", myCards);
 
@@ -213,7 +213,6 @@ public class PokerController {
     userhand.setHand4id(myCards.get(3).getId());
     userhand.setHand5id(myCards.get(4).getId());
     userhand.setTurn(userhand.getTurn() + 1);
-    handMapper.insertHandandIsActive(userhand);
 
     model.addAttribute("myCards", myCards);
 
@@ -232,6 +231,9 @@ public class PokerController {
     model.addAttribute("myCards", myCards);
 
     model.addAttribute("index", new index());
+
+    //ユーザのroleidを初期値10に設定
+    userhand.setRoleid(10);
 
     // ストレートの判定
     if ((myCards.get(4).getNum() == myCards.get(3).getNum() + 1
@@ -362,6 +364,8 @@ public class PokerController {
       model.addAttribute("myrole", myrole);
     }
 
+    handMapper.insertHandandIsActive2(userhand);
+
     if (userhand.getTurn() >= 3) {
       if (match.getUser1id() == userid) {
         this.result.syncUser1(match.getId(), userhand.getId());
@@ -401,7 +405,7 @@ public class PokerController {
 
     model.addAttribute("myCards", myCards);
 
-    handMapper.insertHandandIsActive(hand);
+    handMapper.insertHandandIsActive2(hand);
 
     match = matchMapper.selectAllById(userid);
 
@@ -439,7 +443,7 @@ public class PokerController {
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
     userhand.setTurn(1);
 
-    handMapper.insertHandandIsActive(userhand);
+    handMapper.insertHandandIsActive2(userhand);
 
     match = matchMapper.selectAllById(userid);
 
@@ -488,7 +492,7 @@ public class PokerController {
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
     userhand.setTurn(1);
 
-    handMapper.insertHandandIsActive(userhand);
+    handMapper.insertHandandIsActive2(userhand);
 
     match = matchMapper.selectAllById(userid);
 
@@ -630,7 +634,7 @@ public class PokerController {
 
     model.addAttribute("myCards", myCards);
 
-    handMapper.insertHandandIsActive(userhand);
+    handMapper.insertHandandIsActive2(userhand);
 
     match = matchMapper.selectAllById(userid);
 
@@ -817,7 +821,7 @@ public class PokerController {
           }
         }
 
-        result.syncresult(match.getId());
+        result.syncresult(match.getUser1id());
         drop.syncDrop1(match.getId());
         match = matchMapper.selectAllById(userid);
         model.addAttribute("message", message);
@@ -949,7 +953,7 @@ public class PokerController {
           }
         }
 
-        result.syncresult(match.getId());
+        result.syncresult(match.getUser2id());
         drop.syncDrop2(match.getId());
         match = matchMapper.selectAllById(userid);
         model.addAttribute("message", message);

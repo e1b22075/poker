@@ -24,8 +24,14 @@ public interface HandMapper {
   @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
   void insertHandandIsActive(Hand hand);
 
-  @Update("UPDATE HAND SET ROLEID=#{ROLEID、 WHERE ID=#{id}")
-  void updateRoleIdById(int id);
+
+  @Insert("INSERT INTO Hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,turn,roleid,rolenum,onepairkickernum,onepairkickerid,twopairid,isActive) VALUES (#{userid},#{hand1id},#{hand2id},#{hand3id},#{hand4id},#{hand5id},#{turn},#{roleid},#{rolenum},#{onepairkickernum},#{onepairkickerid},#{twopairid},true);")
+  @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
+  void insertHandandIsActive2(Hand hand);
+
+
+  @Update("UPDATE HAND SET ROLEID=#{ROLEID}, WHERE ID=#{id}")
+  void updateRoleIdById(int id, int roleid);
 
   @Update("UPDATE HAND SET ROLEID=#{ROLEID},ROLENUM=#{ROLENUM} WHERE ID=#{id}")
   void updateRoleIdRoleNumById(int id);
