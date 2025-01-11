@@ -4,6 +4,9 @@ INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUE
 INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('よしたに', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('まつうら', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('CPU', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('CPU2', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('CPU3', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO users (userName, password_hash, email, created_at, updated_at) VALUES ('CPU4', 'isdev', 'example@example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
 
@@ -391,10 +394,15 @@ INSERT INTO cards (rid,num,cardtype,isActive) VALUES (7,13,'clover',false);
 INSERT INTO hand (userid,hand1id,hand2id,hand3id,hand4id,hand5id,turn,roleid,rolenum,onepairkickernum,onepairkickerid,twopairid,isActive) VALUES (1,2,3,4,5,6,7,8,9,10,11,12,false);
 
 
-INSERT INTO match(user1id,user2id,user1coin,user2coin,user1state,user2state,user1hand,user2hand,bet,round,isActive) VALUES
-(1,2,5,5,'change','rays',1,1,1,3,false);
+INSERT INTO match(user1id,user2id,user1coin,user2coin,user1state,user2state,user1hand,user2hand,bet,round,rid,isActive) VALUES
+(1,2,5,5,'change','rays',1,1,1,3,1,false);
 
-INSERT INTO room (roomName,user1id,user1Name,user1Status,user2id,user2Name,user2Status) VALUES ('CPUと対戦',1,'おくだ',true,NULL,NULL,false);
+INSERT INTO room (roomName,user1id,user1Name,user1Status,user2id,user2Name,user2Status) VALUES ('CPUと対戦',6,'CPU',true,NULL,NULL,false);
+INSERT INTO room (roomName,user1id,user1Name,user1Status,user2id,user2Name,user2Status) VALUES ('CPUと対戦',7,'CPU2',true,NULL,NULL,false);
+INSERT INTO room (roomName,user1id,user1Name,user1Status,user2id,user2Name,user2Status) VALUES ('CPUと対戦',8,'CPU3',true,NULL,NULL,false);
+INSERT INTO room (roomName,user1id,user1Name,user1Status,user2id,user2Name,user2Status) VALUES ('CPUと対戦',9,'CPU3',true,NULL,NULL,false);
+INSERT INTO room (roomName,user1id,user1Name,user1Status,user2id,user2Name,user2Status) VALUES ('ユーザと対戦',NULL,NULL,false,NULL,NULL,false);
+INSERT INTO room (roomName,user1id,user1Name,user1Status,user2id,user2Name,user2Status) VALUES ('ユーザと対戦',NULL,NULL,false,NULL,NULL,false);
 INSERT INTO room (roomName,user1id,user1Name,user1Status,user2id,user2Name,user2Status) VALUES ('ユーザと対戦',NULL,NULL,false,NULL,NULL,false);
 
 

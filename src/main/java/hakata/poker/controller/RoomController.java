@@ -148,6 +148,7 @@ public class RoomController {
       match.setUser2coin(5);
       match.setBet(1);
       match.setRound(1);
+      match.setRid(roomId);
       this.ready.syncNewMatch(match);
       model.addAttribute("round", match.getRound() / 2 + 1);
       model.addAttribute("coin", match.getUser1coin());
