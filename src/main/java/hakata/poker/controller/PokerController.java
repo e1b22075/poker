@@ -71,12 +71,6 @@ public class PokerController {
 
   @Autowired
   private AsyncDrop drop;
-  @Autowired
-  private AsyncDrop drop2;
-  @Autowired
-  private AsyncDrop drop3;
-  @Autowired
-  private AsyncDrop drop4;
 
   @Autowired
   private Asyncresult result;

@@ -34,6 +34,7 @@ public class SecurityConfig {
             .permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/poker/**"))
             .authenticated()
+            .requestMatchers(AntPathRequestMatcher.antMatcher("/CSS/**")).permitAll()
             .requestMatchers(AntPathRequestMatcher.antMatcher("/**"))
             .permitAll())// 上記以外は全員アクセス可能
         .csrf(csrf -> csrf
