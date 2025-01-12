@@ -1,7 +1,6 @@
 package hakata.poker.service;
 
 import java.util.concurrent.TimeUnit;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.*;
 import org.slf4j.Logger;
@@ -16,7 +15,7 @@ import hakata.poker.model.match;
 import hakata.poker.model.matchMapper;
 
 @Service
-public class AsyncDrop {
+public class Asynclogout {
   private final Logger logger = LoggerFactory.getLogger(AsyncDrop.class);
   private final Map<Integer, RoomState> roomStates = new ConcurrentHashMap<>();
   @Autowired
@@ -48,14 +47,8 @@ public class AsyncDrop {
   }
 
   @Transactional
-  public void syncDrop1(int id, int roomId) {
-    matchMapper.updateuser1StateById(id, "drop");
-    setRoomUpdated(roomId);
-  }
+  public void synclogput(int id, int roomId) {
 
-  @Transactional
-  public void syncDrop2(int id, int roomId) {
-    matchMapper.updateuser2StateById(id, "drop");
     setRoomUpdated(roomId);
   }
 
@@ -82,7 +75,7 @@ public class AsyncDrop {
           while (iterator.hasNext()) {
             SseEmitter emitter = iterator.next();
             try {
-              emitter.send("drop");
+              emitter.send("logout");
             } catch (Exception e) {
               // エラーが発生したエミッタは削除
               iterator.remove();

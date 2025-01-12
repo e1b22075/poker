@@ -49,7 +49,6 @@ public class Room {
   public String getUser2Name() {
     return user2Name;
   }
-  
 
   public void setUser1Status(Boolean user1Status) {
     this.user1Status = user1Status;
@@ -74,6 +73,5 @@ public class Room {
   public void setUser2Name(String user2Name) {
     this.user2Name = user2Name;
   }
-
 
 }

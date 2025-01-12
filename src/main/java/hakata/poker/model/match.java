@@ -6,7 +6,7 @@ public class match {
   int user2id;
   int user1coin;
   int user2coin;
-
+  int rid;
   int round;
 
   public void setUser1hand(int user1hand) {
@@ -116,6 +116,14 @@ public class match {
 
   public int getRound() {
     return round;
+  }
+
+  public int getRid() {
+    return rid;
+  }
+
+  public void setRid(int rid) {
+    this.rid = rid;
   }
 
 }

@@ -2,6 +2,7 @@ package hakata.poker.model;
 
 import java.util.ArrayList;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
@@ -44,10 +45,13 @@ public interface matchMapper {
   @Update("UPDATE match SET round =#{round} WHERE id =#{id} AND isActive = true")
   void updateRoundById(int id, int round);
 
-  @Insert("INSERT INTO match (user1id,user2id,user1coin,user2coin,bet,round,isActive) VALUES (#{user1id},#{user2id},#{user1coin},#{user2coin},#{bet},#{round},true);")
+  @Insert("INSERT INTO match (user1id,user2id,user1coin,user2coin,bet,round,rid,isActive) VALUES (#{user1id},#{user2id},#{user1coin},#{user2coin},#{bet},#{round},#{rid},true);")
   @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
   void insertMatchandIsActive(match match);
 
   @Select("SELECT * from match where (user1id = #{id} or user2id = #{id}) AND isActive = true")
   match selectAllById(int id);
+
+  @Delete("DELETE FROM match WHERE ID =#{id} AND isActive = true")
+  boolean deleteById(int id);
 }

@@ -4,37 +4,21 @@
 <head>
   <meta charset="utf-8">
   <title>poker</title>
-  <script th:inline="javascript" th:if="${myCards}">
-    window.onload = function () {
-      var counter = 4000; //初期値を60に設定
-      var sse = new EventSource('/step1');
 
-      sse.onmessage = function (event) {
-        counter--;
-        console.log(counter);
-        document.getElementById("p1").textContent = counter;
-
-        if (counter <= 0) {
-          sse.close(); //SSE接続を閉じる
-          window.location.href = "/room";
-        }
-      };
-
-      window.addEventListener('beforeunload', function () {
-        if (sse) {
-          sse.close();
-        }
-      });
-    };
-  </script>
 </head>
 
 <body>
   <h1>[[${login_user}]]</h1>
   <p id="p1"></p>
   <a href="/logout">ログアウト</a>
+  <div th:if="${turn}">
+    <h2>あなたは[[${turn}]]ターン目です。</h2>
+  </div>
   <div th:if="${coin}">
     <h2>あなたのコインは[[${coin}]]枚です。</h2>
+  </div>
+  <div th:if="${rays}">
+    <h2>あなたは[[${rays}]]枚賭けてます。</h2>
   </div>
   <h2>現在の手札</h2>
   <div th:if="${myCards}">
@@ -63,21 +47,7 @@
       <h2 th:text="${result}"></h2>
     </div>
 
-    <div th:each="a : ${myresultflag}">
-      <h3>[[${a}]]</h3>
-    </div>
 
-    <div th:each="a : ${myonepairkicker0}">
-      <h3>[[${a}]]</h3>
-    </div>
-
-    <div th:each="a : ${myonepairkicker1}">
-      <h3>[[${a}]]</h3>
-    </div>
-
-    <div th:each="a : ${myonepairkicker2}">
-      <h3>[[${a}]]</h3>
-    </div>
 
     <h2>どうしますか？</h2>
     <a href="/cpu/poker/call"><button>コール</button></a>

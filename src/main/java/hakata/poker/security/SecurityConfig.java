@@ -24,7 +24,7 @@ public class SecurityConfig {
             .defaultSuccessUrl("/room/step1", true)
             .failureUrl("/error")
             .permitAll())
-
+        .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/index.html"))
         .authorizeHttpRequests(authz -> authz
             .requestMatchers(AntPathRequestMatcher.antMatcher("/room/**"))
             .authenticated()

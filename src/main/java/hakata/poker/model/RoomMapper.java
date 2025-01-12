@@ -17,6 +17,9 @@ public interface RoomMapper {
   @Select("SELECT * from room where id =#{id}")
   Room selectAllById(int id);
 
+  @Select("SELECT * from room where user1id =#{id} OR user2id =#{id}")
+  Room selectAllByuserId(int id);
+
   @Update("UPDATE room SET user1id=#{userid},user1Name=#{userName} WHERE id=#{roomid}")
   void updateUser1ByRoomId(int userid, String userName, int roomid);
 
@@ -34,4 +37,5 @@ public interface RoomMapper {
 
   @Update("UPDATE room SET user2Status=NOT user2Status WHERE id=#{roomid}")
   void updateUser2changeStatusByRoomId(int roomid);
+
 }

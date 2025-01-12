@@ -23,7 +23,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.web.bind.annotation.PathVariable;
 
+import hakata.poker.model.Hand;
+import hakata.poker.model.HandMapper;
 import hakata.poker.model.Room;
 import hakata.poker.model.RoomMapper;
 import hakata.poker.model.User;
@@ -47,6 +50,9 @@ public class RoomController {
   private matchMapper matchMapper;
 
   @Autowired
+  private HandMapper handMapper;
+
+  @Autowired
   private AsyncReady ready;
 
   @Autowired
@@ -57,6 +63,28 @@ public class RoomController {
     String loginUser = prin.getName(); // ログインユーザ情報
     model.addAttribute("room1", true);
     model.addAttribute("login_user", loginUser);
+    int userid;
+    match match;
+    Room room;
+    userid = userMapper.selectid(loginUser);
+    if (matchMapper.selectAllByuser1Id(userid) != null) {
+      match = matchMapper.selectAllById(userid);
+      matchMapper.deleteById(match.getId());
+    }
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
+    if (roomMapper.selectAllByuserId(userid) != null) {
+      room = roomMapper.selectAllByuserId(userid);
+      if (room.getUser1id() != 0) {
+        if (room.getUser1id() == userid) {
+          roomMapper.updateUser1ResetByRoomId(room.getId());
+        }
+      }
+      if (room.getUser2id() != 0) {
+        if (room.getUser2id() == userid) {
+          roomMapper.updateUser2ResetByRoomId(room.getId());
+        }
+      }
+    }
     final ArrayList<Room> rooms1 = acRoom.syncShowRoomsList();
     // ArrayList<User> users1 = userMapper.selectAll();
     model.addAttribute("rooms", rooms1);
@@ -93,7 +121,15 @@ public class RoomController {
   @Transactional
   public String leaveRoom(@RequestParam Integer roomId, ModelMap model, Principal prin) {
     String loginUser = prin.getName(); // ログインユーザ情報
+    int userid;
+    match match;
+    userid = userMapper.selectid(loginUser);
+    if (matchMapper.selectAllById(userid) != null) {
+      match = matchMapper.selectAllById(userid);
+      matchMapper.deleteById(match.getId());
+    }
 
+    handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
     // ログインユーザーが所属しているルームを取得
     acRoom.syncLeaveRoom(loginUser, roomId);
 
@@ -148,13 +184,14 @@ public class RoomController {
       match.setUser2coin(5);
       match.setBet(1);
       match.setRound(1);
+      match.setRid(roomId);
       this.ready.syncNewMatch(match);
       model.addAttribute("round", match.getRound() / 2 + 1);
       model.addAttribute("coin", match.getUser1coin());
       model.addAttribute("bet", match.getBet());
       return "poker.html";
     }
-
+    model.addAttribute("rid", room2.getId());
     return "ready2.html";
   }
 
@@ -172,10 +209,11 @@ public class RoomController {
     return sseEmitter;
   }
 
-  @GetMapping("/start")
-  public SseEmitter sample() {
+  @GetMapping("/start/{rid}")
+  public SseEmitter sample(@PathVariable int rid) {
     final SseEmitter emitter = new SseEmitter();
-    this.ready.AsyncReadySend(emitter);
+    ready.registerEmitter(rid, emitter);
+    ready.AsyncReadySend(rid);
     return emitter;
   }
 }

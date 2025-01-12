@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import hakata.poker.model.Room;
 import hakata.poker.model.RoomMapper;
@@ -101,6 +102,22 @@ public class PokerController {
   @GetMapping("poker")
   public String login(ModelMap model, Principal prin) {
     String loginUser = prin.getName(); // ログインユーザ情報
+    int userid;
+    match match;
+
+    userid = userMapper.selectid(loginUser);
+    match = matchMapper.selectAllById(userid);
+    if (userid == match.getUser1id()) {
+      model.addAttribute("round", match.getRound() / 2 + 1);
+      model.addAttribute("coin", match.getUser1coin());
+      model.addAttribute("bet", match.getBet());
+    } else if (userid == match.getUser2id()) {
+      model.addAttribute("round", match.getRound() / 2 + 1);
+      model.addAttribute("coin", match.getUser2coin());
+      model.addAttribute("bet", match.getBet());
+    }
+    model.addAttribute("rid", match.getRid());
+
     model.addAttribute("login_user", loginUser);
     return "poker.html";
   }
@@ -114,13 +131,19 @@ public class PokerController {
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
     // ここまで
+    userid = userMapper.selectid(loginUser);
+    match = matchMapper.selectAllById(userid);
     Hand hand = new Hand();
     hand.setActive(true);
-    ArrayList<Cards> myCards = cardsMapper.select5RandomCard();
+    match = matchMapper.selectAllById(userid);
+    ArrayList<Cards> myCards = cardsMapper.select5RandomCardByrid(match.getRid());
     for (Cards card : myCards) {
-      cardsMapper.updateisActiveTrueById(card.getId());
+      cardsMapper.updateisActiveTrueByIdAndrid(card.getId(), match.getRid());
     }
-
+    myCards.sort(Comparator.comparingInt((Cards card) -> {
+      int num = card.getNum();
+      return num == 1 ? Integer.MAX_VALUE : num; // 1を最大値として扱う
+    }));
     hand.setHand1id(myCards.get(0).getId());
     hand.setHand2id(myCards.get(1).getId());
     hand.setHand3id(myCards.get(2).getId());
@@ -155,6 +178,7 @@ public class PokerController {
     model.addAttribute("turn", hand.getTurn());
     model.addAttribute("index", new index());
     model.addAttribute("round", match.getRound() / 2 + 1);
+    model.addAttribute("rid", match.getRid());
     return "select.html";
   }
 
@@ -186,7 +210,7 @@ public class PokerController {
     userid = userMapper.selectid(loginUser);
     userhand = handMapper.selectByUserId(userid);
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
-
+    match = matchMapper.selectAllById(userid);
     myCards.add(cardsMapper.selectAllById(userhand.getHand1id()));
     myCards.add(cardsMapper.selectAllById(userhand.getHand2id()));
     myCards.add(cardsMapper.selectAllById(userhand.getHand3id()));
@@ -194,12 +218,12 @@ public class PokerController {
     myCards.add(cardsMapper.selectAllById(userhand.getHand5id()));
 
     for (Integer indes : index.getId()) {
-      userdrawCards = cardsMapper.selectRandomCard();
+      userdrawCards = cardsMapper.selectRandomCardByrid(match.getRid());
       while (userdrawCards.getActive()) {
-        userdrawCards = cardsMapper.selectRandomCard();
+        userdrawCards = cardsMapper.selectRandomCardByrid(match.getRid());
       }
       myCards.set(indes - 1, userdrawCards);
-      cardsMapper.updateisActiveTrueById(myCards.get(indes - 1).getId());
+      cardsMapper.updateisActiveTrueByIdAndrid(myCards.get(indes - 1).getId(), match.getRid());
     }
 
     myCards.sort(Comparator.comparingInt((Cards card) -> {
@@ -232,7 +256,7 @@ public class PokerController {
 
     model.addAttribute("index", new index());
 
-    //ユーザのroleidを初期値10に設定
+    // ユーザのroleidを初期値10に設定
     userhand.setRoleid(10);
 
     // ストレートの判定
@@ -375,10 +399,12 @@ public class PokerController {
         System.out.println("ユーザー2の書き込み");
       }
       model.addAttribute("round", match.getRound() / 2 + 1);
+      model.addAttribute("rid", match.getRid());
       return "wait";
     } else {
       model.addAttribute("round", match.getRound() / 2 + 1);
       model.addAttribute("turn", userhand.getTurn());
+      model.addAttribute("rid", match.getRid());
       return "select";
     }
   }
@@ -423,6 +449,7 @@ public class PokerController {
 
     model.addAttribute("index", new index());
     model.addAttribute("round", match.getRound() / 2 + 1);
+    model.addAttribute("rid", match.getRid());
     return "poker.html";
   }
 
@@ -451,12 +478,12 @@ public class PokerController {
       match.setUser1coin(match.getUser1coin() - 1);
       model.addAttribute("coin", match.getUser1coin());
       matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin());
-      drop.syncDrop1(match.getId());
+      drop.syncDrop1(match.getId(), match.getRid());
     } else if (match.getUser2id() == userid) {
       match.setUser2coin(match.getUser2coin() - 1);
       model.addAttribute("coin", match.getUser2coin());
       matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin());
-      drop.syncDrop2(match.getId());
+      drop.syncDrop2(match.getId(), match.getRid());
     }
     match.setBet(1);
     matchMapper.updateBetById(match.getId(), 1);
@@ -466,7 +493,7 @@ public class PokerController {
 
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
 
-    cardsMapper.updateAllfalsetotrueByfalse();
+    cardsMapper.updateAllfalsetotrueByfalseAndrid(match.getRid());
 
     model.addAttribute("message", message);
 
@@ -499,11 +526,11 @@ public class PokerController {
     if (match.getUser1id() == userid) {
       match.setUser1coin(match.getUser1coin() + 1);
       matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin());
-      drop.syncDrop1(match.getId());
+
     } else if (match.getUser2id() == userid) {
       match.setUser2coin(match.getUser2coin() + 1);
       matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin());
-      drop.syncDrop2(match.getId());
+
     }
     match.setBet(1);
     matchMapper.updateBetById(match.getId(), 1);
@@ -513,7 +540,7 @@ public class PokerController {
 
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
 
-    cardsMapper.updateAllfalsetotrueByfalse();
+    cardsMapper.updateAllfalsetotrueByfalseAndrid(match.getRid());
 
     model.addAttribute("message", message);
 
@@ -530,6 +557,7 @@ public class PokerController {
     int userid;
     userid = userMapper.selectid(loginUser);
     match = matchMapper.selectAllById(userid);
+    model.addAttribute("rid", match.getRid());
     if (match.getUser1coin() <= 0 || match.getUser2coin() <= 0 || match.getRound() >= 5) {
       if (match.getUser1id() == userid && match.getUser1coin() <= 0) {
         return "lose";
@@ -549,6 +577,7 @@ public class PokerController {
     match.setRound(match.getRound() + 1);
     matchMapper.updateRoundById(match.getId(), match.getRound());
     model.addAttribute("round", match.getRound() / 2 + 1);
+    model.addAttribute("rid", match.getRid());
     return "poker.html";
   }
 
@@ -570,6 +599,7 @@ public class PokerController {
 
     model.addAttribute("index", new index());
     match = matchMapper.selectAllById(userid);
+    model.addAttribute("rid", match.getRid());
     if (match.getUser1coin() <= 0 || match.getUser2coin() <= 0 || match.getRound() >= 5) {
       if (match.getUser1id() == userid && match.getUser1coin() <= 0) {
         return "lose";
@@ -589,6 +619,7 @@ public class PokerController {
     match.setRound(match.getRound() + 1);
     matchMapper.updateRoundById(match.getId(), match.getRound());
     model.addAttribute("round", match.getRound() / 2 + 1);
+    model.addAttribute("rid", match.getRid());
     return "poker.html";
   }
 
@@ -652,9 +683,9 @@ public class PokerController {
 
     model.addAttribute("index", new index());
     model.addAttribute("round", match.getRound() / 2 + 1);
+    model.addAttribute("rid", match.getRid());
     return "poker";
   }
-
 
   // カードタイプを区別する関数
   public int determinType(ArrayList<Cards> cards, int a) {
@@ -670,7 +701,6 @@ public class PokerController {
     }
     return cardtype;
   }
-
 
   @GetMapping("poker/result")
   public String result(ModelMap model, Principal prin) {
@@ -721,23 +751,35 @@ public class PokerController {
         // Roleidの大小関係で勝利者を判定
         if (userhand.getRoleid() < hand.getRoleid()) {
           message = "あなたの勝利です!";
+          matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+          matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
         } else if (userhand.getRoleid() > hand.getRoleid()) {
           message = "あなたの負けです...";
+          matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+          matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
         }
         // ロイヤルストレートフラッシュ同士の比較
         else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 1) {
           if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
             message = "あなたの勝利です!";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
             message = "あなたの負けです...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
           }
         }
         // フォア・カード同士の比較
         else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 3) {
           if (myCards.get(3).getNum() > RivalCards.get(3).getNum()) {
             message = "あなたの勝利です!";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           } else if (myCards.get(3).getNum() < RivalCards.get(3).getNum()) {
             message = "あなたの負けです...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
           }
         }
         // フルハウス・スリーカード同士の比較
@@ -745,8 +787,12 @@ public class PokerController {
             || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 7)) {
           if (myCards.get(2).getNum() > RivalCards.get(2).getNum()) {
             message = "あなたの勝利です!";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           } else if (myCards.get(2).getNum() < RivalCards.get(2).getNum()) {
             message = "あなたの負けです...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
           }
         }
         // ストレートフラッシュ・フラッシュ・ストレート同士の比較
@@ -755,13 +801,21 @@ public class PokerController {
             || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 6)) {
           if (a1 > a2) {
             message = "あなたの勝利です!";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           } else if (a1 < a2) {
             message = "あなたの負けです...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
           } else if (a1 == a2) {
             if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
               message = "あなたの勝利です!";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
             } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
               message = "あなたの負けです...";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
             }
           }
         }
@@ -769,18 +823,31 @@ public class PokerController {
         else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 8) {
           if (myCards.get(3).getNum() > RivalCards.get(3).getNum()) {
             message = "あなたの勝利です!";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           } else if (myCards.get(3).getNum() < RivalCards.get(3).getNum()) {
             message = "あなたの負けです...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
           } else if (myCards.get(3).getNum() == RivalCards.get(3).getNum()) {
             if (userhand.getRolenum() > hand.getRolenum()) {
               message = "あなたの勝利です!";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
             } else if (userhand.getRolenum() < hand.getRolenum()) {
               message = "あなたの負けです...";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
             } else if (userhand.getRolenum() == hand.getRolenum()) {
               if (determinType(myCards, userhand.getTwopairid()) < determinType(RivalCards, hand.getTwopairid())) {
                 message = "あなたの勝利です!";
-              } else if (determinType(myCards, userhand.getTwopairid()) > determinType(RivalCards, hand.getTwopairid())) {
+                matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+                matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
+              } else if (determinType(myCards, userhand.getTwopairid()) > determinType(RivalCards,
+                  hand.getTwopairid())) {
                 message = "あなたの負けです...";
+                matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+                matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
               }
             }
           }
@@ -789,19 +856,32 @@ public class PokerController {
         else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 9) {
           if (userhand.getRolenum() > hand.getRolenum()) {
             message = "あなたの勝利です!";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           } else if (userhand.getRolenum() < hand.getRolenum()) {
             message = "あなたの負けです...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
           } else if (userhand.getRolenum() == hand.getRolenum()) {
             if (userhand.getOnepairkickernum() > hand.getOnepairkickernum()) {
               message = "あなたの勝利です!";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
             } else if (userhand.getOnepairkickernum() < hand.getOnepairkickernum()) {
               message = "あなたの負けです...";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
             } else if (userhand.getOnepairkickernum() == hand.getOnepairkickernum()) {
               if (determinType(myCards,
                   userhand.getOnepairkickernum()) < determinType(RivalCards, hand.getOnepairkickerid())) {
                 message = "あなたの勝利です!";
-              } else if (determinType(myCards, userhand.getOnepairkickerid()) > determinType(RivalCards, hand.getOnepairkickerid())) {
+                matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+                matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
+              } else if (determinType(myCards, userhand.getOnepairkickerid()) > determinType(RivalCards,
+                  hand.getOnepairkickerid())) {
                 message = "あなたの負けです...";
+                matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+                matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
               }
             }
           }
@@ -810,23 +890,29 @@ public class PokerController {
         else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 10) {
           if (myCards.get(4).getNum() > RivalCards.get(4).getNum()) {
             message = "あなたの勝利です!";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           } else if (myCards.get(4).getNum() < RivalCards.get(4).getNum()) {
             message = "あなたの負けです...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
           } else if (myCards.get(4).getNum() == RivalCards.get(4).getNum()) {
             if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
               message = "あなたの勝利です!";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
             } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
               message = "あなたの負けです...";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
             }
           }
         }
 
-        result.syncresult(match.getUser1id());
-        drop.syncDrop1(match.getId());
+        drop.syncDrop1(match.getId(), match.getRid());
         match = matchMapper.selectAllById(userid);
         model.addAttribute("message", message);
         model.addAttribute("coin", match.getUser1coin());
-
 
       } else if (match.getUser2id() == userid) {
         userid2 = match.getUser1id();
@@ -851,23 +937,35 @@ public class PokerController {
         // Roleidの大小関係で勝利者を判定
         if (userhand.getRoleid() < hand.getRoleid()) {
           message = "あなたの勝利です!";
+          matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+          matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
         } else if (userhand.getRoleid() > hand.getRoleid()) {
           message = "あなたの負けです...";
+          matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+          matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
         }
         // ロイヤルストレートフラッシュ同士の比較
         else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 1) {
           if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
             message = "あなたの勝利です!";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
           } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
             message = "あなたの負けです...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           }
         }
         // フォア・カード同士の比較
         else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 3) {
           if (myCards.get(3).getNum() > RivalCards.get(3).getNum()) {
             message = "あなたの勝利です!";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
           } else if (myCards.get(3).getNum() < RivalCards.get(3).getNum()) {
             message = "あなたの負けです...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           }
         }
         // フルハウス・スリーカード同士の比較
@@ -875,8 +973,12 @@ public class PokerController {
             || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 7)) {
           if (myCards.get(2).getNum() > RivalCards.get(2).getNum()) {
             message = "あなたの勝利です!";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
           } else if (myCards.get(2).getNum() < RivalCards.get(2).getNum()) {
             message = "あなたの負けです...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           }
         }
         // ストレートフラッシュ・フラッシュ・ストレート同士の比較
@@ -885,13 +987,21 @@ public class PokerController {
             || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 6)) {
           if (a1 > a2) {
             message = "あなたの勝利です!";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
           } else if (a1 < a2) {
             message = "あなたの負けです...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           } else if (a1 == a2) {
             if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
               message = "あなたの勝利です!";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
             } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
               message = "あなたの負けです...";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
             }
           }
         }
@@ -899,19 +1009,31 @@ public class PokerController {
         else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 8) {
           if (myCards.get(3).getNum() > RivalCards.get(3).getNum()) {
             message = "あなたの勝利です!";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
           } else if (myCards.get(3).getNum() < RivalCards.get(3).getNum()) {
             message = "あなたの負けです...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           } else if (myCards.get(3).getNum() == RivalCards.get(3).getNum()) {
             if (userhand.getRolenum() > hand.getRolenum()) {
               message = "あなたの勝利です!";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
             } else if (userhand.getRolenum() < hand.getRolenum()) {
               message = "あなたの負けです...";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
             } else if (userhand.getRolenum() == hand.getRolenum()) {
               if (determinType(myCards, userhand.getTwopairid()) < determinType(RivalCards, hand.getTwopairid())) {
                 message = "あなたの勝利です!";
+                matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+                matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
               } else if (determinType(myCards, userhand.getTwopairid()) > determinType(RivalCards,
                   hand.getTwopairid())) {
                 message = "あなたの負けです...";
+                matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+                matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
               }
             }
           }
@@ -920,20 +1042,32 @@ public class PokerController {
         else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 9) {
           if (userhand.getRolenum() > hand.getRolenum()) {
             message = "あなたの勝利です!";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
           } else if (userhand.getRolenum() < hand.getRolenum()) {
             message = "あなたの負けです...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           } else if (userhand.getRolenum() == hand.getRolenum()) {
             if (userhand.getOnepairkickernum() > hand.getOnepairkickernum()) {
               message = "あなたの勝利です!";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
             } else if (userhand.getOnepairkickernum() < hand.getOnepairkickernum()) {
               message = "あなたの負けです...";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
             } else if (userhand.getOnepairkickernum() == hand.getOnepairkickernum()) {
               if (determinType(myCards,
                   userhand.getOnepairkickernum()) < determinType(RivalCards, hand.getOnepairkickerid())) {
                 message = "あなたの勝利です!";
+                matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+                matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
               } else if (determinType(myCards, userhand.getOnepairkickerid()) > determinType(RivalCards,
                   hand.getOnepairkickerid())) {
                 message = "あなたの負けです...";
+                matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+                matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
               }
             }
           }
@@ -942,26 +1076,35 @@ public class PokerController {
         else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 10) {
           if (myCards.get(4).getNum() > RivalCards.get(4).getNum()) {
             message = "あなたの勝利です!";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
           } else if (myCards.get(4).getNum() < RivalCards.get(4).getNum()) {
             message = "あなたの負けです...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           } else if (myCards.get(4).getNum() == RivalCards.get(4).getNum()) {
             if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
               message = "あなたの勝利です!";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
             } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
               message = "あなたの負けです...";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
             }
           }
         }
 
-        result.syncresult(match.getUser2id());
-        drop.syncDrop2(match.getId());
+        drop.syncDrop2(match.getId(), match.getRid());
         match = matchMapper.selectAllById(userid);
         model.addAttribute("message", message);
         model.addAttribute("coin", match.getUser2coin());
       }
-
+      model.addAttribute("rid", match.getRid());
       return "result";
     } else {
+      model.addAttribute("myCards", myCards);
+      model.addAttribute("rid", match.getRid());
       return "wait";
     }
   }
@@ -973,26 +1116,272 @@ public class PokerController {
     String loginUser = prin.getName(); // ログインユーザ情報
     model.addAttribute("login_user", loginUser);
     match match;
-    String message;
+    String message = "";
+    ArrayList<Cards> myCards = new ArrayList<Cards>();
+    ArrayList<Cards> RivalCards = new ArrayList<Cards>();
+
     userid = userMapper.selectid(loginUser);
     Hand userhand = handMapper.selectByUserId(userid);
+    myCards.add(cardsMapper.selectAllById(userhand.getHand1id()));
+    myCards.add(cardsMapper.selectAllById(userhand.getHand2id()));
+    myCards.add(cardsMapper.selectAllById(userhand.getHand3id()));
+    myCards.add(cardsMapper.selectAllById(userhand.getHand4id()));
+    myCards.add(cardsMapper.selectAllById(userhand.getHand5id()));
     Hand hand;
     match = matchMapper.selectAllById(userid);
     model.addAttribute("round", match.getRound() / 2 + 1);
     if (match.getUser1id() == userid) {
       userid2 = match.getUser2id();
       hand = handMapper.selectByUserId(userid2);
-      message = "あなたの負けです";
+      RivalCards.add(cardsMapper.selectAllById(hand.getHand1id()));
+      RivalCards.add(cardsMapper.selectAllById(hand.getHand2id()));
+      RivalCards.add(cardsMapper.selectAllById(hand.getHand3id()));
+      RivalCards.add(cardsMapper.selectAllById(hand.getHand4id()));
+      RivalCards.add(cardsMapper.selectAllById(hand.getHand5id()));
+
+      int a1 = myCards.get(4).getNum();
+      int a2 = RivalCards.get(4).getNum();
+      // 5枚目のカードが1の時、数値比較の都合上14にする
+      if (myCards.get(4).getNum() == 1) {
+        a1 = 14;
+      }
+      if (RivalCards.get(4).getNum() == 1) {
+        a2 = 14;
+      }
+
+      // Roleidの大小関係で勝利者を判定
+      if (userhand.getRoleid() < hand.getRoleid()) {
+        message = "あなたの勝利です!";
+      } else if (userhand.getRoleid() > hand.getRoleid()) {
+        message = "あなたの負けです...";
+      }
+      // ロイヤルストレートフラッシュ同士の比較
+      else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 1) {
+        if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
+          message = "あなたの勝利です!";
+        } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
+          message = "あなたの負けです...";
+        }
+      }
+      // フォア・カード同士の比較
+      else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 3) {
+        if (myCards.get(3).getNum() > RivalCards.get(3).getNum()) {
+          message = "あなたの勝利です!";
+        } else if (myCards.get(3).getNum() < RivalCards.get(3).getNum()) {
+          message = "あなたの負けです...";
+        }
+      }
+      // フルハウス・スリーカード同士の比較
+      else if ((userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 4)
+          || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 7)) {
+        if (myCards.get(2).getNum() > RivalCards.get(2).getNum()) {
+          message = "あなたの勝利です!";
+        } else if (myCards.get(2).getNum() < RivalCards.get(2).getNum()) {
+          message = "あなたの負けです...";
+        }
+      }
+      // ストレートフラッシュ・フラッシュ・ストレート同士の比較
+      else if ((userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 2)
+          || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 5)
+          || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 6)) {
+        if (a1 > a2) {
+          message = "あなたの勝利です!";
+        } else if (a1 < a2) {
+          message = "あなたの負けです...";
+        } else if (a1 == a2) {
+          if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
+            message = "あなたの勝利です!";
+          } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
+            message = "あなたの負けです...";
+          }
+        }
+      }
+      // ツウ・ペア同士の比較
+      else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 8) {
+        if (myCards.get(3).getNum() > RivalCards.get(3).getNum()) {
+          message = "あなたの勝利です!";
+        } else if (myCards.get(3).getNum() < RivalCards.get(3).getNum()) {
+          message = "あなたの負けです...";
+        } else if (myCards.get(3).getNum() == RivalCards.get(3).getNum()) {
+          if (userhand.getRolenum() > hand.getRolenum()) {
+            message = "あなたの勝利です!";
+          } else if (userhand.getRolenum() < hand.getRolenum()) {
+            message = "あなたの負けです...";
+          } else if (userhand.getRolenum() == hand.getRolenum()) {
+            if (determinType(myCards, userhand.getTwopairid()) < determinType(RivalCards, hand.getTwopairid())) {
+              message = "あなたの勝利です!";
+            } else if (determinType(myCards, userhand.getTwopairid()) > determinType(RivalCards,
+                hand.getTwopairid())) {
+              message = "あなたの負けです...";
+            }
+          }
+        }
+      }
+      // ワン・ペア同士の比較
+      else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 9) {
+        if (userhand.getRolenum() > hand.getRolenum()) {
+          message = "あなたの勝利です!";
+        } else if (userhand.getRolenum() < hand.getRolenum()) {
+          message = "あなたの負けです...";
+        } else if (userhand.getRolenum() == hand.getRolenum()) {
+          if (userhand.getOnepairkickernum() > hand.getOnepairkickernum()) {
+            message = "あなたの勝利です!";
+          } else if (userhand.getOnepairkickernum() < hand.getOnepairkickernum()) {
+            message = "あなたの負けです...";
+          } else if (userhand.getOnepairkickernum() == hand.getOnepairkickernum()) {
+            if (determinType(myCards,
+                userhand.getOnepairkickernum()) < determinType(RivalCards, hand.getOnepairkickerid())) {
+              message = "あなたの勝利です!";
+            } else if (determinType(myCards, userhand.getOnepairkickerid()) > determinType(RivalCards,
+                hand.getOnepairkickerid())) {
+              message = "あなたの負けです...";
+            }
+          }
+        }
+      }
+      // ハイカード同士の比較
+      else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 10) {
+        if (myCards.get(4).getNum() > RivalCards.get(4).getNum()) {
+          message = "あなたの勝利です!";
+        } else if (myCards.get(4).getNum() < RivalCards.get(4).getNum()) {
+          message = "あなたの負けです...";
+        } else if (myCards.get(4).getNum() == RivalCards.get(4).getNum()) {
+          if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
+            message = "あなたの勝利です!";
+          } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
+            message = "あなたの負けです...";
+          }
+        }
+      }
       model.addAttribute("message", message);
       model.addAttribute("coin", match.getUser1coin());
     } else if (match.getUser2id() == userid) {
       userid2 = match.getUser1id();
       hand = handMapper.selectByUserId(userid2);
-      message = "あなたの勝ちです";
+      RivalCards.add(cardsMapper.selectAllById(hand.getHand1id()));
+      RivalCards.add(cardsMapper.selectAllById(hand.getHand2id()));
+      RivalCards.add(cardsMapper.selectAllById(hand.getHand3id()));
+      RivalCards.add(cardsMapper.selectAllById(hand.getHand4id()));
+      RivalCards.add(cardsMapper.selectAllById(hand.getHand5id()));
+
+      int a1 = myCards.get(4).getNum();
+      int a2 = RivalCards.get(4).getNum();
+      // 5枚目のカードが1の時、数値比較の都合上14にする
+      if (myCards.get(4).getNum() == 1) {
+        a1 = 14;
+      }
+      if (RivalCards.get(4).getNum() == 1) {
+        a2 = 14;
+      }
+
+      // Roleidの大小関係で勝利者を判定
+      if (userhand.getRoleid() < hand.getRoleid()) {
+        message = "あなたの勝利です!";
+      } else if (userhand.getRoleid() > hand.getRoleid()) {
+        message = "あなたの負けです...";
+      }
+      // ロイヤルストレートフラッシュ同士の比較
+      else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 1) {
+        if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
+          message = "あなたの勝利です!";
+        } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
+          message = "あなたの負けです...";
+        }
+      }
+      // フォア・カード同士の比較
+      else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 3) {
+        if (myCards.get(3).getNum() > RivalCards.get(3).getNum()) {
+          message = "あなたの勝利です!";
+        } else if (myCards.get(3).getNum() < RivalCards.get(3).getNum()) {
+          message = "あなたの負けです...";
+        }
+      }
+      // フルハウス・スリーカード同士の比較
+      else if ((userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 4)
+          || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 7)) {
+        if (myCards.get(2).getNum() > RivalCards.get(2).getNum()) {
+          message = "あなたの勝利です!";
+        } else if (myCards.get(2).getNum() < RivalCards.get(2).getNum()) {
+          message = "あなたの負けです...";
+        }
+      }
+      // ストレートフラッシュ・フラッシュ・ストレート同士の比較
+      else if ((userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 2)
+          || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 5)
+          || (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 6)) {
+        if (a1 > a2) {
+          message = "あなたの勝利です!";
+        } else if (a1 < a2) {
+          message = "あなたの負けです...";
+        } else if (a1 == a2) {
+          if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
+            message = "あなたの勝利です!";
+          } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
+            message = "あなたの負けです...";
+          }
+        }
+      }
+      // ツウ・ペア同士の比較
+      else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 8) {
+        if (myCards.get(3).getNum() > RivalCards.get(3).getNum()) {
+          message = "あなたの勝利です!";
+        } else if (myCards.get(3).getNum() < RivalCards.get(3).getNum()) {
+          message = "あなたの負けです...";
+        } else if (myCards.get(3).getNum() == RivalCards.get(3).getNum()) {
+          if (userhand.getRolenum() > hand.getRolenum()) {
+            message = "あなたの勝利です!";
+          } else if (userhand.getRolenum() < hand.getRolenum()) {
+            message = "あなたの負けです...";
+          } else if (userhand.getRolenum() == hand.getRolenum()) {
+            if (determinType(myCards, userhand.getTwopairid()) < determinType(RivalCards, hand.getTwopairid())) {
+              message = "あなたの勝利です!";
+            } else if (determinType(myCards, userhand.getTwopairid()) > determinType(RivalCards,
+                hand.getTwopairid())) {
+              message = "あなたの負けです...";
+            }
+          }
+        }
+      }
+      // ワン・ペア同士の比較
+      else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 9) {
+        if (userhand.getRolenum() > hand.getRolenum()) {
+          message = "あなたの勝利です!";
+        } else if (userhand.getRolenum() < hand.getRolenum()) {
+          message = "あなたの負けです...";
+        } else if (userhand.getRolenum() == hand.getRolenum()) {
+          if (userhand.getOnepairkickernum() > hand.getOnepairkickernum()) {
+            message = "あなたの勝利です!";
+          } else if (userhand.getOnepairkickernum() < hand.getOnepairkickernum()) {
+            message = "あなたの負けです...";
+          } else if (userhand.getOnepairkickernum() == hand.getOnepairkickernum()) {
+            if (determinType(myCards,
+                userhand.getOnepairkickernum()) < determinType(RivalCards, hand.getOnepairkickerid())) {
+              message = "あなたの勝利です!";
+            } else if (determinType(myCards, userhand.getOnepairkickerid()) > determinType(RivalCards,
+                hand.getOnepairkickerid())) {
+              message = "あなたの負けです...";
+            }
+          }
+        }
+      }
+      // ハイカード同士の比較
+      else if (userhand.getRoleid() == hand.getRoleid() && hand.getRoleid() == 10) {
+        if (myCards.get(4).getNum() > RivalCards.get(4).getNum()) {
+          message = "あなたの勝利です!";
+        } else if (myCards.get(4).getNum() < RivalCards.get(4).getNum()) {
+          message = "あなたの負けです...";
+        } else if (myCards.get(4).getNum() == RivalCards.get(4).getNum()) {
+          if (determinType(myCards, 4) < determinType(RivalCards, 4)) {
+            message = "あなたの勝利です!";
+          } else if (determinType(myCards, 4) > determinType(RivalCards, 4)) {
+            message = "あなたの負けです...";
+          }
+        }
+      }
       model.addAttribute("message", message);
       model.addAttribute("coin", match.getUser2coin());
     }
-
+    model.addAttribute("rid", match.getRid());
     return "result";
 
   }
@@ -1021,24 +1410,29 @@ public class PokerController {
     return emitter;
   }
 
-  @GetMapping("/start")
-  public SseEmitter sample() {
+  @GetMapping("/start/{rid}")
+  public SseEmitter sample(@PathVariable int rid) {
     final SseEmitter emitter = new SseEmitter();
-    this.ready.AsyncReadySend(emitter);
+    ready.registerEmitter(rid, emitter);
+    ready.AsyncReadySend(rid);
     return emitter;
   }
 
-  @GetMapping("/drop3")
-  public SseEmitter dropSse() {
+  @GetMapping("/drop3/{rid}")
+  public SseEmitter dropSse(@PathVariable int rid) {
     final SseEmitter emitter = new SseEmitter();
-    this.drop.AsyncDropSend(emitter);
+    drop.registerEmitter(rid, emitter);
+    // 初回アクセスで監視タスクを起動
+    drop.startRoomMonitor(rid);
     return emitter;
   }
 
-  @GetMapping("/result")
-  public SseEmitter resultSse() {
+  @GetMapping("/result/{rid}")
+  public SseEmitter resultSse(@PathVariable int rid) {
     final SseEmitter emitter = new SseEmitter();
-    this.drop.AsyncDropSend(emitter);
+    drop.registerEmitter(rid, emitter);
+    // 初回アクセスで監視タスクを起動
+    drop.startRoomMonitor(rid);
     return emitter;
   }
 }
