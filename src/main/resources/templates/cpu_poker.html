@@ -41,16 +41,11 @@
 
   <div th:if="${CPUCards}">
     <h4>CPUの手札</h4>
-    <form action="#" th:action="@{/cpu/result}" th:object="${cpuindex}" method="post">
-      <input type="hidden" name="type" value="cpu" /> <!-- CPUのフォームと指定 -->
-      <div th:each="item, iterStat : ${CPUCards}">
-        <label>
-          <input type="checkbox" th:value="${iterStat.index+1}" th:text="${item.num} + ' ' +  ${item.cardtype}"
-            th:field="*{id}" />
-        </label>
-      </div>
-      <p><input type="submit" value="CPUのカードを交換する" /> </p>
-    </form>
+    <div th:each="item, iterStat : ${CPUCards}">
+      <tr>
+        <td>[[${item.num}]] [[${item.cardtype}]]</td>
+      </tr>
+    </div>
   </div>
 
 
