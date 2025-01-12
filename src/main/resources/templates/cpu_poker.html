@@ -4,37 +4,17 @@
 <head>
   <meta charset="utf-8">
   <title>poker</title>
-  <script th:inline="javascript" th:if="${myCards}">
-    window.onload = function () {
-      var counter = 4000; //初期値を60に設定
-      var sse = new EventSource('/step1');
-
-      sse.onmessage = function (event) {
-        counter--;
-        console.log(counter);
-        document.getElementById("p1").textContent = counter;
-
-        if (counter <= 0) {
-          sse.close(); //SSE接続を閉じる
-          window.location.href = "/room";
-        }
-      };
-
-      window.addEventListener('beforeunload', function () {
-        if (sse) {
-          sse.close();
-        }
-      });
-    };
-  </script>
 </head>
 
 <body>
-  <h1>Authorized! [[${login_user}]]</h1>
+  <h1>CPU対戦!! [[${login_user}]]</h1>
   <p id="p1"></p>
   <a href="/logout">ログアウト</a>
   <div th:if="${message}">
     <h3 th:text="${message}"></h3>
+  </div>
+  <div th:if="${turn}">
+    <h2>あなたは[[${turn}]]ターン目です。</h2>
   </div>
   <div th:if="${coin}">
     <h2>あなたのコインは[[${coin}]]枚です。</h2>
@@ -51,7 +31,8 @@
       <input type="hidden" name="type" value="player" /> <!-- プレイヤーのフォームと指定 -->
       <div th:each="item, iterStat : ${myCards}">
         <label>
-          <input type="checkbox" th:value="${iterStat.index+1}" th:text="${item.num} + ' ' +  ${item.cardtype}" th:field="*{id}" />
+          <input type="checkbox" th:value="${iterStat.index+1}" th:text="${item.num} + ' ' +  ${item.cardtype}"
+            th:field="*{id}" />
         </label>
       </div>
       <p><input type="submit" value="プレイヤーのカードを交換する" /> </p>
@@ -72,13 +53,7 @@
     </form>
   </div>
 
-  <div th:each="a : ${myindex}">
-    <h3>[[${a}]]</h3>
-  </div>
 
-  <div th:if="${cpuindex}">
-    <h3 th:text="${cpuindex}"></h3>
-  </div>
 
   <!-- ワンペアなどの役を表示 -->
   <div th:if="${role}">

@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <title>poker</title>
+  <link th:href="@{/CSS/poker.css}" rel="stylesheet">
   <script>
     const rid = [[${ rid }]];
 
@@ -85,10 +86,16 @@
   </div>
   <h2>現在の手札</h2>
   <div th:if="${myCards}">
-    <div th:each="item, iterStat : ${myCards}">
-      <tr>
-        <td>[[${item.num}]] [[${item.cardtype}]]</td>
-      </tr>
+    <div class="cardlist">
+      <div th:each="item, iterStat : ${myCards}">
+        <tr>
+          <label>
+            <td>[[${item.num}]] [[${item.cardtype}]]
+              <img th:src="@{/image/{img1}/{img2}.png(img1=${item.cardtype},img2=${item.num})}" />
+            </td>
+          </label>
+        </tr>
+      </div>
     </div>
 
     <div th:if="${myrole}">

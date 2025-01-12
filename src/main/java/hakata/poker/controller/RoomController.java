@@ -124,10 +124,11 @@ public class RoomController {
     int userid;
     match match;
     userid = userMapper.selectid(loginUser);
-    if (matchMapper.selectAllByuser1Id(userid) != null) {
+    if (matchMapper.selectAllById(userid) != null) {
       match = matchMapper.selectAllById(userid);
       matchMapper.deleteById(match.getId());
     }
+
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
     // ログインユーザーが所属しているルームを取得
     acRoom.syncLeaveRoom(loginUser, roomId);
@@ -211,7 +212,8 @@ public class RoomController {
   @GetMapping("/start/{rid}")
   public SseEmitter sample(@PathVariable int rid) {
     final SseEmitter emitter = new SseEmitter();
-    this.ready.AsyncReadySend(emitter, rid);
+    ready.registerEmitter(rid, emitter);
+    ready.AsyncReadySend(rid);
     return emitter;
   }
 }

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.springframework.org/schema/security">
+
+<head>
+  <meta charset="utf-8">
+  <title>poker</title>
+  <script th:inline="javascript" th:if="${myCards}">
+
+
+  </script>
+
+
+</head>
+
+<body>
+  <h1>[[${login_user}]]さん、結果が出ました</h1>
+  <p id="p1"></p>
+  <p id="timer">次の試合まで</p>
+  <a href="/logout">ログアウト</a>
+
+
+  <div th:if="${message}">
+    <h3 th:text="${message}"></h3>
+  </div>
+  <div th:if="${coin}">
+    <h2>あなたのコインは[[${coin}]]枚です。</h2>
+  </div>
+
+  <div th:if="${result}">
+    <h2 th:text="${result}"></h2>
+  </div>
+  </div>
+  <script th:inline="javascript">
+    // 設定する制限時間（秒）
+    const limitTime = 5;
+    let remainingTime = limitTime;
+
+
+    const timerElement = document.getElementById('timer');
+
+    // タイマーの更新と処理
+    function updateTimer() {
+      timerElement.textContent = `次の試合まで: ${remainingTime}秒`;
+      if (remainingTime <= 0) {
+        window.location.href = "/cpu/poker/reset";
+      }
+      remainingTime--;
+    }
+
+    // タイマーを1秒ごとに更新
+    const timerInterval = setInterval(updateTimer, 1000);
+  </script>

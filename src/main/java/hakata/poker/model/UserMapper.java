@@ -22,6 +22,9 @@ public interface UserMapper {
   @Select("SELECT id from users WHERE userName = #{name}")
   Integer selectid(String name);
 
+  @Select("SELECT id from users WHERE id = #{id}")
+  Integer selectidbyid(int id);
+
   @Select("SELECT userName from Users WHERE userid = #{id}")
   String selectUserName(int id);
 

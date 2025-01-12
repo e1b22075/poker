@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <title>poker</title>
+  <link th:href="@{/CSS/poker.css}" rel="stylesheet">
   <script th:inline="javascript" th:if="${myCards}">
 
     const rid = [[${ rid }]];
@@ -16,7 +17,7 @@
       dropsse.onmessage = function (event) {
         console.log(event.data);
         dropsse.close();
-        window.location.href = '/poker/result2';
+        window.location.href = '/poker/drop2';
       };
       dropsse.onerror = function () {
         console.log("Connection lost. Retrying...");
@@ -78,26 +79,25 @@
   </div>
   <h2>現在の手札</h2>
   <div th:if="${myCards}">
-    <div th:each="item, iterStat : ${myCards}">
-      <tr>
-        <td>[[${item.num}]] [[${item.cardtype}]]</td>
-      </tr>
+    <div class="cardlist">
+      <div th:each="item, iterStat : ${myCards}">
+        <tr>
+          <label>
+            <td>[[${item.num}]] [[${item.cardtype}]]
+              <img th:src="@{/image/{img1}/{img2}.png(img1=${item.cardtype},img2=${item.num})}" />
+            </td>
+          </label>
+        </tr>
+      </div>
     </div>
 
     <div th:if="${myrole}">
       <h3 th:text="${myrole}"></h3>
     </div>
 
-    <h2>CPUの手札</h2>
-    <div th:each="item, iterStat : ${CPUCards}">
-      <tr>
-        <td>[[${item.num}]] [[${item.cardtype}]]</td>
-      </tr>
-    </div>
 
-    <div th:if="${cpurole}">
-      <h3 th:text="${cpurole}"></h3>
-    </div>
+
+
 
     <div th:if="${result}">
       <h2 th:text="${result}"></h2>

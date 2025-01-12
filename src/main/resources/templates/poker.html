@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <title>poker</title>
+  <link th:href="@{/CSS/poker.css}" rel="stylesheet">
   <script th:inline="javascript" th:if="${myCards}">
 
     const rid = [[${ rid }]];
@@ -16,7 +17,7 @@
       dropsse.onmessage = function (event) {
         console.log(event.data);
         dropsse.close();
-        window.location.href = '/poker/result2';
+        window.location.href = '/poker/drop2';
       };
       dropsse.onerror = function () {
         console.log("Connection lost. Retrying...");
@@ -25,7 +26,7 @@
       };
       window.addEventListener('beforeunload', function () {
 
-        if (dropsse) dropsse.close();
+        dropsse.close();
         window.location.href = '/logout';
       });
     }
@@ -53,7 +54,7 @@
     });
     window.addEventListener('beforeunload', function () {
 
-      if (dropsse) dropsse.close();
+      dropsse.close();
       window.location.href = '/logout';
     });
 
@@ -84,12 +85,15 @@
   </div>
   <div th:if="${myCards}">
     <h4>自分の手札</h4>
-    <form action="#" th:action="@{/result}" th:object="${index}" method="post">
-      <div th:each="item, iterStat : ${myCards}">
-        <label>
-          <input type="checkbox" th:value="${iterStat.index+1}" th:text="${item.num} + ' ' +  ${item.cardtype}"
-            th:field="*{id}" />
-        </label>
+    <form action=" #" th:action="@{/result}" th:object="${index}" method="post">
+      <div class="cardlist">
+        <div th:each="item, iterStat : ${myCards}">
+          <label>
+            <input type="checkbox" th:value="${iterStat.index+1}" th:text="${item.num} + ' ' +  ${item.cardtype}"
+              th:field="*{id}" />
+            <img th:src="@{/image/{img1}/{img2}.png(img1=${item.cardtype},img2=${item.num})}" />
+          </label>
+        </div>
       </div>
 
       <p><input type="submit" value="カードを交換する" /> </p>

@@ -1413,7 +1413,8 @@ public class PokerController {
   @GetMapping("/start/{rid}")
   public SseEmitter sample(@PathVariable int rid) {
     final SseEmitter emitter = new SseEmitter();
-    this.ready.AsyncReadySend(emitter, rid);
+    ready.registerEmitter(rid, emitter);
+    ready.AsyncReadySend(rid);
     return emitter;
   }
 
