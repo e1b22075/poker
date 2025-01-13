@@ -1,7 +1,6 @@
 package hakata.poker.service;
 
 import java.util.concurrent.TimeUnit;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.*;
 import org.slf4j.Logger;
@@ -114,8 +113,9 @@ public class AsyncDrop {
     RoomState roomState = roomStates.get(roomId);
     if (roomState != null) {
       synchronized (roomState) {
-        roomState.getEmitters().remove(emitter);
+        roomState.emitters.remove(emitter);
       }
     }
   }
+
 }

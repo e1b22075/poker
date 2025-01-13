@@ -42,7 +42,7 @@
     <h2>現在[[${bet}]]枚賭けてます。</h2>
   </div>
   <h2>どの程度上乗せしますか？</h2>
-  <form action="#" th:action="@{/cpu/rays}" method="post">
+  <form action="#" th:action="@{/rays}" method="post">
     <label class="rays">
       <select name="rays">
         <div th:each="i : ${#numbers.sequence(0,4)}">

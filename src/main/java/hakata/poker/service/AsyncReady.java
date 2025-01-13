@@ -114,8 +114,9 @@ public class AsyncReady {
     RoomState roomState = roomStates.get(roomId);
     if (roomState != null) {
       synchronized (roomState) {
-        roomState.getEmitters().remove(emitter);
+        roomState.emitters.remove(emitter);
       }
     }
   }
+
 }

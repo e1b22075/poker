@@ -512,16 +512,14 @@ public class PokerController {
     String loginUser = prin.getName();
     model.addAttribute("login_user", loginUser);
     // ここまで
+    userid = userMapper.selectid(loginUser);
+    match = matchMapper.selectAllById(userid);
+    if (match.getUser1hand() != 0 && match.getUser2hand() != 0) {
+      return result2(model, prin);
+    }
     String message = "相手がドロップしました";
 
-    userid = userMapper.selectid(loginUser);
-    Hand userhand = handMapper.selectByUserId(userid);
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
-    userhand.setTurn(1);
-
-    handMapper.insertHandandIsActive2(userhand);
-
-    match = matchMapper.selectAllById(userid);
 
     if (match.getUser1id() == userid) {
       match.setUser1coin(match.getUser1coin() + 1);
@@ -535,8 +533,6 @@ public class PokerController {
     match.setBet(1);
     matchMapper.updateBetById(match.getId(), 1);
     model.addAttribute("rays", match.getBet());
-
-    model.addAttribute("turn", userhand.getTurn());
 
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
 
@@ -1427,12 +1423,12 @@ public class PokerController {
     return emitter;
   }
 
-  @GetMapping("/result/{rid}")
+  @GetMapping("/result3/{rid}")
   public SseEmitter resultSse(@PathVariable int rid) {
     final SseEmitter emitter = new SseEmitter();
-    drop.registerEmitter(rid, emitter);
+    result.registerEmitter(rid, emitter);
     // 初回アクセスで監視タスクを起動
-    drop.startRoomMonitor(rid);
+    result.startRoomMonitor(rid);
     return emitter;
   }
 }
