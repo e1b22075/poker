@@ -14,6 +14,7 @@
       posse.onmessage = function (event) {
         console.log(event.data);
         if (posse) posse.close();
+        alert("準備ができました");
         window.location.href = '/poker';
       };
       posse.onerror = function () {
@@ -30,6 +31,28 @@
   <h2>相手を待っています</h2>
   <p>準備ができるまで待機してください。</p>
   <a th:href="@{/room/changeStatus(roomId=${room2.id})}"><button>戻る</button></a>
+
+  <script th:inline="javascript">
+    // 設定する制限時間（秒）
+    const limitTime = 10;
+    let remainingTime = limitTime;
+
+
+
+
+    // タイマーの更新と処理
+    function updateTimer() {
+
+      if (remainingTime == 0) {
+        alert("一定時間たったので情報を更新します");
+        window.location.href = "/room/serch/" + [[${ rid }]];
+      }
+      remainingTime--;
+    }
+
+    // タイマーを1秒ごとに更新
+    const timerInterval = setInterval(updateTimer, 1000);
+  </script>
 </body>
 
 </html>

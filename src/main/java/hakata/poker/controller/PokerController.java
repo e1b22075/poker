@@ -609,7 +609,6 @@ public class PokerController {
         return "win";
       }
     }
-
     matchMapper.updateUser1HandById(match.getId(), 0);
     matchMapper.updateUser2HandById(match.getId(), 0);
     match.setRound(match.getRound() + 1);

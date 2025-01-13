@@ -117,4 +117,25 @@
     <div th:if="${result}">
       <h2 th:text="${result}"></h2>
     </div>
+    <script th:inline="javascript">
+      // 設定する制限時間（秒）
+      const limitTime = 20;
+      let remainingTime = limitTime;
+
+
+
+
+      // タイマーの更新と処理
+      function updateTimer() {
+
+        if (remainingTime == 0) {
+          alert("ボタンを押してみてね");
+
+        }
+        remainingTime--;
+      }
+
+      // タイマーを1秒ごとに更新
+      const timerInterval = setInterval(updateTimer, 1000);
+    </script>
   </div>

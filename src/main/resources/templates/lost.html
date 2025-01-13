@@ -1,3 +1,14 @@
-相手との通信が切れました。
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.springframework.org/schema/security">
 
-<a th:href="@{/room/leaveRoom(roomId=${rid})}">退室</a>
+<head>
+  <meta charset="utf-8">
+  <title>poker</title>
+  <link th:href="@{/CSS/poker.css}" rel="stylesheet">
+</head>
+
+<body>
+  <h1>相手との接続が切れました</h1>
+
+  <a th:href="@{/room/leaveRoom(roomId=${rid})}">退室</a>
+</body>

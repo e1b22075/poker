@@ -195,50 +195,39 @@ public class RoomController {
     return "ready2.html";
   }
 
-  @GetMapping("/serch")
+  @GetMapping("/serch/{rid}")
   @Transactional
-  public String serch(@RequestParam Integer roomId, ModelMap model, Principal prin) {
+  public String serch(@PathVariable Integer rid, ModelMap model, Principal prin) {
     int userid;
     match match = new match();
     String loginUser = prin.getName(); // ログインユーザ情報
     model.addAttribute("login_user", loginUser);
+    userid = userMapper.selectid(loginUser);
     // 再びroom1の処理を実行してルーム一覧を表示
     User user1 = userMapper.selectAllByName(loginUser);
-    Room enteredRoom = roomMapper.selectAllById(roomId);
+    Room enteredRoom = roomMapper.selectAllById(rid);
     int userIndex = 0;
     if (enteredRoom.getUser1id() == user1.getId()) {
       userIndex = 1;
     } else if (enteredRoom.getUser2id() == user1.getId()) {
       userIndex = 2;
     }
-    Room room2 = acRoom.syncShowRoomById(roomId);
+    Room room2 = acRoom.syncShowRoomById(rid);
     /*
      * ArrayList<User> users1 = userMapper.selectAll();
      * model.addAttribute("users", users1);
      */
     model.addAttribute("room2", true);
-
     model.addAttribute("room2", room2);
-    if (enteredRoom.getUser1id() == user1.getId() && enteredRoom.getUser2id() == 0) {
-      acRoom.syncChangeStatusByuName_and_rId(loginUser, roomId);
-      return "ready_room";
-    } else if (enteredRoom.getUser2id() == user1.getId() && enteredRoom.getUser1id() == 0) {
-      acRoom.syncChangeStatusByuName_and_rId(loginUser, roomId);
-      return "ready_room";
-    }
-    if (enteredRoom.getUser1Status() && enteredRoom.getUser2Status()) {
-      if (matchMapper.selectAllById(room2.getUser1id()) != null || matchMapper
-          .selectAllById(room2.getUser2id()) != null) {
-        match = matchMapper.selectAllById(room2.getUser1id());
-        model.addAttribute("round", match.getRound() / 2 + 1);
-        model.addAttribute("coin", match.getUser1coin());
-        model.addAttribute("bet", match.getBet());
-        return "poker";
-      }
-      return "poker.html";
-    }
     model.addAttribute("rid", room2.getId());
-    return "ready2.html";
+    if (matchMapper.selectAllById(userid) == null) {
+      return "ready2";
+    }
+    match = matchMapper.selectAllById(userid);
+    model.addAttribute("round", match.getRound() / 2 + 1);
+    model.addAttribute("coin", match.getUser1coin());
+    model.addAttribute("bet", match.getBet());
+    return "poker";
   }
 
   @GetMapping("/step3")
