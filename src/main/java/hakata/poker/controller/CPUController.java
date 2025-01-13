@@ -885,7 +885,7 @@ public class CPUController {
     cpuid = match.getUser1id();
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(cpuid);
     model.addAttribute("rid", match.getRid());
-    if (match.getUser1coin() <= 0 || match.getUser2coin() <= 0 || match.getRound() >= 4) {
+    if (match.getUser1coin() <= 0 || match.getUser2coin() <= 0 || match.getRound() >= 3) {
       if (match.getUser1id() == userid && match.getUser1coin() <= 0) {
         return "lose";
       } else if (match.getUser2id() == userid && match.getUser2coin() <= 0) {

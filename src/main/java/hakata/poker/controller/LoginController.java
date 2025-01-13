@@ -102,7 +102,14 @@ public class LoginController {
   }
 
   @GetMapping("/lost")
-  public String lost(HttpServletRequest request) {
+  public String lost(HttpServletRequest request, ModelMap model, Principal prin) {
+    String loginUser = prin.getName();
+    model.addAttribute("login_user", loginUser);
+
+    int user1id = userMapper.selectid(loginUser);
+    match match;
+    match = matchMapper.selectAllById(user1id);
+    model.addAttribute("rid", match.getRid());
     return "lost.html";
   }
 
