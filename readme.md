@@ -2,8 +2,30 @@
  ## はじめに
  このセットアップマニュアルは、JDKがインストールされているサーバーにセットアップするためのマニュアルです。JDKのインストールがまだな場合は先にJDKのインストールをお願いします。
 ## セットアップ方法
- ### 1.	cloneを行う
-  JDKがインストールされているサーバーでgit内にあるポーカーゲームのリポジトリをcloneします。cloneの際、HTTPSでのcloneを行う場合は以下のコマンドを入力してください。
+
+### 1. サーバーにアクセスする
+以下のコマンドを利用してサーバーにアクセスします。
+```
+ ssh isdev24@150.89.233.204
+ ```
+ ### 2. タイムゾーンの変更を行う
+  サーバーに接続後、以下のコマンドを入力してタイムゾーンの変更を行います。
+  ```
+  sudo timedatectl set-timezone Asia/Tokyo
+  ```
+### 3. Javaのインストール
+ 以下のコマンドを入力してJavaのインストールする準備を行いましょう。
+ ```
+ wget -O - https://apt.corretto.aws/corretto.key | sudo gpg --dearmor -o /usr/share/keyrings/corretto-keyring.gpg &&
+ echo "deb [signed-by=/usr/share/keyrings/corretto-keyring.gpg] https://apt.corretto.aws stable main" | sudo tee /etc/apt/sources.list.d/corretto.list
+ ```
+終了したら、次のコマンドでインストールします
+```
+ sudo apt-get update; sudo apt-get install -y java-21-amazon-corretto-jdk
+ ```
+
+ ### 5.	cloneを行う
+  git内にあるポーカーゲームのリポジトリをcloneします。cloneの際、HTTPSでのcloneを行う場合は以下のコマンドを入力してください。
   ```
   git clone https://github.com/e1b22075/poker.git
   ```
@@ -12,16 +34,16 @@
   git clone git@github.com:e1b22075/poker.git
   ```
 
- ### 2. ディレクトリの移動
+ ### 6. ディレクトリの移動
  cloneが終了すると、pokerというディレクトリが作成されます。以下のコマンドを入力し、pokerディレクトリに移動してください。
   cd poker
 
- ### 3.  gradlewの実行
+ ### 7.  gradlewの実行
 移動後、bashを利用してgradlewを実行します。以下のコマンドを入力してください。
 ```
   bash ./gradlew
   ```
- ### 4.	アプリの起動
+ ### 8.	アプリの起動
   最後に、プロジェクトを実行するために以下のコマンドを入力してください
   ```
   bash ./gradlew bootrun
