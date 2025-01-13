@@ -16,11 +16,28 @@
       dropsse.onmessage = function (event) {
         console.log(event.data);
         dropsse.close();
-        window.location.href = '/poker/result2';
+        window.location.href = '/poker/drop2';
       };
       dropsse.onerror = function () {
         console.log("Connection lost. Retrying...");
         dropsse.close(); // 一度接続を閉じる
+        setTimeout(connectSSE, 1000); // 3秒後に再接続
+      };
+
+    }
+    function connectSSE2() {
+      var resse = new EventSource('/result3/' + [[${ rid }]]);
+      resse.onopen = function (event) {
+        console.log("SSE connection established."); // 接続が確立された場合にコンソールに表示 };
+      };
+      resse.onmessage = function (event) {
+        console.log(event.data);
+        dropsse.close();
+        window.location.href = '/poker/result2';
+      };
+      resse.onerror = function () {
+        console.log("Connection lost. Retrying...");
+        resse.close(); // 一度接続を閉じる
         setTimeout(connectSSE, 1000); // 3秒後に再接続
       };
 
@@ -49,6 +66,7 @@
     }
     window.addEventListener('load', function () {
       connectSSE();
+      connectSSE2();
       lostSSE();
     });
     window.addEventListener('beforeunload', function () {

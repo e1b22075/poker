@@ -1,7 +1,8 @@
 package hakata.poker.service;
 
 import java.util.concurrent.TimeUnit;
-
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,16 +11,46 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import hakata.poker.model.matchMapper;
 import hakata.poker.model.match;
+import hakata.poker.model.matchMapper;
 
 @Service
 public class Asyncresult {
-
-  boolean dbUpdated = false;
-  private final Logger logger = LoggerFactory.getLogger(AsyncReady.class);
+  private final Logger logger = LoggerFactory.getLogger(AsyncDrop.class);
+  private final Map<Integer, RoomState> roomStates = new ConcurrentHashMap<>();
   @Autowired
   private matchMapper matchMapper;
+
+  private static class RoomState {
+    private final List<SseEmitter> emitters = new ArrayList<>();
+    private boolean updated = false;
+
+    public synchronized void addEmitter(SseEmitter emitter) {
+      emitters.add(emitter);
+    }
+
+    public synchronized void setUpdated(boolean updated) {
+      this.updated = updated;
+    }
+
+    public synchronized boolean isUpdated() {
+      return updated;
+    }
+
+    public synchronized List<SseEmitter> getEmitters() {
+      return new ArrayList<>(emitters); // コピーを返す
+    }
+
+    public synchronized void clearEmitters() {
+      emitters.clear();
+    }
+  }
+
+  @Transactional
+  public void syncs(int id, int roomId) {
+
+    setRoomUpdated(roomId);
+  }
 
   @Transactional
   public void syncUser1(int id, int handid) {
@@ -33,40 +64,64 @@ public class Asyncresult {
     return;
   }
 
-  @Transactional
-  public void syncresult(int id) {
-    match match = matchMapper.selectAllById(id);
-    matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
-    matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
-    matchMapper.updateBetById(match.getId(), 1);
-    System.out.println("ここまでの処理");
-    this.dbUpdated = true;
-    System.out.println(dbUpdated);
-    return;
+  private void setRoomUpdated(int roomId) {
+    roomStates.computeIfAbsent(roomId, k -> new RoomState()).setUpdated(true);
   }
 
   @Async
-  public void AsyncReusltSend(SseEmitter emitter) {
-    String massage = "result";
-    System.out.println("ここつながるか");
-    try {
+  public void startRoomMonitor(int roomId) {
+    RoomState roomState = roomStates.computeIfAbsent(roomId, k -> new RoomState());
 
-      while (true) {// 無限ループ
-        // DBが更新されていなければ0.5s休み
-        if (false == dbUpdated) {
-          TimeUnit.MILLISECONDS.sleep(500);
-          continue;
+    try {
+      while (true) {
+        synchronized (roomState) {
+          if (!roomState.isUpdated()) {
+            roomState.wait(500); // 状態が更新されるのを待機
+            continue;
+          }
+
+          // 状態が更新された場合、すべてのエミッタに通知
+          List<SseEmitter> emitters = roomState.getEmitters();
+          Iterator<SseEmitter> iterator = emitters.iterator();
+
+          while (iterator.hasNext()) {
+            SseEmitter emitter = iterator.next();
+            try {
+              emitter.send("logout");
+            } catch (Exception e) {
+              // エラーが発生したエミッタは削除
+              iterator.remove();
+            }
+          }
+
+          // 状態リセット
+          roomState.setUpdated(false);
         }
-        emitter.send(massage);
-        TimeUnit.MILLISECONDS.sleep(1000);
-        dbUpdated = false;
       }
-    } catch (Exception e) {
-      // 例外の名前とメッセージだけ表示する
-      logger.warn("Exception:" + e.getClass().getName() + ":" + e.getMessage());
+    } catch (InterruptedException e) {
+      logger.info("Room monitor interrupted for roomId: " + roomId);
     } finally {
-      emitter.complete();
+      roomState.clearEmitters();
+      logger.info("Room monitor stopped for roomId: " + roomId);
     }
-    System.out.println("AsyncMatch complete");
   }
+
+  public void registerEmitter(int roomId, SseEmitter emitter) {
+    RoomState roomState = roomStates.computeIfAbsent(roomId, k -> new RoomState());
+    roomState.addEmitter(emitter);
+
+    emitter.onCompletion(() -> removeEmitter(roomId, emitter));
+    emitter.onTimeout(() -> removeEmitter(roomId, emitter));
+    emitter.onError((e) -> removeEmitter(roomId, emitter));
+  }
+
+  private void removeEmitter(int roomId, SseEmitter emitter) {
+    RoomState roomState = roomStates.get(roomId);
+    if (roomState != null) {
+      synchronized (roomState) {
+        roomState.emitters.remove(emitter);
+      }
+    }
+  }
+
 }

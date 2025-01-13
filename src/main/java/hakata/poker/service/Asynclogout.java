@@ -104,11 +104,12 @@ public class Asynclogout {
   }
 
   private void removeEmitter(int roomId, SseEmitter emitter) {
-    RoomState roomState = roomStates.get(roomId);
-    if (roomState != null) {
-      synchronized (roomState) {
-        roomState.getEmitters().remove(emitter);
-      }
+  RoomState roomState = roomStates.get(roomId);
+  if (roomState != null) {
+    synchronized (roomState) {
+      roomState.emitters.remove(emitter);
     }
   }
+}
+
 }
