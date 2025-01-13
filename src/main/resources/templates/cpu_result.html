@@ -8,28 +8,27 @@
 
 
   </script>
-
+  <link th:href="@{/CSS/poker.css}" rel="stylesheet">
 
 </head>
 
 <body>
-  <h1>[[${login_user}]]さん、結果が出ました</h1>
-  <p id="p1"></p>
-  <p id="timer">次の試合まで</p>
   <a href="/logout">ログアウト</a>
-
+  <div th:if="${round}">
+    <h1>第[[${round}]]ラウンド　試合結果</h1>
+  </div>
 
   <div th:if="${message}">
     <h3 th:text="${message}"></h3>
   </div>
   <div th:if="${coin}">
-    <h2>あなたのコインは[[${coin}]]枚です。</h2>
+    <h2>コイン：[[${coin}]]枚</h2>
   </div>
 
   <div th:if="${result}">
     <h2 th:text="${result}"></h2>
   </div>
-  </div>
+  <h2 id="timer">次の試合まで</h2>
   <script th:inline="javascript">
     // 設定する制限時間（秒）
     const limitTime = 5;

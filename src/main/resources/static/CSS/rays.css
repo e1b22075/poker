@@ -1,0 +1,89 @@
+body {
+
+  /* 使用するフォント */
+  background-color: #21b600;
+  /* 背景色 */
+  display: flex;
+  /* フレックスボックスを使用 */
+  flex-flow: column;
+  align-items: center;
+  /* 中央揃え（垂直方向） */
+  height: 100vh;
+  /* ビューポートの高さを100%に設定 */
+  margin: 0;
+  /* 余白のリセット */
+  padding: 0;
+  /* パディングのリセット */
+}
+
+.rays {
+  position: relative;
+}
+
+.rays::before,
+.rays::after {
+  position: absolute;
+  content: '';
+  pointer-events: none;
+}
+
+.rays::before {
+  display: inline-block;
+  right: 0;
+  width: 2.8em;
+  height: 2.8em;
+  border-radius: 0 3px 3px 0;
+  background-color: #2589d0;
+}
+
+.rays::after {
+  position: absolute;
+  top: 50%;
+  right: 1.4em;
+  transform: translate(50%, -50%) rotate(45deg);
+  width: 6px;
+  height: 6px;
+  border-bottom: 3px solid #fff;
+  border-right: 3px solid #fff;
+}
+
+.rays select {
+  appearance: none;
+  min-width: 230px;
+  height: 2.8em;
+  padding: .4em 3.6em .4em .8em;
+  border: none;
+  border-radius: 3px;
+  background-color: #ffffff;
+  color: #333;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+.rays select:focus {
+  outline: 2px solid #2589d0;
+}
+
+button {
+  display: inline-block;
+  margin: 0.3em;
+  padding: 1.2em 10em;
+  overflow: hidden;
+  position: relative;
+  text-decoration: none;
+  text-transform: uppercase;
+  border-radius: 3px;
+  -webkit-transition: 0.3s;
+  -moz-transition: 0.3s;
+  -ms-transition: 0.3s;
+  -o-transition: 0.3s;
+  transition: 0.3s;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  border: none;
+  font-size: 15px;
+  text-align: center;
+}
+
+button:hover {
+  background-color: #8B0000;
+}
