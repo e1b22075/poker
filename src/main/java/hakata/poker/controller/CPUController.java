@@ -79,8 +79,6 @@ public class CPUController {
     ;
     matchMapper.insertMatchandIsActive(match);
 
-    model.addAttribute("coin", match.getUser2coin());
-    model.addAttribute("bet", match.getBet());
     model.addAttribute("round", match.getRound());
     return "cpu_poker.html";
   }
@@ -105,7 +103,10 @@ public class CPUController {
     for (Cards card : myCards) {
       cardsMapper.updateisActiveTrueById(card.getId());
     }
-
+    myCards.sort(Comparator.comparingInt((Cards card) -> {
+      int num = card.getNum();
+      return num == 1 ? Integer.MAX_VALUE : num; // 1を最大値として扱う
+    }));
     hand.setHand1id(myCards.get(0).getId());
     hand.setHand2id(myCards.get(1).getId());
     hand.setHand3id(myCards.get(2).getId());
@@ -124,7 +125,7 @@ public class CPUController {
     model.addAttribute("myCards", myCards);
     model.addAttribute("coin", match.getUser2coin());
     model.addAttribute("myindex", new PlayerIndex());
-
+    model.addAttribute("round", match.getRound());
     Hand CPUhand = new Hand();
     CPUhand.setActive(true);
     ArrayList<Cards> CPUCards = cardsMapper.select5RandomCardByrid(match.getRid());
@@ -152,6 +153,7 @@ public class CPUController {
     model.addAttribute("cpuindex", CPUindex);
     model.addAttribute("rid", match.getRid());
     model.addAttribute("turn", hand.getTurn());
+    model.addAttribute("bet", match.getBet());
     return "cpu_select.html";
   }
 
@@ -251,12 +253,16 @@ public class CPUController {
     userhand.setTurn(userhand.getTurn() + 1);
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(userid);
     handMapper.insertHandandIsActive(userhand);
+    myCards.sort(Comparator.comparingInt((Cards card) -> {
+      int num = card.getNum();
+      return num == 1 ? Integer.MAX_VALUE : num; // 1を最大値として扱う
+    }));
     model.addAttribute("myCards", myCards);
 
     model.addAttribute("myindex", new PlayerIndex());
 
     model.addAttribute("coin", match.getUser2coin());
-
+    model.addAttribute("round", match.getRound());
     cpuid = userMapper.selectidbyid(match.getUser1id());
     cpuhand = handMapper.selectByUserId(cpuid);
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(cpuid);
@@ -290,7 +296,8 @@ public class CPUController {
     model.addAttribute("CPUCards", CPUCards);
     model.addAttribute("turn", userhand.getTurn());
     model.addAttribute("cpuindex", new CPUIndex());
-
+    model.addAttribute("bet", match.getBet());
+    model.addAttribute("bet", match.getBet());
     userhand.setRoleid(10); // プレイヤーのRoleidをハイカードのid10に設定
     cpuhand.setRoleid(10); // CPUのRoleidをハイカードのid10に設定
 
@@ -573,9 +580,13 @@ public class CPUController {
       // Roleidの大小関係で勝利者を判定
       if (userhand.getRoleid() < cpuhand.getRoleid()) {
         result = "あなたの勝利です!";
+        matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() - match.getBet());
+        matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() + match.getBet());
         model.addAttribute("result", result);
       } else if (userhand.getRoleid() > cpuhand.getRoleid()) {
         result = "CPUの勝利です...";
+        matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+        matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
         model.addAttribute("result", result);
       }
       // ロイヤルストレートフラッシュ同士の比較
@@ -587,6 +598,8 @@ public class CPUController {
           model.addAttribute("result", result);
         } else if (determinType(myCards, 4) > determinType(CPUCards, 4)) {
           result = "CPUの勝利です...";
+          matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+          matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           model.addAttribute("result", result);
         }
       }
@@ -599,6 +612,8 @@ public class CPUController {
           model.addAttribute("result", result);
         } else if (myCards.get(3).getNum() < CPUCards.get(3).getNum()) {
           result = "CPUの勝利です...";
+          matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+          matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           model.addAttribute("result", result);
         }
       }
@@ -612,6 +627,8 @@ public class CPUController {
           model.addAttribute("result", result);
         } else if (myCards.get(2).getNum() < CPUCards.get(2).getNum()) {
           result = "CPUの勝利です...";
+          matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+          matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           model.addAttribute("result", result);
         }
       }
@@ -626,6 +643,8 @@ public class CPUController {
           model.addAttribute("result", result);
         } else if (a1 < a2) {
           result = "CPUの勝利です...";
+          matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+          matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           model.addAttribute("result", result);
         } else if (a1 == a2) {
           if (determinType(myCards, 4) < determinType(CPUCards, 4)) {
@@ -635,6 +654,8 @@ public class CPUController {
             model.addAttribute("result", result);
           } else if (determinType(myCards, 4) > determinType(CPUCards, 4)) {
             result = "CPUの勝利です...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
             model.addAttribute("result", result);
           }
         }
@@ -648,6 +669,8 @@ public class CPUController {
           model.addAttribute("result", result);
         } else if (myCards.get(3).getNum() < CPUCards.get(3).getNum()) {
           result = "CPUの勝利です...";
+          matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+          matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           model.addAttribute("result", result);
         } else if (myCards.get(3).getNum() == CPUCards.get(3).getNum()) {
           if (userhand.getRolenum() > cpuhand.getRolenum()) {
@@ -657,6 +680,8 @@ public class CPUController {
             model.addAttribute("result", result);
           } else if (userhand.getRolenum() < cpuhand.getRolenum()) {
             result = "CPUの勝利です...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
             model.addAttribute("result", result);
           } else if (userhand.getRolenum() == cpuhand.getRolenum()) {
             if (determinType(myCards, mytwopairid) < determinType(CPUCards, cputwopairid)) {
@@ -666,6 +691,8 @@ public class CPUController {
               model.addAttribute("result", result);
             } else if (determinType(myCards, mytwopairid) > determinType(CPUCards, cputwopairid)) {
               result = "CPUの勝利です...";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
               model.addAttribute("result", result);
             }
           }
@@ -680,6 +707,8 @@ public class CPUController {
           model.addAttribute("result", result);
         } else if (userhand.getRolenum() < cpuhand.getRolenum()) {
           result = "CPUの勝利です...";
+          matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+          matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           model.addAttribute("result", result);
         } else if (userhand.getRolenum() == cpuhand.getRolenum()) {
           if (myonepairkickernum > cpuonepairkickernum) {
@@ -689,6 +718,8 @@ public class CPUController {
             model.addAttribute("result", result);
           } else if (myonepairkickernum < cpuonepairkickernum) {
             result = "CPUの勝利です...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
             model.addAttribute("result", result);
           } else if (myonepairkickernum == cpuonepairkickernum) {
             if (determinType(myCards, myonepairkickerid) < determinType(CPUCards, cpuonepairkickerid)) {
@@ -698,6 +729,8 @@ public class CPUController {
               model.addAttribute("result", result);
             } else if (determinType(myCards, myonepairkickerid) > determinType(CPUCards, cpuonepairkickerid)) {
               result = "CPUの勝利です...";
+              matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+              matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
               model.addAttribute("result", result);
             }
           }
@@ -712,6 +745,8 @@ public class CPUController {
           model.addAttribute("result", result);
         } else if (myCards.get(4).getNum() < CPUCards.get(4).getNum()) {
           result = "CPUの勝利です...";
+          matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+          matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
           model.addAttribute("result", result);
         } else if (myCards.get(4).getNum() == CPUCards.get(4).getNum()) {
           if (determinType(myCards, 4) < determinType(CPUCards, 4)) {
@@ -721,6 +756,8 @@ public class CPUController {
             model.addAttribute("result", result);
           } else if (determinType(myCards, 4) > determinType(CPUCards, 4)) {
             result = "CPUの勝利です...";
+            matchMapper.updateuser1CoinById(match.getId(), match.getUser1coin() + match.getBet());
+            matchMapper.updateuser2CoinById(match.getId(), match.getUser2coin() - match.getBet());
             model.addAttribute("result", result);
           }
         }
@@ -761,7 +798,7 @@ public class CPUController {
     model.addAttribute("myCards", myCards);
 
     model.addAttribute("myindex", Playerindex);
-
+    model.addAttribute("round", match.getRound());
     model.addAttribute("coin", hand.getTurn());
 
     ArrayList<Cards> CPUCards = new ArrayList<Cards>();
@@ -823,7 +860,7 @@ public class CPUController {
     handMapper.updateIsActivefalsetotrueByfalseAndUserId(cpuid);
 
     model.addAttribute("cpuindex", CPUindex);
-
+    model.addAttribute("round", match.getRound());
     model.addAttribute("index", new index());
 
     return "cpu_drop.html";
@@ -866,10 +903,11 @@ public class CPUController {
     matchMapper.updateUser2HandById(match.getId(), 0);
     match.setRound(match.getRound() + 1);
     matchMapper.updateRoundById(match.getId(), match.getRound());
-    model.addAttribute("bet", match.getBet());
+    matchMapper.updateBetById(match.getId(), 1);
+    model.addAttribute("coin", match.getUser2coin());
     model.addAttribute("round", match.getRound());
     model.addAttribute("rid", match.getRid());
-
+    model.addAttribute("bet", match.getBet());
     return "cpu_poker.html";
   }
 
@@ -883,6 +921,7 @@ public class CPUController {
     match = matchMapper.selectAllById(id);
     model.addAttribute("bet", match.getBet());
     model.addAttribute("coin", match.getUser2coin());
+    model.addAttribute("round", match.getRound());
     return "cpu_rays.html";
   }
 
@@ -916,7 +955,7 @@ public class CPUController {
     model.addAttribute("myCards", myCards);
     matchMapper.updateBetById(match.getId(), match.getBet() + rays);
     model.addAttribute("myindex", Playerindex);
-    model.addAttribute("bet", match.getBet());
+    model.addAttribute("bet", match.getBet() + rays);
     model.addAttribute("coin", match.getUser2coin());
     model.addAttribute("index", new index());
 
@@ -935,6 +974,7 @@ public class CPUController {
     model.addAttribute("rid", match.getRid());
     model.addAttribute("index", new index());
     model.addAttribute("turn", userhand.getTurn());
+    model.addAttribute("round", match.getRound());
     return "cpu_poker";
   }
 

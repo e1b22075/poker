@@ -4,24 +4,31 @@
 <head>
   <meta charset="utf-8">
   <title>poker</title>
-
+  <link th:href="@{/CSS/rays.css}" rel="stylesheet">
 </head>
 
 <body>
-  <h1>[[${login_user}]]さん</h1>
-  <p id="p1"></p>
   <a href="/logout">ログアウト</a>
+  <div th:if="${round}">
+    <h1>第[[${round}]]ラウンド</h1>
+  </div>
   <div th:if="${coin}">
-    <h2>あなたのコインは[[${coin}]]枚です。</h2>
-    <p>どの程度上乗せしますか？</p>
-    <form action="#" th:action="@{/cpu/rays}" method="post">
+    <h2>コイン：[[${coin}]]枚</h2>
+  </div>
+  <div th:if="${bet}">
+    <h2>現在[[${bet}]]枚賭けてます。</h2>
+  </div>
+  <h2>どの程度上乗せしますか？</h2>
+  <form action="#" th:action="@{/cpu/rays}" method="post">
+    <label class="rays">
       <select name="rays">
         <div th:each="i : ${#numbers.sequence(0,4)}">
           <option th:if="${coin} >= ${i}" th:value="${i}" th:text="${i}">
           </option>
         </div>
       </select>
-      <button type="submit">送信</button>
-    </form>
-  </div>
+    </label>
+    <br>
+    <button type="submit">送信</button>
+  </form>
 </body>

@@ -1,3 +1,14 @@
-お前の負け
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.springframework.org/schema/security">
 
-<a th:href="@{/room/leaveRoom(roomId=${rid})}">退室</a>
+<head>
+  <meta charset="utf-8">
+  <title>poker</title>
+  <link th:href="@{/CSS/poker.css}" rel="stylesheet">
+</head>
+
+<body>
+  <h1>試合結果</h1>
+  <h1>あなたの負け…</h1>
+  <a th:href="@{/room/leaveRoom(roomId=${rid})}">退室</a>
+</body>

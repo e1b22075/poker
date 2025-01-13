@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <title>poker</title>
+  <link th:href="@{/CSS/menu.css}" rel="stylesheet">
   <script>
     window.onload = function () {
       var sse = new EventSource('/room/step3');
@@ -54,34 +55,36 @@
 
   <div th:if="${room1}">
     <h1>ルームを選んでください</h1>
-    ルーム一覧
-    <table border="1">
-      <thead>
-        <tr>
-          <th>ルーム名</th>
-          <th>プレイヤー1</th>
-          <th>1の状態</th>
-          <th>プレイヤー2</th>
-          <th>2の状態</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody id="rooms_list">
-        <span th:if="${rooms}">
-          <tr th:each="room : ${rooms}">
-            <td>[[${room.roomName}]]</td>
-            <td>[[${room.user1Name}]]</td>
-            <td>[[${room.user1Status == 1 ? '準備完了' : '未準備'}]]</td>
-            <td>[[${room.user2id != 0 ? room.user2Name : '募集中'}]]</td>
-            <td>[[${room.user2Status == 1 ? '準備完了' : '未準備'}]]</td>
-            <td>
-              <a th:if="${room.user1id == 0 || room.user2id == 0 }" th:href="@{/room/step2(roomId=${room.id})}">入室</a>
-              <span th:if="${room.user1id != 0 && room.user2id != 0 }">満員</span>
-            </td>
+    <div class="rooms">
+      ルーム一覧
+      <table border="1">
+        <thead>
+          <tr>
+            <th>ルーム名</th>
+            <th>プレイヤー1</th>
+            <th>1の状態</th>
+            <th>プレイヤー2</th>
+            <th>2の状態</th>
+            <th>操作</th>
           </tr>
-        </span>
-      </tbody>
-    </table>
+        </thead>
+        <tbody id="rooms_list">
+          <span th:if="${rooms}">
+            <tr th:each="room : ${rooms}">
+              <td>[[${room.roomName}]]</td>
+              <td>[[${room.user1Name}]]</td>
+              <td>[[${room.user1Status == 1 ? '準備完了' : '未準備'}]]</td>
+              <td>[[${room.user2id != 0 ? room.user2Name : '募集中'}]]</td>
+              <td>[[${room.user2Status == 1 ? '準備完了' : '未準備'}]]</td>
+              <td>
+                <a th:if="${room.user1id == 0 || room.user2id == 0 }" th:href="@{/room/step2(roomId=${room.id})}">入室</a>
+                <span th:if="${room.user1id != 0 && room.user2id != 0 }">満員</span>
+              </td>
+            </tr>
+          </span>
+        </tbody>
+      </table>
+    </div>
   </div>
 
 

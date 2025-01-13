@@ -62,29 +62,31 @@
 </head>
 
 <body>
-  <h1>こんにちは [[${login_user}]]さん</h1>
+  <a href="/logout">ログアウト</a>
   <div th:if="${round}">
     <h1>第[[${round}]]ラウンド</h1>
   </div>
-  <p id="timer">残り時間:</p>
-  <a href="/logout">ログアウト</a>
-  <div th:if="${message}">
-    <h3 th:text="${message}"></h3>
-  </div>
+
   <div th:if="${turn}">
-    <h2>あなたは[[${turn}]]ターン目です。</h2>
+    <h2>[[${turn}]]ターン目</h2>
   </div>
   <div th:if="${coin}">
-    <h2>あなたのコインは[[${coin}]]枚です。</h2>
+    <h2>コイン：[[${coin}]]枚</h2>
   </div>
   <div th:if="${rays}">
-    <h2>あなたは[[${rays}]]枚賭けてます。</h2>
+    <h2>現在[[${rays}]]枚賭けてます。</h2>
   </div>
+  <h3 id="timer">残り時間:</h3>
   <div th:if="!${myCards}">
     <h2><a href="/poker/card">カードを引く</a></h2>
   </div>
   <div th:if="${myCards}">
-    <h4>自分の手札</h4>
+    <h3>自分の手札</h3>
+  </div>
+  <div th:if="${myCards}">
+    <h3>カードを選択してください</h3>
+  </div>
+  <div th:if="${myCards}">
     <form action=" #" th:action="@{/result}" th:object="${index}" method="post">
       <div class="cardlist">
         <div th:each="item, iterStat : ${myCards}">

@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <title>poker</title>
+  <link th:href="@{/CSS/menu.css}" rel="stylesheet">
   <script>
     window.onload = function () {
       var sse = new EventSource('/room/update'); // サーバーのエンドポイントを指定
@@ -31,10 +32,11 @@
 </head>
 
 <body>
+  <a href="/logout">ログアウト</a>
   <div th:if="${room2}">
     <h1 id="welcome_message">[[${login_user}]]が<span id="room_name">[[${room2.roomName}]]</span>に入室しました</h1>
-    <a href="/logout">ログアウト</a>
-    <br>
+  </div>
+  <div th:if="${room2}">
     <h3>プレイヤー一覧</h3>
     <ul>
       <!-- プレイヤー1の動的表示エリア -->
@@ -48,23 +50,22 @@
         (<span id="player2_status" th:text="${room2.user2Status != false ? '準備完了' : '準備中'}"></span>)
       </li>
     </ul>
-    <br>
-    <div th:if="${room2.id >= 5}">
-      <a th:href="@{/room/changeStatus(roomId=${room2.id})}"><button>準備</button></a>
-      <br>
-    </div>
-
-
-
-    <div th:if="${room2.id <= 4}">
-      <a th:if="${room2.id}" href="/cpu/poker"><button>pokerを開始(CPU)</button></a>
-      <br>
-    </div>
-    <a th:href="@{/room/leaveRoom(roomId=${room2.id})}">退室</a>
-    <br>
-    <a href="/help" target="_blank" rel="noopener noreferrer">helpへのアクセス</a>
-
   </div>
+  <div th:if="${room2.id >= 5}">
+    <a th:href="@{/room/changeStatus(roomId=${room2.id})}"><button>準備</button></a>
+    <br>
+  </div>
+
+
+
+  <div th:if="${room2.id <= 4}">
+    <a th:if="${room2.id}" href="/cpu/poker"><button>pokerを開始(CPU)</button></a>
+    <br>
+  </div>
+  <a th:href="@{/room/leaveRoom(roomId=${room2.id})}"><button>退室</button></a>
+  <br>
+  <a href="/help" target="_blank" rel="noopener noreferrer"><button>helpへのアクセス</button></a>
+
 </body>
 
 </html>
